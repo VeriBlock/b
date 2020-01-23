@@ -21,12 +21,6 @@ struct Context {
     {
         return btc == other.btc && vbk == other.vbk;
     }
-
-    Context& operator+= (const Context& other) {
-        this->btc.insert(this->btc.end(), other.btc.begin(), other.btc.end());
-        this->vbk.insert(this->vbk.end(), other.vbk.begin(), other.vbk.end());
-        return *this;
-    }
 };
 
 enum class PopTxType {
