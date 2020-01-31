@@ -67,7 +67,6 @@ void clearTemporaryPayloadsImpl(VeriBlock::PopService& pop, uint32_t begin, uint
         try {
             pop.removePayloads(heightToHash(height), height);
         } catch (const std::exception&) {
-            LogPrintf("removePayloads failed on height %s, but this is okay. \n", height);
         }
     }
 }
