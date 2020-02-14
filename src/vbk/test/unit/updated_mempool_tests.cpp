@@ -283,8 +283,8 @@ BOOST_FIXTURE_TEST_CASE(check_the_pop_tx_limits_in_block, TestingSetup)
 
 BOOST_FIXTURE_TEST_CASE(check_CreateNewBlock_with_blockPopValidation_fail, TestingSetup)
 {
-    Fake(Method(pop_service_mock, addPayloads));
-    Fake(Method(pop_service_mock, removePayloads));
+    Fake(OverloadedMethod(pop_service_mock, addPayloads, void(std::string, const int&, const VeriBlock::Publications&)));
+    Fake(OverloadedMethod(pop_service_mock, removePayloads, void(std::string, const int&)));
     Fake(Method(pop_service_mock, clearTemporaryPayloads));
     When(Method(pop_service_mock, determineATVPlausibilityWithBTCRules)).AlwaysReturn(true);
 
