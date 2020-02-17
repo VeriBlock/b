@@ -20,6 +20,13 @@ UniValue CallRPC(std::string args);
 
 struct RpcServiceFixture : public TestChain100Setup {
     VeriBlockTest::ServicesFixture service_fixture;
+
+    fakeit::Mock<VeriBlock::PopService> pop_service_mock;
+
+    RpcServiceFixture()
+    {
+        VeriBlockTest::setUpPopServiceMock(pop_service_mock);
+    }
 };
 
 BOOST_FIXTURE_TEST_SUITE(rpc_service_tests, RpcServiceFixture)

@@ -29,6 +29,10 @@ inline void setUpPopServiceMock(fakeit::Mock<VeriBlock::PopService>& mock)
     fakeit::When(Method(mock, blockPopValidation)).AlwaysReturn(true);
     fakeit::Fake(Method(mock, updateContext));
 
+    fakeit::Fake(OverloadedMethod(mock, addPayloads, void(std::string, const int&, const VeriBlock::Publications&)));
+    fakeit::Fake(OverloadedMethod(mock, addPayloads, void(const CBlockIndex &, const CBlock &)));
+    fakeit::Fake(OverloadedMethod(mock, removePayloads, void(std::string, const int&)));
+
     setServiceMock(mock);
 }
 
