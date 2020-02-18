@@ -301,8 +301,10 @@ BOOST_FIXTURE_TEST_CASE(check_CreateNewBlock_with_blockPopValidation_fail, Testi
     // Simulate that we have 8 invalid popTxs
     When(Method(pop_service_mock, updateContext)).Throw(8_Times(VeriBlock::PopServiceException("fail"))).AlwaysDo([](const std::vector<std::vector<uint8_t>>& veriBlockBlocks, const std::vector<std::vector<uint8_t>>& bitcoinBlocks) {});
 
+    const size_t popTxCount = 10;
+
     TestMemPoolEntryHelper entry;
-    for (size_t i = 0; i < 10; ++i) {
+    for (size_t i = 0; i < popTxCount; ++i) {
         LOCK2(cs_main, mempool.cs);
         CMutableTransaction popTx = VeriBlockTest::makePopTx({1}, {std::vector<uint8_t>(100, i)});
         mempool.addUnchecked(entry.Fee(0LL).FromTx(popTx));
@@ -310,9 +312,21 @@ BOOST_FIXTURE_TEST_CASE(check_CreateNewBlock_with_blockPopValidation_fail, Testi
 
     BlockAssembler blkAssembler(Params());
     CScript scriptPubKey = CScript() << OP_CHECKSIG;
-    std::unique_ptr<CBlockTemplate> pblockTemplate = blkAssembler.CreateNewBlock(scriptPubKey);
 
-    BOOST_TEST(pblockTemplate->block.vtx.size() == 3);
+    // repeatedly attempt to create a new block until either it
+    // succeeds or we make a suspiciously large number of attempts
+    bool success = false;
+    for(int i = 0; i < popTxCount; i++) {
+        try {
+            std::unique_ptr<CBlockTemplate> pblockTemplate = blkAssembler.CreateNewBlock(scriptPubKey);
+
+            BOOST_TEST(pblockTemplate->block.vtx.size() == 3);
+
+            success = true;
+        }
+        catch (const std::runtime_error&) {}
+    }
+    BOOST_TEST(success);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
