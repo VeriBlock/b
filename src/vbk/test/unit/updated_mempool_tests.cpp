@@ -317,6 +317,7 @@ BOOST_FIXTURE_TEST_CASE(check_CreateNewBlock_with_blockPopValidation_fail, Testi
     // succeeds or we make a suspiciously large number of attempts
     bool success = false;
     for(int i = 0; i < popTxCount; i++) {
+        BOOST_TEST(mempool.size() + i == popTxCount);
         try {
             std::unique_ptr<CBlockTemplate> pblockTemplate = blkAssembler.CreateNewBlock(scriptPubKey);
 
