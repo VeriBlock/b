@@ -25,7 +25,7 @@ static CBlock createBlockWithPopTx(TestChain100Setup& test)
 inline void setPublicationData(VeriBlock::PublicationData& pub, const CDataStream& stream, const int64_t& index)
 {
     pub.set_identifier(index);
-    pub.set_header(stream.data(), stream.size());
+    pub.set_header((void*)stream.data(), stream.size());
 }
 
 struct PopServiceFixture : public TestChain100Setup {
@@ -36,8 +36,10 @@ struct PopServiceFixture : public TestChain100Setup {
         AbortShutdown();
         VeriBlock::InitUtilService();
         VeriBlock::InitConfig();
+        VeriBlockTest::setUpPopServiceMock(pop_service_mock);
+        Fake(OverloadedMethod(pop_service_mock, removePayloads, void(const CBlockIndex&)));
         Fake(OverloadedMethod(pop_service_impl_mock, addPayloads, void(std::string, const int&, const VeriBlock::Publications&)));
-        Fake(OverloadedMethod(pop_service_impl_mock, addPayloads, void(const CBlockIndex &, const CBlock &)));
+        Fake(OverloadedMethod(pop_service_impl_mock, addPayloads, void(const CBlockIndex&, const CBlock&)));
         Fake(OverloadedMethod(pop_service_impl_mock, removePayloads, void(std::string, const int&)));
         Fake(Method(pop_service_impl_mock, clearTemporaryPayloads));
         When(OverloadedMethod(pop_service_impl_mock, parsePopTx, bool(const CTransactionRef&, ScriptError*, VeriBlock::Publications*, VeriBlock::Context*, VeriBlock::PopTxType*)))

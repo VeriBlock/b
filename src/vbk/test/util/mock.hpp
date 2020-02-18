@@ -32,6 +32,7 @@ inline void setUpPopServiceMock(fakeit::Mock<VeriBlock::PopService>& mock)
     fakeit::Fake(OverloadedMethod(mock, addPayloads, void(std::string, const int&, const VeriBlock::Publications&)));
     fakeit::Fake(OverloadedMethod(mock, addPayloads, void(const CBlockIndex &, const CBlock &)));
     fakeit::Fake(OverloadedMethod(mock, removePayloads, void(std::string, const int&)));
+    fakeit::Fake(OverloadedMethod(mock, removePayloads, void(const CBlockIndex &)));
 
     setServiceMock(mock);
 }

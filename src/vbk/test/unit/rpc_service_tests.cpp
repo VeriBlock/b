@@ -15,6 +15,7 @@
 #include <vbk/util_service.hpp>
 
 #include <string>
+#include <vbk/init.hpp>
 
 UniValue CallRPC(std::string args);
 
@@ -25,6 +26,7 @@ struct RpcServiceFixture : public TestChain100Setup {
 
     RpcServiceFixture()
     {
+        VeriBlock::InitConfig();
         VeriBlockTest::setUpPopServiceMock(pop_service_mock);
     }
 };
@@ -37,6 +39,8 @@ BOOST_AUTO_TEST_CASE(getpopdata_test)
     auto chain = interfaces::MakeChain(node);
     std::shared_ptr<CWallet> wallet = std::make_shared<CWallet>(chain.get(), WalletLocation(), WalletDatabase::CreateDummy());
     AddWallet(wallet);
+    node.connman = std::unique_ptr<CConnman>(new CConnman(GetRand(std::numeric_limits<uint64_t>::max()), GetRand(std::numeric_limits<uint64_t>::max())));
+    VeriBlock::InitRpcService(node.connman.get());
 
     int blockHeight = 10;
     CBlockIndex* blockIndex = ChainActive()[blockHeight];
@@ -60,12 +64,15 @@ BOOST_AUTO_TEST_CASE(getpopdata_test)
 }
 
 BOOST_AUTO_TEST_CASE(submitpop_test)
-{   
+{
+    auto connman = std::unique_ptr<CConnman>(new CConnman(GetRand(std::numeric_limits<uint64_t>::max()), GetRand(std::numeric_limits<uint64_t>::max())));
+    VeriBlock::InitRpcService(connman.get());
+
     JSONRPCRequest request;
     request.strMethod = "submitpop";
     request.params = UniValue(UniValue::VARR);
     request.fHelp = false;
-    
+
     std::vector<uint8_t> atv(100, 1);
     std::vector<uint8_t> vtb(100, 2);
 
