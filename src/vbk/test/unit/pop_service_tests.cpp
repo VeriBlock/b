@@ -37,6 +37,7 @@ struct PopServiceFixture : public TestChain100Setup {
         VeriBlock::InitUtilService();
         VeriBlock::InitConfig();
         Fake(OverloadedMethod(pop_service_impl_mock, addPayloads, void(std::string, const int&, const VeriBlock::Publications&)));
+        Fake(OverloadedMethod(pop_service_impl_mock, addPayloads, void(const CBlockIndex &, const CBlock &)));
         Fake(OverloadedMethod(pop_service_impl_mock, removePayloads, void(std::string, const int&)));
         Fake(Method(pop_service_impl_mock, clearTemporaryPayloads));
         When(OverloadedMethod(pop_service_impl_mock, parsePopTx, bool(const CTransactionRef&, ScriptError*, VeriBlock::Publications*, VeriBlock::Context*, VeriBlock::PopTxType*)))
