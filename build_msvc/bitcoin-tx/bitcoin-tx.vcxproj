@@ -22,9 +22,7 @@
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <AdditionalOptions>/Wv:18 %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile />
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\bitcoin-tx.cpp" />
