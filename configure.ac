@@ -1263,7 +1263,7 @@ if test x$use_pkgconfig = xyes; then
       PKG_CHECK_MODULES([SSL], [libssl],, [AC_MSG_ERROR(openssl not found.)])
       PKG_CHECK_MODULES([CRYPTO], [libcrypto],,[AC_MSG_ERROR(libcrypto not found.)])
       if test x$use_tests != xno; then
-        PKG_CHECK_MODULES([GMOCK], [libgmock],,[AC_MSG_ERROR(libgmock not found.)])
+        PKG_CHECK_MODULES([GMOCK], [gmock],,[AC_MSG_ERROR(gmock not found.)])
       fi
       if test x$enable_bip70 != xno; then
         BITCOIN_QT_CHECK([PKG_CHECK_MODULES([PROTOBUF], [protobuf], [have_protobuf=yes], [have_protobuf=no])])
@@ -1304,7 +1304,8 @@ else
   AC_CHECK_LIB([address_sorting],[main],[GRPC_LIBS+=" -laddress_sorting"],AC_MSG_ERROR(protobuf missing))
 
   if test x$use_tests != xno; then
-    AC_CHECK_LIB([gmock],[main],[TEST_LIBS=" -lgmock"],AC_MSG_ERROR(libgmock missing))
+    AC_CHECK_HEADER([gmock/gmock.h],,AC_MSG_ERROR(libgmock headers missing))
+    AC_CHECK_LIB([gmock],[main],[GMOCK_LIBS=" -lgmock"],AC_MSG_ERROR(libgmock missing))
   fi
 
   AC_ARG_VAR(GRPC_LIBS, "linker flags for GRPC")
@@ -1717,7 +1718,6 @@ echo "  with test     = $use_tests"
 if test x$use_tests != xno; then
     echo "    with prop   = $enable_property_tests"
     echo "    with fuzz   = $enable_fuzz"
-    echo "    with gmock  = $enable_gmock"
 fi
 echo "  with bench    = $use_bench"
 echo "  with upnp     = $use_upnp"
