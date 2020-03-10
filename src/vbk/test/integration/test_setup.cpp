@@ -37,8 +37,7 @@ IntegrationTestFixture::IntegrationTestFixture() : TestChain100Setup()
         return util_service_impl.getKeystoneHashesForTheNextBlock(pindexPrev);
       });
 
-    VeriBlock::setService<VeriBlock::UtilService>(
-        std::shared_ptr<VeriBlock::UtilService>(&util_service_mock));
+    VeriBlockTest::setServiceMock<VeriBlock::UtilService>(util_service_mock);
 
     auto* validationService = new VeriBlock::GrpcIntegrationService();
     VeriBlock::setService<VeriBlock::GrpcIntegrationService>(validationService);
