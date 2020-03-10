@@ -24,8 +24,6 @@
 
 #include <boost/thread.hpp>
 
-#include <fakeit.hpp>
-
 // Enable BOOST_CHECK_EQUAL for enum class types
 template <typename T>
 std::ostream& operator<<(typename std::enable_if<std::is_enum<T>::value, std::ostream>::type& stream, const T& e)
