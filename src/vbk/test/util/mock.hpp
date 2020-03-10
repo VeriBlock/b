@@ -1,6 +1,8 @@
 #ifndef BITCOIN_SRC_VBK_TEST_UTIL_MOCK_HPP
 #define BITCOIN_SRC_VBK_TEST_UTIL_MOCK_HPP
 
+#include <chain.h>
+
 #include <vbk/entity/pop.hpp>
 #include <vbk/config.hpp>
 #include <vbk/pop_service.hpp>
