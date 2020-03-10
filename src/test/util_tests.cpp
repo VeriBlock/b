@@ -1623,13 +1623,14 @@ static void TestOtherProcess(fs::path dirname, std::string lockname, int fd)
 }
 #endif
 
-///TODO: leaked mock cause of fork()
-#if 0
 BOOST_AUTO_TEST_CASE(test_LockDirectory)
 {
     fs::path dirname = GetDataDir() / "lock_dir";
     const std::string lockname = ".lock";
 #ifndef WIN32
+
+    testing::Mock::AllowLeak(&pop_service_mock);
+
     // Revert SIGCHLD to default, otherwise boost.test will catch and fail on
     // it: there is BOOST_TEST_IGNORE_SIGCHLD but that only works when defined
     // at build-time of the boost library
@@ -1712,7 +1713,6 @@ BOOST_AUTO_TEST_CASE(test_LockDirectory)
     ReleaseDirectoryLocks();
     fs::remove_all(dirname);
 }
-#endif //0
 
 BOOST_AUTO_TEST_CASE(test_DirIsWritable)
 {
