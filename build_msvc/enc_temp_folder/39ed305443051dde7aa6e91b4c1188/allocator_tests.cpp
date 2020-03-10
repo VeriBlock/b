@@ -11,10 +11,10 @@
 
 #include <boost/test/unit_test.hpp>
 
+BOOST_FIXTURE_TEST_SUITE(allocator_tests, BasicTestingSetup)
+
 ///TODO: stack corruption
 #if 0
-
-BOOST_FIXTURE_TEST_SUITE(allocator_tests, BasicTestingSetup)
 
 BOOST_AUTO_TEST_CASE(arena_tests)
 {
@@ -236,6 +236,6 @@ BOOST_AUTO_TEST_CASE(lockedpool_tests_live)
     BOOST_CHECK(pool.stats().used == initial.used);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
-
 #endif //0
+
+BOOST_AUTO_TEST_SUITE_END()
