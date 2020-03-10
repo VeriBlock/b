@@ -52,8 +52,7 @@ struct EvalScriptFixture {
 
     EvalScriptFixture()
     {
-        VeriBlock::setService<VeriBlock::PopService>(
-            std::shared_ptr<VeriBlock::PopService>(&pop));
+        VeriBlockTest::setServiceMock<VeriBlock::PopService>(pop);
 
         config.min_atv_size = 1;
         config.max_atv_size = 10;

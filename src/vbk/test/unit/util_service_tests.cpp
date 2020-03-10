@@ -122,8 +122,8 @@ BOOST_AUTO_TEST_CASE(check_pop_inputs)
     VeriBlock::InitConfig();
     auto& util = VeriBlock::InitUtilService();
     VeriBlockTest::PopServiceMock pop_service_mock;
-    VeriBlock::setService<VeriBlock::PopService>(
-      std::shared_ptr<VeriBlock::PopService>(&pop_service_mock));
+
+    VeriBlockTest::setServiceMock<VeriBlock::PopService>(pop_service_mock);
 
     CTransaction tx = VeriBlockTest::makePopTx({1, 2, 3, 4, 5}, {{2, 3, 4, 5, 6, 7}});
     TxValidationState state;

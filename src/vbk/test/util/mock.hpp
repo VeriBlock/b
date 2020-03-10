@@ -107,6 +107,12 @@ public:
     MOCK_METHOD(void, clearTemporaryPayloads, (), (override));
 };
 
+template <typename T>
+void setServiceMock(T& mock)
+{
+    VeriBlock::setService<T>(std::shared_ptr<T>(&mock, [](T*) { /* empty destructor*/ }));
+}
+
 inline void setUpPopServiceMock(PopServiceMock& mock)
 {
     ON_CALL(mock, checkVTBinternally).WillByDefault(Return(true));
@@ -117,8 +123,7 @@ inline void setUpPopServiceMock(PopServiceMock& mock)
     ON_CALL(mock, blockPopValidation).WillByDefault(Return(true));
     ON_CALL(mock, addTemporaryPayloads).WillByDefault(Return(true));
 
-    VeriBlock::setService<VeriBlock::PopService>(
-        std::shared_ptr<VeriBlock::PopService>(&mock));
+    setServiceMock<VeriBlock::PopService>(mock);
 }
 
 struct ServicesFixture {
@@ -147,8 +152,7 @@ struct ServicesFixture {
                     return util_service_impl.getKeystoneHashesForTheNextBlock(pindexPrev);
                 });
 
-        VeriBlock::setService<VeriBlock::UtilService>(
-                std::shared_ptr<VeriBlock::UtilService>(&util_service_mock));
+        setServiceMock<VeriBlock::UtilService>(util_service_mock);
     }
 };
 
