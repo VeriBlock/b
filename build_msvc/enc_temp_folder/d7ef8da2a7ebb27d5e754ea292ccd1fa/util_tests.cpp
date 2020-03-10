@@ -1623,8 +1623,6 @@ static void TestOtherProcess(fs::path dirname, std::string lockname, int fd)
 }
 #endif
 
-///TODO: leaked mock cause of fork()
-#if 0
 BOOST_AUTO_TEST_CASE(test_LockDirectory)
 {
     fs::path dirname = GetDataDir() / "lock_dir";
@@ -1712,7 +1710,6 @@ BOOST_AUTO_TEST_CASE(test_LockDirectory)
     ReleaseDirectoryLocks();
     fs::remove_all(dirname);
 }
-#endif //0
 
 BOOST_AUTO_TEST_CASE(test_DirIsWritable)
 {
