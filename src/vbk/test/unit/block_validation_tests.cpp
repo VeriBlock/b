@@ -9,6 +9,7 @@
 #include <vbk/pop_service.hpp>
 #include <vbk/service_locator.hpp>
 #include <vbk/test/util/tx.hpp>
+#include <vbk/test/util/mock.hpp>
 #include <vbk/util_service.hpp>
 
 #include <string>
@@ -22,7 +23,7 @@ inline std::vector<uint8_t> operator""_v(const char* s, size_t size)
 }
 
 struct BlockValidationFixture : public TestChain100Setup {
-    fakeit::Mock<VeriBlock::PopServiceImpl> pop_impl_mock;
+    VeriBlockTest::PopServiceImplMock pop_impl_mock;
 
     CScript cbKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
 

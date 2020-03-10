@@ -17,6 +17,7 @@
 #include <vbk/pop_service.hpp>
 #include <vbk/util_service.hpp>
 #include <vbk/config.hpp>
+#include <vbk/test/util/mock.hpp>
 #include <vbk/rpc_service.hpp>
 
 #include <type_traits>
@@ -72,7 +73,7 @@ static inline bool InsecureRandBool() { return g_insecure_rand_ctx.randbool(); }
 static constexpr CAmount CENT{1000000};
 
 struct BasicVbkSetup {
-    fakeit::Mock<VeriBlock::PopService> pop_service_mock;
+    VeriBlockTest::PopServiceMock pop_service_mock;
 
     BasicVbkSetup();
 
