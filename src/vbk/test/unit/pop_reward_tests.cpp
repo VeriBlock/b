@@ -179,6 +179,7 @@ BOOST_FIXTURE_TEST_CASE(check_wallet_balance_with_pop_reward, PopRewardsTestFixt
     auto& chain = *node.chain;
     {
         CWallet wallet(&chain, WalletLocation(), WalletDatabase::CreateDummy());
+
         {
             LOCK(wallet.GetLegacyScriptPubKeyMan()->cs_wallet);
             // add Pubkey to wallet

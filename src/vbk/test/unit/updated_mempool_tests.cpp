@@ -321,9 +321,21 @@ BOOST_FIXTURE_TEST_CASE(check_CreateNewBlock_with_blockPopValidation_fail, Testi
     VeriBlock::initTemporaryPayloadsMock(pop_impl_mock);
 
     // Simulate that we have 8 invalid popTxs
+    /*EXPECT_CALL(pop_impl_mock, updateContext)
+        .WillRepeatedly(Return());
     EXPECT_CALL(pop_impl_mock, updateContext)
         .Times(8)
-        .WillRepeatedly(testing::Throw(VeriBlock::PopServiceException("fail")));
+        .WillRepeatedly(testing::Throw(VeriBlock::PopServiceException("fail")));*/
+    EXPECT_CALL(pop_impl_mock, updateContext)
+        .WillOnce(testing::Throw(VeriBlock::PopServiceException("fail")))
+        .WillOnce(testing::Throw(VeriBlock::PopServiceException("fail")))
+        .WillOnce(testing::Throw(VeriBlock::PopServiceException("fail")))
+        .WillOnce(testing::Throw(VeriBlock::PopServiceException("fail")))
+        .WillOnce(testing::Throw(VeriBlock::PopServiceException("fail")))
+        .WillOnce(testing::Throw(VeriBlock::PopServiceException("fail")))
+        .WillOnce(testing::Throw(VeriBlock::PopServiceException("fail")))
+        .WillOnce(testing::Throw(VeriBlock::PopServiceException("fail")))
+        .WillRepeatedly(Return());
     const size_t popTxCount = 10;
 
     TestMemPoolEntryHelper entry;
