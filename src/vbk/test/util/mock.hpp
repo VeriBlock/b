@@ -85,9 +85,11 @@ public:
       bool with_checks), ());
 };
 
-class PopServiceImplMock : public ::testing::NiceMock<VeriBlock::PopServiceImpl>
+class PopServiceImplMock : public VeriBlock::PopServiceImpl
 {
 public:
+    PopServiceImplMock() : VeriBlock::PopServiceImpl(false, false) {}
+
     MOCK_METHOD(void, getPublicationsData,
       (const VeriBlock::Publications& data, VeriBlock::PublicationData& pub), (override));
     MOCK_METHOD(void, updateContext,

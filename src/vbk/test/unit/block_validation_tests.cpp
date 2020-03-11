@@ -23,7 +23,7 @@ inline std::vector<uint8_t> operator""_v(const char* s, size_t size)
 }
 
 struct BlockValidationFixture : public TestChain100Setup {
-    VeriBlockTest::PopServiceImplMock pop_impl_mock;
+    testing::NiceMock<VeriBlockTest::PopServiceImplMock> pop_impl_mock;
 
     CScript cbKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
 

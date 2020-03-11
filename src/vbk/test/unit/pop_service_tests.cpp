@@ -28,7 +28,7 @@ inline void setPublicationData(VeriBlock::PublicationData& pub, const CDataStrea
 }
 
 struct PopServiceFixture : public TestChain100Setup {
-    VeriBlockTest::PopServiceImplMock pop_service_impl_mock{};
+    testing::NiceMock<VeriBlockTest::PopServiceImplMock> pop_service_impl_mock;
 
     PopServiceFixture()
     {
@@ -119,7 +119,8 @@ BOOST_FIXTURE_TEST_CASE(blockPopValidation_test_wrong_index, PopServiceFixture)
         .WillByDefault(
             [](VeriBlock::AltchainId altChainIdentifier, const CBlockHeader& popEndorsementHeader,
               const Consensus::Params& params, TxValidationState& state) -> bool {
-                return VeriBlock::PopServiceImpl().determineATVPlausibilityWithBTCRules(altChainIdentifier, popEndorsementHeader, params, state);
+                VeriBlock::PopServiceImpl pop_service_impl(false, false);
+                return pop_service_impl.determineATVPlausibilityWithBTCRules(altChainIdentifier, popEndorsementHeader, params, state);
             });
     setNoAddRemovePayloadsExpectations();
 
