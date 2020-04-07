@@ -144,7 +144,7 @@ RUN git clone --progress https://github.com/VeriBlock/alt-integration-cpp.git &&
       git submodule update --init --recursive; \
       mkdir build; \
       cd build; \
-      cmake .. -DCMAKE_BUILD_TYPE=Release; \
+      cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF; \
       make -j4 install; \
     ) && \
     rm -rf alt-integration-cpp
