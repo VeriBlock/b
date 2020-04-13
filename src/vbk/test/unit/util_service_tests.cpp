@@ -11,7 +11,7 @@
 #include <vbk/test/util/tx.hpp>
 #include <vbk/test/util/mock.hpp>
 #include <vbk/util.hpp>
-#include <vbk/util_service/util_service_impl.hpp>
+#include <vbk/merkle.hpp>
 
 using ::testing::Return;
 
@@ -20,12 +20,12 @@ BOOST_AUTO_TEST_SUITE(util_service_tests)
 BOOST_AUTO_TEST_CASE(poptx_validate)
 {
     VeriBlock::InitConfig();
-    auto& util = VeriBlock::InitUtilService();
+    auto& pop = VeriBlock::InitPopService();
     auto tx = VeriBlockTest::makePopTx({0}, {{1}});
     TxValidationState state;
-    BOOST_CHECK_MESSAGE(util.validatePopTx(CTransaction(tx), state), "valid tx");
+    BOOST_CHECK_MESSAGE(pop.validatePopTx(CTransaction(tx), state), "valid tx");
     tx.vin[0].prevout = COutPoint(uint256S("0x123"), 5);
-    BOOST_CHECK_MESSAGE(!util.validatePopTx(CTransaction(tx), state), "invalid tx");
+    BOOST_CHECK_MESSAGE(!pop.validatePopTx(CTransaction(tx), state), "invalid tx");
 }
 
 BOOST_AUTO_TEST_CASE(poptx_valid)
@@ -51,20 +51,18 @@ BOOST_AUTO_TEST_CASE(poptx_input_wrong_scriptPubKey)
 
 BOOST_AUTO_TEST_CASE(is_keystone)
 {
-    auto& config = VeriBlock::InitConfig();
-    auto& util = VeriBlock::InitUtilService();
+    SelectParams("test");
     CBlockIndex index;
-    config.keystone_interval = 5;
     index.nHeight = 100; // multiple of 5
-    BOOST_CHECK(util.isKeystone(index));
+    BOOST_CHECK(VeriBlock::isKeystone(index));
     index.nHeight = 99; // not multiple of 5
-    BOOST_CHECK(!util.isKeystone(index));
+    BOOST_CHECK(!VeriBlock::isKeystone(index));
 }
 
 BOOST_AUTO_TEST_CASE(get_previous_keystone)
 {
     auto& config = VeriBlock::InitConfig();
-    auto& util = VeriBlock::InitUtilService();
+    auto& pop = VeriBlock::InitPopService();
     config.keystone_interval = 3;
 
     std::vector<CBlockIndex> blocks;
@@ -82,19 +80,19 @@ BOOST_AUTO_TEST_CASE(get_previous_keystone)
     blocks[5].pprev = &blocks[4];
     blocks[5].nHeight = 5;
 
-    BOOST_CHECK(util.getPreviousKeystone(blocks[5]) == &blocks[3]);
-    BOOST_CHECK(util.getPreviousKeystone(blocks[4]) == &blocks[3]);
-    BOOST_CHECK(util.getPreviousKeystone(blocks[3]) == &blocks[0]);
-    BOOST_CHECK(util.getPreviousKeystone(blocks[2]) == &blocks[0]);
-    BOOST_CHECK(util.getPreviousKeystone(blocks[1]) == &blocks[0]);
-    BOOST_CHECK(util.getPreviousKeystone(blocks[0]) == nullptr);
+    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[5]) == &blocks[3]);
+    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[4]) == &blocks[3]);
+    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[3]) == &blocks[0]);
+    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[2]) == &blocks[0]);
+    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[1]) == &blocks[0]);
+    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[0]) == nullptr);
 }
 
 BOOST_AUTO_TEST_CASE(make_context_info)
 {
     TestChain100Setup blockchain;
 
-    auto& util = VeriBlock::InitUtilService();
+    auto& util = VeriBlock::InitPopService();
     auto& config = VeriBlock::InitConfig();
     config.keystone_interval = 3;
 
@@ -107,35 +105,28 @@ BOOST_AUTO_TEST_CASE(make_context_info)
     BOOST_REQUIRE(index != nullptr);
 
     uint256 txRoot{};
-    auto keystones = util.getKeystoneHashesForTheNextBlock(index->pprev);
+    auto keystones = VeriBlock::getKeystoneHashesForTheNextBlock(index->pprev);
     auto container = VeriBlock::ContextInfoContainer(index->nHeight, keystones, txRoot);
 
     // TestChain100Setup has blockchain with 100 blocks, new block is 101
     BOOST_CHECK(container.height == 101);
     BOOST_CHECK(container.keystones == keystones);
     BOOST_CHECK(container.getAuthenticated().size() == container.getUnauthenticated().size() + 32);
-    BOOST_CHECK(container.getUnauthenticated().size() == 4 + VBK_NUM_KEYSTONES * 32);
+    BOOST_CHECK(container.getUnauthenticated().size() == 4 + 2 * 32);
 }
 
 BOOST_AUTO_TEST_CASE(check_pop_inputs)
 {
     VeriBlock::InitConfig();
-    auto& util = VeriBlock::InitUtilService();
-    VeriBlockTest::PopServiceMock pop_service_mock;
-
-    VeriBlockTest::setServiceMock<VeriBlock::PopService>(pop_service_mock);
+    auto& util = VeriBlock::InitPopService();
 
     CTransaction tx = VeriBlockTest::makePopTx({1, 2, 3, 4, 5}, {{2, 3, 4, 5, 6, 7}});
     TxValidationState state;
 
     PrecomputedTransactionData data(tx);
 
-    ON_CALL(pop_service_mock, checkATVinternally).WillByDefault(Return(true));
-    ON_CALL(pop_service_mock, checkVTBinternally).WillByDefault(Return(true));
-    BOOST_CHECK(util.CheckPopInputs(tx, state, 0, false, data));
-
-    ON_CALL(pop_service_mock, checkATVinternally).WillByDefault(Return(false));
-    BOOST_CHECK(!util.CheckPopInputs(tx, state, 0, false, data));
+    BOOST_CHECK(util.checkPopInputs(tx, state, 0, false, data));
+    BOOST_CHECK(!util.checkPopInputs(tx, state, 0, false, data));
 }
 
 BOOST_AUTO_TEST_CASE(RegularTxesTotalSize_test)

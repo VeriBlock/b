@@ -8,25 +8,21 @@
 #include <validation.h>
 #include <wallet/wallet.h>
 
-#include <vbk/rpc_service/rpc_service_impl.hpp>
 #include <vbk/service_locator.hpp>
 #include <vbk/test/util/mock.hpp>
-#include <vbk/util_service.hpp>
 
 #include <string>
 #include <vbk/init.hpp>
+#include <vbk/merkle.hpp>
 
 UniValue CallRPC(std::string args);
 
 struct RpcServiceFixture : public TestChain100Setup {
-    VeriBlockTest::ServicesFixture service_fixture;
 
-    VeriBlockTest::PopServiceMock pop_service_mock;
-
-    RpcServiceFixture()
+    RpcServiceFixture(): TestChain100Setup()
     {
         VeriBlock::InitConfig();
-        VeriBlockTest::setUpPopServiceMock(pop_service_mock);
+        VeriBlock::InitPopService();
     }
 };
 
@@ -34,13 +30,6 @@ BOOST_FIXTURE_TEST_SUITE(rpc_service_tests, RpcServiceFixture)
 
 BOOST_AUTO_TEST_CASE(getpopdata_test)
 {
-    NodeContext node;
-    auto chain = interfaces::MakeChain(node);
-    std::shared_ptr<CWallet> wallet = std::make_shared<CWallet>(chain.get(), WalletLocation(), WalletDatabase::CreateDummy());
-    AddWallet(wallet);
-    node.connman = std::unique_ptr<CConnman>(new CConnman(GetRand(std::numeric_limits<uint64_t>::max()), GetRand(std::numeric_limits<uint64_t>::max())));
-    VeriBlock::InitRpcService(node.connman.get());
-
     int blockHeight = 10;
     CBlockIndex* blockIndex = ChainActive()[blockHeight];
     CBlock block;
@@ -51,7 +40,7 @@ BOOST_AUTO_TEST_CASE(getpopdata_test)
     ssBlock << blockIndex->GetBlockHeader();
 
     uint256 txRoot = BlockMerkleRoot(block);
-    auto keystones = VeriBlock::getService<VeriBlock::UtilService>().getKeystoneHashesForTheNextBlock(blockIndex->pprev);
+    auto keystones = VeriBlock::getKeystoneHashesForTheNextBlock(blockIndex->pprev);
     auto contextInfo = VeriBlock::ContextInfoContainer(blockIndex->nHeight, keystones, txRoot);
     auto authedContext = contextInfo.getAuthenticated();
 
@@ -64,9 +53,6 @@ BOOST_AUTO_TEST_CASE(getpopdata_test)
 
 BOOST_AUTO_TEST_CASE(submitpop_test)
 {
-    auto connman = std::unique_ptr<CConnman>(new CConnman(GetRand(std::numeric_limits<uint64_t>::max()), GetRand(std::numeric_limits<uint64_t>::max())));
-    VeriBlock::InitRpcService(connman.get());
-
     JSONRPCRequest request;
     request.strMethod = "submitpop";
     request.params = UniValue(UniValue::VARR);
