@@ -6,12 +6,12 @@
 #include <validation.h>
 #include <vbk/config.hpp>
 #include <vbk/init.hpp>
+#include <vbk/merkle.hpp>
 #include <vbk/pop_service.hpp>
 #include <vbk/service_locator.hpp>
-#include <vbk/test/util/tx.hpp>
 #include <vbk/test/util/mock.hpp>
+#include <vbk/test/util/tx.hpp>
 #include <vbk/util.hpp>
-#include <vbk/merkle.hpp>
 
 using ::testing::Return;
 
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(poptx_input_wrong_scriptPubKey)
 
 BOOST_AUTO_TEST_CASE(is_keystone)
 {
-    SelectParams("test");
+    VeriBlock::InitConfig();
     CBlockIndex index;
     index.nHeight = 100; // multiple of 5
     BOOST_CHECK(VeriBlock::isKeystone(index));
@@ -61,27 +61,23 @@ BOOST_AUTO_TEST_CASE(is_keystone)
 
 BOOST_AUTO_TEST_CASE(get_previous_keystone)
 {
-    auto& config = VeriBlock::InitConfig();
-    auto& pop = VeriBlock::InitPopService();
-    config.keystone_interval = 3;
+    VeriBlock::InitConfig();
 
     std::vector<CBlockIndex> blocks;
-    blocks.resize(6);
+    blocks.resize(10);
     blocks[0].pprev = nullptr;
     blocks[0].nHeight = 0;
-    blocks[1].pprev = &blocks[0];
-    blocks[1].nHeight = 1;
-    blocks[2].pprev = &blocks[1];
-    blocks[2].nHeight = 2;
-    blocks[3].pprev = &blocks[2];
-    blocks[3].nHeight = 3;
-    blocks[4].pprev = &blocks[3];
-    blocks[4].nHeight = 4;
-    blocks[5].pprev = &blocks[4];
-    blocks[5].nHeight = 5;
+    for (size_t i = 1; i < blocks.size(); i++) {
+        blocks[i].pprev = &blocks[i - 1];
+        blocks[i].nHeight = i;
+    }
 
-    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[5]) == &blocks[3]);
-    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[4]) == &blocks[3]);
+    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[9]) == &blocks[5]);
+    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[8]) == &blocks[5]);
+    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[7]) == &blocks[5]);
+    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[6]) == &blocks[5]);
+    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[5]) == &blocks[0]);
+    BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[4]) == &blocks[0]);
     BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[3]) == &blocks[0]);
     BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[2]) == &blocks[0]);
     BOOST_CHECK(VeriBlock::getPreviousKeystone(blocks[1]) == &blocks[0]);
@@ -92,9 +88,8 @@ BOOST_AUTO_TEST_CASE(make_context_info)
 {
     TestChain100Setup blockchain;
 
-    auto& util = VeriBlock::InitPopService();
-    auto& config = VeriBlock::InitConfig();
-    config.keystone_interval = 3;
+    VeriBlock::InitPopService();
+    VeriBlock::InitConfig();
 
     CScript scriptPubKey = CScript() << ToByteVector(blockchain.coinbaseKey.GetPubKey()) << OP_CHECKSIG;
     CBlock block = blockchain.CreateAndProcessBlock({}, scriptPubKey);
