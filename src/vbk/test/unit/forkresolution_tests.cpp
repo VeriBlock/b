@@ -11,192 +11,192 @@
 #include <vbk/test/util/tx.hpp>
 
 
-static CBlock CreateTestBlock(TestChain100Setup& test, std::vector<CMutableTransaction> trxs = {})
-{
-    test.coinbaseKey.MakeNewKey(true);
-    CScript scriptPubKey = CScript() << ToByteVector(test.coinbaseKey.GetPubKey()) << OP_CHECKSIG;
-
-    return test.CreateAndProcessBlock({}, scriptPubKey);
-}
-
-static void InvalidateTestBlock(CBlockIndex* pblock)
-{
-    BlockValidationState state;
-
-    InvalidateBlock(state, Params(), pblock);
-    ActivateBestChain(state, Params());
-    mempool.clear();
-}
-
-static void ReconsiderTestBlock(CBlockIndex* pblock)
-{
-    BlockValidationState state;
-
-    {
-        LOCK(cs_main);
-        ResetBlockFailureFlags(pblock);
-    }
-    ActivateBestChain(state, Params(), std::shared_ptr<const CBlock>());
-}
+//static CBlock CreateTestBlock(TestChain100Setup& test, std::vector<CMutableTransaction> trxs = {})
+//{
+//    test.coinbaseKey.MakeNewKey(true);
+//    CScript scriptPubKey = CScript() << ToByteVector(test.coinbaseKey.GetPubKey()) << OP_CHECKSIG;
+//
+//    return test.CreateAndProcessBlock({}, scriptPubKey);
+//}
+//
+//static void InvalidateTestBlock(CBlockIndex* pblock)
+//{
+//    BlockValidationState state;
+//
+//    InvalidateBlock(state, Params(), pblock);
+//    ActivateBestChain(state, Params());
+//    mempool.clear();
+//}
+//
+//static void ReconsiderTestBlock(CBlockIndex* pblock)
+//{
+//    BlockValidationState state;
+//
+//    {
+//        LOCK(cs_main);
+//        ResetBlockFailureFlags(pblock);
+//    }
+//    ActivateBestChain(state, Params(), std::shared_ptr<const CBlock>());
+//}
 
 BOOST_AUTO_TEST_SUITE(forkresolution_tests)
 
 
 BOOST_FIXTURE_TEST_CASE(not_crossing_keystone_case_1_test, TestChain100Setup)
 {
-    for (int i = 0; i < 2; i++) {
-        CreateTestBlock(*this);
-    }
-
-    CBlockIndex* pblock = ChainActive().Tip();
-
-    InvalidateTestBlock(pblock);
-
-    for (int i = 0; i < 2; i++) {
-        CreateTestBlock(*this);
-    }
-
-    CBlockIndex* pblock2 = ChainActive().Tip();
-    ReconsiderTestBlock(pblock);
-
-    BOOST_CHECK(pblock2 == ChainActive().Tip());
+//    for (int i = 0; i < 2; i++) {
+//        CreateTestBlock(*this);
+//    }
+//
+//    CBlockIndex* pblock = ChainActive().Tip();
+//
+//    InvalidateTestBlock(pblock);
+//
+//    for (int i = 0; i < 2; i++) {
+//        CreateTestBlock(*this);
+//    }
+//
+//    CBlockIndex* pblock2 = ChainActive().Tip();
+//    ReconsiderTestBlock(pblock);
+//
+//    BOOST_CHECK(pblock2 == ChainActive().Tip());
 }
 
-BOOST_FIXTURE_TEST_CASE(not_crossing_keystone_case_2_test, TestChain100Setup)
-{
-    CreateTestBlock(*this);
-    CBlockIndex* pblock = ChainActive().Tip();
-    InvalidateTestBlock(pblock);
-
-    CreateTestBlock(*this);
-
-    ReconsiderTestBlock(pblock);
-
-    BOOST_CHECK(pblock == ChainActive().Tip());
-}
-
-BOOST_FIXTURE_TEST_CASE(not_crossing_keystone_case_3_test, TestChain100Setup)
-{
-    for (int i = 0; i < 2; i++) {
-        CreateTestBlock(*this);
-    }
-
-    CBlockIndex* pblock = ChainActive().Tip();
-    InvalidateTestBlock(pblock);
-
-    CreateTestBlock(*this);
-    CBlockIndex* pblock2 = ChainActive().Tip();
-    InvalidateTestBlock(pblock2);
-
-    CreateTestBlock(*this);
-
-    ReconsiderTestBlock(pblock);
-    ReconsiderTestBlock(pblock2);
-
-    BOOST_CHECK(pblock == ChainActive().Tip());
-}
-
-BOOST_FIXTURE_TEST_CASE(not_crossing_keystone_case_4_test, TestChain100Setup)
-{
-    CreateTestBlock(*this);
-
-    CBlockIndex* pblock = ChainActive().Tip();
-
-    CreateTestBlock(*this);
-
-    CBlockIndex* pblock2 = ChainActive().Tip();
-
-    InvalidateTestBlock(pblock);
-
-    CreateTestBlock(*this);
-
-    CreateTestBlock(*this);
-
-    ReconsiderTestBlock(pblock);
-
-    BOOST_CHECK(pblock2 == ChainActive().Tip());
-}
-
-BOOST_FIXTURE_TEST_CASE(crossing_keystone_case_1_test, TestChain100Setup)
-{
-    CBlockIndex* pblock = ChainActive().Tip();
-    CreateTestBlock(*this);
-    InvalidateTestBlock(pblock);
-
-    for (int i = 0; i < 3; i++) {
-        CreateTestBlock(*this);
-    }
-
-    CBlockIndex* pblock2 = ChainActive().Tip();
-    ReconsiderTestBlock(pblock);
-
-    BOOST_CHECK(pblock2 == ChainActive().Tip());
-}
-
-BOOST_FIXTURE_TEST_CASE(crossing_keystone_case_2_test, TestChain100Setup)
-{
-    CBlockIndex* pblock = ChainActive().Tip();
-    InvalidateTestBlock(pblock);
-
-    for (int i = 0; i < 2; i++) {
-        CreateTestBlock(*this);
-    }
-
-    CBlockIndex* pblock2 = ChainActive()[100];
-    CBlockIndex* pblock3 = ChainActive().Tip();
-    InvalidateTestBlock(pblock2);
-
-    for (int i = 0; i < 2; i++) {
-        CreateTestBlock(*this);
-    }
-
-    ReconsiderTestBlock(pblock);
-    ReconsiderTestBlock(pblock2);
-
-    BOOST_CHECK(pblock3 == ChainActive().Tip());
-}
-
-BOOST_FIXTURE_TEST_CASE(crossing_keystone_case_3_test, TestChain100Setup)
-{
-    CBlockIndex* pblock = ChainActive().Tip();
-    InvalidateTestBlock(pblock);
-    CreateTestBlock(*this);
-
-    CBlockIndex* pblock2 = ChainActive().Tip();
-    InvalidateTestBlock(pblock2);
-    CreateTestBlock(*this);
-
-    ReconsiderTestBlock(pblock);
-    ReconsiderTestBlock(pblock2);
-
-    BOOST_CHECK(pblock == ChainActive().Tip());
-}
-
-BOOST_FIXTURE_TEST_CASE(crossing_keystone_case_4_test, TestChain100Setup)
-{
-    CBlockIndex* pblock = ChainActive().Tip();
-    CreateTestBlock(*this);
-    InvalidateTestBlock(pblock);
-
-    for (int i = 0; i < 3; i++) {
-        CreateTestBlock(*this);
-    }
-
-    CBlockIndex* pblock2 = ChainActive().Tip();
-    InvalidateTestBlock(pblock2);
-
-    for (int i = 0; i < 2; i++) {
-        CreateTestBlock(*this);
-    }
-
-    CBlockIndex* pblock3 = ChainActive().Tip();
-
-    ReconsiderTestBlock(pblock);
-    ReconsiderTestBlock(pblock2);
-
-    BOOST_CHECK(pblock3 == ChainActive().Tip());
-}
-
+//BOOST_FIXTURE_TEST_CASE(not_crossing_keystone_case_2_test, TestChain100Setup)
+//{
+//    CreateTestBlock(*this);
+//    CBlockIndex* pblock = ChainActive().Tip();
+//    InvalidateTestBlock(pblock);
+//
+//    CreateTestBlock(*this);
+//
+//    ReconsiderTestBlock(pblock);
+//
+//    BOOST_CHECK(pblock == ChainActive().Tip());
+//}
+//
+//BOOST_FIXTURE_TEST_CASE(not_crossing_keystone_case_3_test, TestChain100Setup)
+//{
+//    for (int i = 0; i < 2; i++) {
+//        CreateTestBlock(*this);
+//    }
+//
+//    CBlockIndex* pblock = ChainActive().Tip();
+//    InvalidateTestBlock(pblock);
+//
+//    CreateTestBlock(*this);
+//    CBlockIndex* pblock2 = ChainActive().Tip();
+//    InvalidateTestBlock(pblock2);
+//
+//    CreateTestBlock(*this);
+//
+//    ReconsiderTestBlock(pblock);
+//    ReconsiderTestBlock(pblock2);
+//
+//    BOOST_CHECK(pblock == ChainActive().Tip());
+//}
+//
+//BOOST_FIXTURE_TEST_CASE(not_crossing_keystone_case_4_test, TestChain100Setup)
+//{
+//    CreateTestBlock(*this);
+//
+//    CBlockIndex* pblock = ChainActive().Tip();
+//
+//    CreateTestBlock(*this);
+//
+//    CBlockIndex* pblock2 = ChainActive().Tip();
+//
+//    InvalidateTestBlock(pblock);
+//
+//    CreateTestBlock(*this);
+//
+//    CreateTestBlock(*this);
+//
+//    ReconsiderTestBlock(pblock);
+//
+//    BOOST_CHECK(pblock2 == ChainActive().Tip());
+//}
+//
+//BOOST_FIXTURE_TEST_CASE(crossing_keystone_case_1_test, TestChain100Setup)
+//{
+//    CBlockIndex* pblock = ChainActive().Tip();
+//    CreateTestBlock(*this);
+//    InvalidateTestBlock(pblock);
+//
+//    for (int i = 0; i < 3; i++) {
+//        CreateTestBlock(*this);
+//    }
+//
+//    CBlockIndex* pblock2 = ChainActive().Tip();
+//    ReconsiderTestBlock(pblock);
+//
+//    BOOST_CHECK(pblock2 == ChainActive().Tip());
+//}
+//
+//BOOST_FIXTURE_TEST_CASE(crossing_keystone_case_2_test, TestChain100Setup)
+//{
+//    CBlockIndex* pblock = ChainActive().Tip();
+//    InvalidateTestBlock(pblock);
+//
+//    for (int i = 0; i < 2; i++) {
+//        CreateTestBlock(*this);
+//    }
+//
+//    CBlockIndex* pblock2 = ChainActive()[100];
+//    CBlockIndex* pblock3 = ChainActive().Tip();
+//    InvalidateTestBlock(pblock2);
+//
+//    for (int i = 0; i < 2; i++) {
+//        CreateTestBlock(*this);
+//    }
+//
+//    ReconsiderTestBlock(pblock);
+//    ReconsiderTestBlock(pblock2);
+//
+//    BOOST_CHECK(pblock3 == ChainActive().Tip());
+//}
+//
+//BOOST_FIXTURE_TEST_CASE(crossing_keystone_case_3_test, TestChain100Setup)
+//{
+//    CBlockIndex* pblock = ChainActive().Tip();
+//    InvalidateTestBlock(pblock);
+//    CreateTestBlock(*this);
+//
+//    CBlockIndex* pblock2 = ChainActive().Tip();
+//    InvalidateTestBlock(pblock2);
+//    CreateTestBlock(*this);
+//
+//    ReconsiderTestBlock(pblock);
+//    ReconsiderTestBlock(pblock2);
+//
+//    BOOST_CHECK(pblock == ChainActive().Tip());
+//}
+//
+//BOOST_FIXTURE_TEST_CASE(crossing_keystone_case_4_test, TestChain100Setup)
+//{
+//    CBlockIndex* pblock = ChainActive().Tip();
+//    CreateTestBlock(*this);
+//    InvalidateTestBlock(pblock);
+//
+//    for (int i = 0; i < 3; i++) {
+//        CreateTestBlock(*this);
+//    }
+//
+//    CBlockIndex* pblock2 = ChainActive().Tip();
+//    InvalidateTestBlock(pblock2);
+//
+//    for (int i = 0; i < 2; i++) {
+//        CreateTestBlock(*this);
+//    }
+//
+//    CBlockIndex* pblock3 = ChainActive().Tip();
+//
+//    ReconsiderTestBlock(pblock);
+//    ReconsiderTestBlock(pblock2);
+//
+//    BOOST_CHECK(pblock3 == ChainActive().Tip());
+//}
+//
 //BOOST_FIXTURE_TEST_CASE(crossing_keystone_with_pop_1_test, TestChain100Setup)
 //{
 //    VeriBlockTest::ServicesFixture service_fixture;

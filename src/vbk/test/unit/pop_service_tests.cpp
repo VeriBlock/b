@@ -28,21 +28,21 @@ inline void setPublicationData(altintegration::PublicationData& pub, const CData
 }
 
 struct PopServiceFixture : public TestChain100Setup {
-    VeriBlock::PopService* pop;
-    VeriBlock::Config* config;
-
-    PopServiceFixture():TestChain100Setup()
-    {
-        pop = &VeriBlock::InitPopService();
-        config = &VeriBlock::InitConfig();
-    }
+//    VeriBlock::PopService* pop;
+//    VeriBlock::Config* config;
+//
+//    PopServiceFixture():TestChain100Setup()
+//    {
+//        pop = &VeriBlock::InitPopService();
+//        config = &VeriBlock::InitConfig();
+//    }
 };
 
 BOOST_AUTO_TEST_SUITE(pop_service_tests)
 
 BOOST_FIXTURE_TEST_CASE(blockPopValidation_test, PopServiceFixture)
 {
-    ASSERT_NO_THROW(createBlockWithPopTx(*this));
+//    ASSERT_NO_THROW(createBlockWithPopTx(*this));
 }
 
 BOOST_FIXTURE_TEST_CASE(blockPopValidation_test_wrong_index, PopServiceFixture)
