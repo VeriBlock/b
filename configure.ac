@@ -1279,7 +1279,7 @@ if test x$use_pkgconfig = xyes; then
   )
 else
   # alt-integration
-  AC_CHECK_HEADER([veriblock/popmanager.hpp],,AC_MSG_ERROR(altintegration headers missing))
+  AC_CHECK_HEADER([veriblock/altintegration.hpp],,AC_MSG_ERROR(altintegration headers missing))
   AC_CHECK_LIB([altintegration],[main],[ALTINTEGRATION_LIBS=" -laltintegration"],AC_MSG_ERROR(altintegration missing))
 
   if test x$use_tests != xno; then
