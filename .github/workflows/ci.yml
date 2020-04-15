@@ -25,11 +25,11 @@ jobs:
       run: |
         cd depends
         make HOST=x86_64-pc-linux-gnu NO_QT=1 NO_ZMQ=1 NO_UPNP=1 NO_WALLET=1 NO_QR=1
+        export CONFIG_SITE=$PWD/depends/x86_64-pc-linux-gnu/share/config.site
     - name: autogen
       run: ./autogen.sh
     - name: configure
-      env:
-        CONFIG_SITE: $PWD/depends/x86_64-pc-linux-gnu/share/config.site
+
       run: ./configure
         --without-gui
         --enable-werror
