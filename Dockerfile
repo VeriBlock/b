@@ -1,6 +1,7 @@
 FROM veriblock/prerelease-btc
 
-ENV ALTINTEGRATION_VERSION=eb8d5128a8df6ee7eb96cec042f1c78ed71dc722
+# commit hash
+ARG ALTINTEGRATION_VERSION
 RUN ( \
     cd /tmp; \
     wget https://github.com/VeriBlock/alt-integration-cpp/archive/${ALTINTEGRATION_VERSION}.tar.gz; \

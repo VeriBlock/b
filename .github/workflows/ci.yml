@@ -17,7 +17,6 @@ jobs:
     env:
       CC: gcc
       CXX: g++
-      ALTINTEGRATION_VERSION: eb8d5128a8df6ee7eb96cec042f1c78ed71dc722
     steps:
     - uses: actions/checkout@v1
       with:
@@ -25,6 +24,7 @@ jobs:
     - name: install alt-integration-cpp
       run: |
         (
+        export ALTINTEGRATION_VERSION=$(cat altintegration-version)
         cd /opt;
         wget https://github.com/VeriBlock/alt-integration-cpp/archive/${ALTINTEGRATION_VERSION}.tar.gz;
         tar -xf ${ALTINTEGRATION_VERSION}.tar.gz;
