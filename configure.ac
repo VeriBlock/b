@@ -129,6 +129,11 @@ AC_ARG_ENABLE(tests,
     [use_tests=$enableval],
     [use_tests=yes])
 
+AC_ARG_ENABLE(gmock,
+    AS_HELP_STRING([--disable-gmock],[do not compile tests which use gmock (default is to compile)]),
+    [use_gmock=$enableval],
+    [use_gmock=yes])
+
 AC_ARG_ENABLE(gui-tests,
     AS_HELP_STRING([--disable-gui-tests],[do not compile GUI tests (default is to compile if GUI and tests enabled)]),
     [use_gui_tests=$enableval],
@@ -1251,7 +1256,9 @@ if test x$use_pkgconfig = xyes; then
       PKG_CHECK_MODULES([CRYPTO], [libcrypto],,[AC_MSG_ERROR(libcrypto not found.)])
       PKG_CHECK_MODULES([ALTINTEGRATION], [altintegration],,[AC_MSG_ERROR(libaltintegration not found.)])
       if test x$use_tests != xno; then
-        PKG_CHECK_MODULES([GMOCK], [gmock],,[AC_MSG_ERROR(gmock not found.)])
+        if test x$use_gmock != xno; then
+          PKG_CHECK_MODULES([GMOCK], [gmock],,[AC_MSG_ERROR(gmock not found.)])
+        fi
       fi
       if test x$enable_bip70 != xno; then
         BITCOIN_QT_CHECK([PKG_CHECK_MODULES([PROTOBUF], [protobuf], [have_protobuf=yes], [have_protobuf=no])])
@@ -1283,9 +1290,11 @@ else
   AC_CHECK_LIB([altintegration],[main],[ALTINTEGRATION_LIBS=" -laltintegration"],AC_MSG_ERROR(altintegration missing))
 
   if test x$use_tests != xno; then
-    AC_CHECK_HEADER([gmock/gmock.h],,AC_MSG_ERROR(libgmock headers missing))
-    AC_CHECK_LIB([gtest],[main],[GMOCK_LIBS=" -lgtest"],AC_MSG_ERROR(libgtest missing))
-    AC_CHECK_LIB([gmock],[main],[GMOCK_LIBS+=" -lgmock"],AC_MSG_ERROR(libgmock missing))
+    if test x$use_gmock != xno; then
+      AC_CHECK_HEADER([gmock/gmock.h],,AC_MSG_ERROR(libgmock headers missing))
+      AC_CHECK_LIB([gtest],[main],[GMOCK_LIBS=" -lgtest"],AC_MSG_ERROR(libgtest missing))
+      AC_CHECK_LIB([gmock],[main],[GMOCK_LIBS+=" -lgmock"],AC_MSG_ERROR(libgmock missing))
+    fi
   fi
 
   AC_ARG_VAR(ALTINTEGRATION_LIBS, "linker flags for ALTINTEGRATION")

@@ -2,7 +2,7 @@ FROM veriblock/prerelease-btc
 
 ADD . /app
 WORKDIR /app
-RUN (cd depends; make HOST=x86_64-pc-linux-gnu NO_QT=1 NO_ZMQ=1 NO_UPNP=1 NO_WALLET=1 NO_QR=1)
+RUN (cd depends; make HOST=x86_64-pc-linux-gnu NO_QT=1)
 ENV CONFIG_SITE=/app/depends/x86_64-pc-linux-gnu/share/config.site
 RUN ./autogen.sh
 RUN CC=gcc-7 CXX=g++-7 ./configure --without-gui --disable-tests --disable-bench --disable-man --with-libs=no
