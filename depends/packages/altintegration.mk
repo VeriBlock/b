@@ -9,11 +9,11 @@ define $(package)_config_cmds
 endef
 
 define $(package)_build_cmds
-  $(MAKE) -j
+  $(MAKE)
 endef
 
 define $(package)_stage_cmds
-  $(MAKE) -j install
+  $(MAKE) install
 endef
 
 

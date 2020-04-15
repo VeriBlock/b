@@ -24,7 +24,7 @@ jobs:
     - name: install dependencies
       run: |
         cd depends
-        make HOST=x86_64-pc-linux-gnu altintegration
+        make HOST=x86_64-pc-linux-gnu NO_QT=1 NO_ZMQ=1 NO_UPNP=1 NO_WALLET=1 NO_QR=1
     - name: autogen
       run: ./autogen.sh
     - name: configure

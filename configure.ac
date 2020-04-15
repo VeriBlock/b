@@ -1249,7 +1249,7 @@ if test x$use_pkgconfig = xyes; then
       export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/lib64/pkgconfig
       PKG_CHECK_MODULES([SSL], [libssl],, [AC_MSG_ERROR(openssl not found.)])
       PKG_CHECK_MODULES([CRYPTO], [libcrypto],,[AC_MSG_ERROR(libcrypto not found.)])
-      PKG_CHECK_MODULES([ALTINTEGRATION], [altintegration],,[AC_MSG_ERROR(libaltingegration not found.)])
+      PKG_CHECK_MODULES([ALTINTEGRATION], [altintegration],,[AC_MSG_ERROR(libaltintegration not found.)])
       if test x$use_tests != xno; then
         PKG_CHECK_MODULES([GMOCK], [gmock],,[AC_MSG_ERROR(gmock not found.)])
       fi
