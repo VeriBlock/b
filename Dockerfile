@@ -1,20 +1,8 @@
 FROM veriblock/prerelease-btc
 
-# commit hash
-ARG ALTINTEGRATION_VERSION
-RUN ( \
-    cd /tmp; \
-    wget https://github.com/VeriBlock/alt-integration-cpp/archive/${ALTINTEGRATION_VERSION}.tar.gz; \
-    tar -xf ${ALTINTEGRATION_VERSION}.tar.gz; \
-    cd alt-integration-cpp-${ALTINTEGRATION_VERSION}; \
-    mkdir build; \
-    cd build; \
-    cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_ROCKSDB=OFF; \
-    make -j2 install; \
-    )
-
-ADD . /app
 WORKDIR /app
+RUN (cd depends; make HOST=x86_64-pc-linux-gnu altintegration)
+ENV CONFIG_SITE=/app/depends/x86_64-pc-linux-gnu/share/config.site
 RUN ./autogen.sh
 RUN CC=gcc-7 CXX=g++-7 ./configure --without-gui --disable-tests --disable-bench --disable-man --with-libs=no
 RUN make -j6 install

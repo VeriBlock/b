@@ -14,8 +14,6 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: true
-      - run: export ALTINTEGRATION_VERSION=$(cat altintegration-version)
-      - run: echo $ALTINTEGRATION_VERSION
       - name: Docker Push
         uses: warchant/Publish-Docker-Github-Action@3
         with:
@@ -25,4 +23,3 @@ jobs:
           password: ${{ secrets.PUBLIC_DOCKERHUB_PASSWORD }}
           tag_names: true
           snapshot: true
-          buildargs: ALTINTEGRATION_VERSION

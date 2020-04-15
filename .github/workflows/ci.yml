@@ -21,22 +21,15 @@ jobs:
     - uses: actions/checkout@v1
       with:
         submodules: true
-    - name: install alt-integration-cpp
+    - name: install dependencies
       run: |
-        (
-        export ALTINTEGRATION_VERSION=$(cat altintegration-version)
-        cd /opt;
-        wget https://github.com/VeriBlock/alt-integration-cpp/archive/${ALTINTEGRATION_VERSION}.tar.gz;
-        tar -xf ${ALTINTEGRATION_VERSION}.tar.gz;
-        cd alt-integration-cpp-${ALTINTEGRATION_VERSION};
-        mkdir build;
-        cd build;
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_ROCKSDB=OFF;
-        make -j2 install
-        )
+        cd depends
+        make HOST=x86_64-pc-linux-gnu altintegration
     - name: autogen
       run: ./autogen.sh
     - name: configure
+      env:
+        CONFIG_SITE: $PWD/depends/x86_64-pc-linux-gnu/share/config.site
       run: ./configure
         --without-gui
         --enable-werror
