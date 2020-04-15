@@ -15,6 +15,7 @@ jobs:
         with:
           submodules: true
       - run: export ALTINTEGRATION_VERSION=$(cat altintegration-version)
+      - run: echo $ALTINTEGRATION_VERSION
       - name: Docker Push
         uses: warchant/Publish-Docker-Github-Action@3
         with:

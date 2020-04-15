@@ -9,7 +9,7 @@ RUN ( \
     cd alt-integration-cpp-${ALTINTEGRATION_VERSION}; \
     mkdir build; \
     cd build; \
-    cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF; \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_ROCKSDB=OFF; \
     make -j2 install; \
     )
 
