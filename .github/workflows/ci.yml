@@ -53,28 +53,3 @@ jobs:
 #        gcovr --xml cov.xml -j2 -v -s -b -r src
 #    - name: Run sonarqube
 #      run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
-  windows:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        host: ["x86_64-w64-mingw32"]
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - uses: actions/checkout@v1
-        with:
-          submodules: true
-      - run: which bash
-      - name: install dependencies
-        run: |
-          cd depends
-          make HOST=${{ matrix.host }} NO_QT=1
-      - name: autogen
-        run: ./autogen.sh
-      - name: configure
-        run: CONFIG_SITE=$PWD/depends/${{ matrix.host }}/share/config.site ./configure
-           --without-gui
-           --enable-werror
-           --disable-bench
