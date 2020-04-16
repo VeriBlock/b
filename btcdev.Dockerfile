@@ -93,6 +93,6 @@ ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 RUN pip3 install --upgrade setuptools wheel bashlex compiledb gcovr
 
-RUN apt-get install -y g++-mingw-w64-x86-64 mingw-w64-x86-64-dev
+RUN apt-get install -y g++-mingw-w64-x86-64 mingw-w64-x86-64-dev mingw-w64
 
 WORKDIR /
