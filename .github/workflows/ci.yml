@@ -14,6 +14,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: veriblock/btcdev:cpp
+    matrix:
+      host: ["x86_64-w64-mingw32", "x86_64-pc-linux-gnu"]
     env:
       CC: gcc
       CXX: g++
@@ -24,22 +26,20 @@ jobs:
     - name: install dependencies
       run: |
         cd depends
-        make HOST=x86_64-pc-linux-gnu NO_QT=1
+        make HOST=${{ matrix.host }} NO_QT=1
     - name: autogen
       run: ./autogen.sh
     - name: configure
-      run: CONFIG_SITE=$PWD/depends/x86_64-pc-linux-gnu/share/config.site ./configure
+      run: CONFIG_SITE=$PWD/depends/${{ matrix.host }}/share/config.site ./configure
         --without-gui
         --enable-werror
         --disable-bench
         #--enable-lcov
         #--enable-lcov-branch-coverage
-
-
-- name: make
+    - name: make
       run: make -j2
     - name: make check
-      timeout-minutes: 10
+      timeout-minutes: 15
       run: make check
 #    - name: Collect coverage
 #      run: |
