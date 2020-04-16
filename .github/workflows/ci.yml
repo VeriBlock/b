@@ -14,8 +14,9 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     container: veriblock/btcdev:cpp
-    matrix:
-      host: ["x86_64-pc-linux-gnu"]
+    strategy:
+      matrix:
+        host: ["x86_64-pc-linux-gnu"]
     env:
       CC: gcc
       CXX: g++
@@ -52,8 +53,9 @@ jobs:
 
   windows:
     runs-on: windows-latest
-    matrix:
-      host: ["x86_64-w64-mingw32"]
+    strategy:
+      matrix:
+        host: ["x86_64-w64-mingw32"]
     steps:
       - uses: actions/checkout@v1
         with:
