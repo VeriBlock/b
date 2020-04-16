@@ -24,6 +24,9 @@ jobs:
     - uses: actions/checkout@v1
       with:
         submodules: true
+    - name: mingw preinstall script
+      if: ${{ matrix.host }} == "x86_64-w64-mingw32"
+      run: sudo update-alternatives --config x86_64-w64-mingw32-g++
     - name: install dependencies
       run: |
         cd depends
