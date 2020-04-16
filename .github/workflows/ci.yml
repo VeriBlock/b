@@ -24,7 +24,7 @@ jobs:
     - uses: actions/checkout@v1
       with:
         submodules: true
-    - if: matrix.host == "x86_64-w64-mingw32"
+    - if: matrix.host == 'x86_64-w64-mingw32'
       name: mingw preinstall script
       run: update-alternatives --config x86_64-w64-mingw32-g++
     - name: install dependencies
