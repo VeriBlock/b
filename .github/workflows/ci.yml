@@ -13,10 +13,10 @@ on:
 jobs:
   linux:
     runs-on: ubuntu-latest
-    container: veriblock/btcdev:cpp
+    container: veriblock/btcdev
     strategy:
       matrix:
-        host: ["x86_64-pc-linux-gnu"]
+        host: ["x86_64-pc-linux-gnu", "x86_64-w64-mingw32"]
     env:
       CC: gcc
       CXX: g++
@@ -50,35 +50,3 @@ jobs:
 #        gcovr --xml cov.xml -j2 -v -s -b -r src
 #    - name: Run sonarqube
 #      run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
-  windows:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        host: ["x86_64-w64-mingw32"]
-    steps:
-      - uses: actions/checkout@v1
-        with:
-          submodules: true
-      - name: install dependencies
-        shell: powershell
-        run: |
-          cd depends
-          make HOST=${{ matrix.host }} NO_QT=1
-      - name: autogen.sh
-        shell: powershell
-        run: ./autogen.sh
-      - name: configure
-        shell: powershell
-        run: CONFIG_SITE=./depends/${{ matrix.host }}/share/config.site ./configure
-          --without-gui
-          --enable-werror
-          --disable-gmock
-          --disable-bench
-      - name: build
-        shell: powershell
-        run: make -j2
-      - name: test
-        shell: powershell
-        timeout-minutes: 20
-        run: make check
