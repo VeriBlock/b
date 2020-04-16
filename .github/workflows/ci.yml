@@ -11,11 +11,11 @@ on:
     - develop
 
 jobs:
-  build:
+  linux:
     runs-on: ubuntu-latest
     container: veriblock/btcdev:cpp
     matrix:
-      host: ["x86_64-w64-mingw32", "x86_64-pc-linux-gnu"]
+      host: ["x86_64-pc-linux-gnu"]
     env:
       CC: gcc
       CXX: g++
@@ -36,10 +36,12 @@ jobs:
         --disable-bench
         #--enable-lcov
         #--enable-lcov-branch-coverage
+
+
     - name: make
       run: make -j2
     - name: make check
-      timeout-minutes: 15
+      timeout-minutes: 20
       run: make check
 #    - name: Collect coverage
 #      run: |
@@ -47,3 +49,27 @@ jobs:
 #        gcovr --xml cov.xml -j2 -v -s -b -r src
 #    - name: Run sonarqube
 #      run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
+  windows:
+    runs-on: windows-latest
+    matrix:
+      host: ["x86_64-w64-mingw32"]
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - name: install dependencies
+        run: |
+          cd depends
+          make HOST=${{ matrix.host }} NO_QT=1
+      - name: autogen.sh
+        run: ./autogen.sh
+      - name: configure
+        run: CONFIG_SITE=./depends/${{ matrix.host }}/share/config.site ./configure
+          --without-gui
+          --enable-werror
+          --disable-gmock
+          --disable-bench
+      - name: test
+        timeout-minutes: 20
+        run: make check
