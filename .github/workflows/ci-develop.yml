@@ -1,12 +1,12 @@
-name: CI (master)
+name: CI (develop)
 
 on:
   push:
     branches:
-      - master
+      - develop
   pull_request:
     branches:
-      - master
+      - develop
 
 jobs:
   linux:
@@ -19,7 +19,7 @@ jobs:
           repository: veriblock/alt-integration-cpp
           path: alt-integration-cpp
       - name: configure alt-integration-cpp
-        run: cd alt-integration-cpp/ && cmake . -Bbuild -DFIND_ROCKSDB=OFF
+        run: cd alt-integration-cpp/ && cmake . -Bbuild -DFIND_ROCKSDB=OFF -DTESTING=OFF
       - name: make alt-integration-cpp
         run: cd alt-integration-cpp/build && make -j2
       - name: install alt-integration-cpp
@@ -39,22 +39,21 @@ jobs:
         run: ./autogen.sh
       - name: configure
         run: ./configure
+          --without-gui
           --enable-werror
           --disable-bench
           --disable-gmock
-      #         --enable-lcov
-      #         --enable-lcov-branch-coverage
+          --disable-tests
+#         --enable-lcov
+#         --enable-lcov-branch-coverage
       - name: make
         run: make -j2
-      - name: make check
-        timeout-minutes: 20
-        run: make check
-  #     - name: Collect coverage
-  #       run: |
-  #         lcov -c -d src -o cov.info
-  #         gcovr --xml cov.xml -j2 -v -s -b -r src
-  #     - name: Run sonarqube
-  #       run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+#     - name: Collect coverage
+#       run: |
+#         lcov -c -d src -o cov.info
+#         gcovr --xml cov.xml -j2 -v -s -b -r src
+#     - name: Run sonarqube
+#       run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
   x86_64-w64-mingw32:
     runs-on: ubuntu-latest
@@ -71,7 +70,7 @@ jobs:
       - name: strip out problematic Windows %PATH% imported var
         run: PATH=$(echo "$PATH" | sed -e 's/:\/mnt.*//g')
       - name: set host variable and build dependencies for x86_64-w64
-        run: cd depends && make -j2 HOST=x86_64-w64-mingw32
+        run: cd depends && make -j2 HOST=x86_64-w64-mingw32 NO_QT=1
       - name: checkout alt-integration-cpp
         uses: actions/checkout@v2
         with:
@@ -79,7 +78,7 @@ jobs:
           repository: veriblock/alt-integration-cpp
           path: alt-integration-cpp
       - name: configure alt-integration-cpp
-        run: cd alt-integration-cpp/ && cmake . -Bbuild -DFIND_ROCKSDB=OFF -DCMAKE_INSTALL_PREFIX=../depends/x86_64-w64-mingw32/ -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++
+        run: cd alt-integration-cpp/ && cmake . -Bbuild -DFIND_ROCKSDB=OFF -DTESTING=OFF -DCMAKE_INSTALL_PREFIX=../depends/x86_64-w64-mingw32/ -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++
       - name: make alt-integration-cpp
         run: cd alt-integration-cpp/build && make -j$(nproc)
       - name: install alt-integration-cpp
@@ -88,10 +87,9 @@ jobs:
         run: ./autogen.sh
       - name: configure
         run: CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure --prefix=/
+          --without-gui
           --disable-bench
           --disable-gmock
+          --disable-tests
       - name: make
         run: make -j2
-      - name: make check
-        timeout-minutes: 20
-        run: make check
