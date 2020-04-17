@@ -11,6 +11,8 @@
 
 #include <vbk/init.hpp>
 
+#if 0
+
 struct IntegrationTextFixture : public TestChain100Setup {
 
     IntegrationTextFixture() : TestChain100Setup()
@@ -158,3 +160,5 @@ BOOST_AUTO_TEST_CASE(updatecontext_test)
     BOOST_CHECK(find_value(result.get_obj(), "last_known_bitcoin_blocks").get_array().size() == 16); // number of bustrap blocks that have been set up in .properties file
 }
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif //0

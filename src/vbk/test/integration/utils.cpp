@@ -8,6 +8,8 @@
 #include <util/strencodings.h>
 #include <version.h>
 
+#if 0
+
 #include <vbk/service_locator.hpp>
 
 namespace VeriBlockTest {
@@ -254,3 +256,5 @@ VeriBlock::AltPublication generateSignedAltPublication(const CBlock& endorsedBlo
     return publication;
 }
 } // namespace VeriBlockTest
+
+#endif //0

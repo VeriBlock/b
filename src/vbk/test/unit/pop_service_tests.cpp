@@ -12,7 +12,7 @@
 #include <vbk/test/util/mock.hpp>
 #include <vbk/test/util/tx.hpp>
 
-using ::testing::Return;
+//using ::testing::Return;
 
 static CBlock createBlockWithPopTx(TestChain100Setup& test)
 {

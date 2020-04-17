@@ -13,7 +13,7 @@
 #include <vbk/test/util/tx.hpp>
 #include <vbk/util.hpp>
 
-using ::testing::Return;
+//using ::testing::Return;
 
 BOOST_AUTO_TEST_SUITE(util_service_tests)
 

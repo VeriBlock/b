@@ -434,7 +434,7 @@ bool PopServiceImpl::parseTxPopPayloads(const CBlock& block, const CTransaction&
             "[ " + txhash.ToString() + "]: endorsed block " + endorsedHeader.GetHash().ToString() + " is missing");
     }
 
-    payloads.containingTx = txhash.asVector();
+    payloads.containingTx = altintegration::Slice<const uint8_t>(txhash.asVector());
     payloads.containingBlock = cast(pindexThis.nHeight, block.GetBlockHeader());
     payloads.endorsed = cast(endorsedIndex->nHeight, endorsedHeader);
 

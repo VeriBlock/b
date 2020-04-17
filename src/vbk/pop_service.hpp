@@ -17,7 +17,7 @@ class CScript;
 
 namespace altintegration {
 struct AltPayloads;
-struct ValidationState;
+class ValidationState;
 }
 
 namespace Consensus {

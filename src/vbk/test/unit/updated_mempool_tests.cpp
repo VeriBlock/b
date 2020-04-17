@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <vector>
 
-using ::testing::Return;
+//using ::testing::Return;
 
 BOOST_AUTO_TEST_SUITE(updated_mempool_tests)
 

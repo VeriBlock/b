@@ -2,6 +2,8 @@
 #include <validation.h>
 #include <vbk/test/integration/test_setup.hpp>
 
+#if 0
+
 static CBlock CreateTestBlock(TestChain100Setup& test, std::vector<CMutableTransaction> trxs = {})
 {
     test.coinbaseKey.MakeNewKey(true);
@@ -77,3 +79,5 @@ BOOST_AUTO_TEST_CASE(basic_test)
     BOOST_CHECK(pblockwins == ChainActive().Tip());
 }
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif //0

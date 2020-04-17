@@ -15,7 +15,6 @@
 #include <assert.h>
 
 #include <vbk/genesis.hpp>
-#include <vbk/init.hpp>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>

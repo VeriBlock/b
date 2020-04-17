@@ -6,6 +6,8 @@
 
 #include <vector>
 
+#if 0
+
 namespace VeriBlockTest {
 
 void mineVeriBlockBlocks(VeriBlock::VeriBlockBlock& block);
@@ -14,5 +16,7 @@ void setUpGenesisBlocks();
 
 VeriBlock::AltPublication generateSignedAltPublication(const CBlock& endorsedBlock, const uint32_t& identifier, const CScript& payoutInfo);
 } // namespace VeriBlockTest
+
+#endif //0
 
 #endif

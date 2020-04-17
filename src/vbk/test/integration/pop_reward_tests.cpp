@@ -1,5 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
+#if 0
+
 #include <chainparams.h>
 #include <script/interpreter.h>
 #include <test/util/setup_common.h>
@@ -71,3 +73,5 @@ BOOST_AUTO_TEST_CASE(basic_test)
     }) != blockWithRewards.vtx[0]->vout.end());
 }
 BOOST_AUTO_TEST_SUITE_END()
+
+#endif //0
