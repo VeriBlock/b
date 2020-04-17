@@ -1,12 +1,14 @@
-name: CI (develop)
+name: CI (no tests, no gui)
 
 on:
   push:
     branches:
       - develop
+      - master
   pull_request:
     branches:
       - develop
+      - master
 
 jobs:
   linux:
@@ -88,6 +90,7 @@ jobs:
       - name: configure
         run: CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure --prefix=/
           --without-gui
+          --enable-werror
           --disable-bench
           --disable-gmock
           --disable-tests
