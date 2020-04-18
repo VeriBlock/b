@@ -51,6 +51,8 @@ jobs:
       - name: make check
         timeout-minutes: 20
         run: make check
+      - name: display src/test-suite.log
+        run: cat src/test-suite.log
 #     - name: Collect coverage
 #       run: |
 #         lcov -c -d src -o cov.info
@@ -98,3 +100,5 @@ jobs:
       - name: make check
         timeout-minutes: 20
         run: make check
+      - name: display src/test-suite.log
+        run: cat src/test-suite.log
