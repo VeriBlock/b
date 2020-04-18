@@ -1,6 +1,16 @@
 FROM veriblock/prerelease-btc
 
 ADD . /app
+WORKDIR /tmp
+RUN git clone --progress https://github.com/veriblock/alt-integration-cpp && \
+    ( \
+      cd alt-integration-cpp && git submodule update --init --recursive; \
+      cmake . -Bbuild -DFIND_ROCKSDB=OFF -DCMAKE_INSTALL_PREFIX=/app/depends/x86_64-w64-mingw32/; \
+      cd build; \
+      make -j$(nproc); \
+      make install; \
+    ) && \
+    rm -rf alt-integration-cpp
 WORKDIR /app
 RUN (cd depends; make HOST=x86_64-pc-linux-gnu NO_QT=1)
 ENV CONFIG_SITE=/app/depends/x86_64-pc-linux-gnu/share/config.site
