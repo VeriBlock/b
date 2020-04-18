@@ -12,7 +12,6 @@ jobs:
       - name: checkout
         uses: actions/checkout@v1
         with:
-          submodules: true
           path: main
       - name: get version for alt-integration-cpp
         run: echo "::set-env name=ALTINTEGRATION_VERSION::$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/altintegration.mk | head -n1)"
@@ -33,7 +32,7 @@ jobs:
           cd alt-integration-cpp-${ALTINTEGRATION_VERSION};
           mkdir build;
           cd build;
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF;
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_ROCKSDB=OFF;
           sudo make -j2 install
           )
       - name: autogen
@@ -63,7 +62,6 @@ jobs:
       - name: checkout
         uses: actions/checkout@v1
         with:
-          submodules: true
           path: main
       - name: install build requirements
         run: sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils curl git g++-mingw-w64-x86-64
