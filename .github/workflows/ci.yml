@@ -73,7 +73,7 @@ jobs:
       - name: strip out problematic Windows %PATH% imported var
         run: PATH=$(echo "$PATH" | sed -e 's/:\/mnt.*//g')
       - name: set host variable and build dependencies for x86_64-w64
-        run: cd depends && make -j2 HOST=x86_64-w64-mingw32 NO_QT=1
+        run: cd depends && make -j2 VERBOSE=1 HOST=x86_64-w64-mingw32 NO_QT=1
       - name: autogen
         run: ./autogen.sh
       - name: configure

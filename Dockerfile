@@ -9,7 +9,7 @@ RUN export ALTINTEGRATION_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $N
      cd alt-integration-cpp-${ALTINTEGRATION_VERSION}; \
      mkdir build; \
      cd build; \
-     cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF; \
+     cmake .. -DCMAKE_BUILD_TYPE=Release -DWITH_ROCKSDB=OFF -DTESTING=OFF; \
      make -j2 install \
     )
 RUN ./autogen.sh
