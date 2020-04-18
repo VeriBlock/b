@@ -1,19 +1,17 @@
 FROM veriblock/prerelease-btc
 
+RUN ( \
+    cd /tmp; \
+    git clone https://github.com/VeriBlock/alt-integration-cpp/; \
+    cd alt-integration-cpp; \
+    mkdir build; \
+    cd build; \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF; \
+    make -j2 install; \
+    )
+
 ADD . /app
-WORKDIR /tmp
-RUN git clone --progress https://github.com/veriblock/alt-integration-cpp && \
-    ( \
-      cd alt-integration-cpp && git submodule update --init --recursive; \
-      cmake . -Bbuild -DFIND_ROCKSDB=OFF -DCMAKE_INSTALL_PREFIX=/app/depends/x86_64-pc-linux-gnu/; \
-      cd build; \
-      make -j$(nproc); \
-      make install; \
-    ) && \
-    rm -rf alt-integration-cpp
 WORKDIR /app
-RUN (cd depends; make HOST=x86_64-pc-linux-gnu NO_QT=1)
-ENV CONFIG_SITE=/app/depends/x86_64-pc-linux-gnu/share/config.site
 RUN ./autogen.sh
 RUN CC=gcc-7 CXX=g++-7 ./configure --without-gui --disable-tests --disable-bench --disable-man --with-libs=no
 RUN make -j6 install
