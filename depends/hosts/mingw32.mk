@@ -8,6 +8,3 @@ mingw32_debug_CFLAGS=-O1
 mingw32_debug_CXXFLAGS=$(mingw32_debug_CFLAGS)
 
 mingw32_debug_CPPFLAGS=-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC
-
-CC=x86_64-w64-mingw32-gcc
-CXX=x86_64-w64-mingw32-g++

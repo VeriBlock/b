@@ -42,19 +42,19 @@ jobs:
           --enable-werror
           --disable-bench
           --disable-gmock
-#         --enable-lcov
-#         --enable-lcov-branch-coverage
+          --enable-lcov
+          --enable-lcov-branch-coverage
       - name: make
         run: make -j2
       - name: make check
         timeout-minutes: 20
         run: make check && cat src/test-suite.log
-#     - name: Collect coverage
-#       run: |
-#         lcov -c -d src -o cov.info
-#         gcovr --xml cov.xml -j2 -v -s -b -r src
-#     - name: Run sonarqube
-#       run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      - name: Collect coverage
+        run: |
+          lcov -c -d src -o cov.info
+          gcovr --xml cov.xml -j2 -v -s -b -r src
+      - name: Run sonarqube
+        run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
   x86_64-w64-mingw32:
     runs-on: ubuntu-latest
@@ -70,7 +70,11 @@ jobs:
       - name: strip out problematic Windows %PATH% imported var
         run: PATH=$(echo "$PATH" | sed -e 's/:\/mnt.*//g')
       - name: set host variable and build dependencies for x86_64-w64
-        run: cd depends && make -j2 VERBOSE=1 HOST=x86_64-w64-mingw32
+        env:
+          CC: x86_64-w64-mingw32-gcc
+          CXX: x86_64-w64-mingw32-g++
+          HOST: x86_64-w64-mingw32
+        run: cd depends && make -j2
       - name: autogen
         run: ./autogen.sh
       - name: configure
