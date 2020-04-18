@@ -1,14 +1,9 @@
-name: CI (no tests, no gui)
+name: CI (nightly)
 
 on:
-  push:
-    branches:
-      - develop
-      - master
-  pull_request:
-    branches:
-      - develop
-      - master
+  schedule:
+    # create nightly full builds at midnight
+    - cron:  '0 0 * * *'
 
 jobs:
   linux:
@@ -28,7 +23,7 @@ jobs:
       - name: install build requirements
         run: sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3
       - name: install dependencies
-        run: sudo apt-get install libevent-dev libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libminiupnpc-dev libzmq3-dev libdb4.8-dev libdb4.8++-dev
+        run: sudo apt-get install libevent-dev libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libminiupnpc-dev libzmq3-dev libdb4.8-dev libdb4.8++-dev libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libqrencode-dev
       - name: install alt-integration-cpp
         run: |
           (
@@ -45,15 +40,16 @@ jobs:
         run: ./autogen.sh
       - name: configure
         run: ./configure
-          --without-gui
           --enable-werror
           --disable-bench
           --disable-gmock
-          --disable-tests
 #         --enable-lcov
 #         --enable-lcov-branch-coverage
       - name: make
         run: make -j2
+      - name: make check
+        timeout-minutes: 20
+        run: make check && cat src/test-suite.log
 #     - name: Collect coverage
 #       run: |
 #         lcov -c -d src -o cov.info
@@ -76,15 +72,16 @@ jobs:
       - name: strip out problematic Windows %PATH% imported var
         run: PATH=$(echo "$PATH" | sed -e 's/:\/mnt.*//g')
       - name: set host variable and build dependencies for x86_64-w64
-        run: cd depends && make -j2 HOST=x86_64-w64-mingw32 NO_QT=1
+        run: cd depends && make -j2 HOST=x86_64-w64-mingw32
       - name: autogen
         run: ./autogen.sh
       - name: configure
         run: CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure --prefix=/
-          --without-gui
           --enable-werror
           --disable-bench
           --disable-gmock
-          --disable-tests
       - name: make
         run: make -j2
+      - name: make check
+        timeout-minutes: 20
+        run: make check && cat src/test-suite.log
