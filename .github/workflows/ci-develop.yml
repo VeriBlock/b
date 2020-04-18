@@ -14,29 +14,33 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout alt-integration-cpp
-        uses: actions/checkout@v2
-        with:
-          submodules: true
-          repository: veriblock/alt-integration-cpp
-          path: alt-integration-cpp
-      - name: configure alt-integration-cpp
-        run: cd alt-integration-cpp/ && cmake . -Bbuild -DFIND_ROCKSDB=OFF -DTESTING=OFF
-      - name: make alt-integration-cpp
-        run: cd alt-integration-cpp/build && make -j2
-      - name: install alt-integration-cpp
-        run: cd alt-integration-cpp/build && sudo make install
       - name: checkout
         uses: actions/checkout@v1
         with:
           submodules: true
           path: main
+      - name: get version for alt-integration-cpp
+        run: echo "::set-env name=ALTINTEGRATION_VERSION::$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/altintegration.mk | head -n1)"
+      - name: alt-integration-cpp release version
+        run: echo "Using alt-integration-cpp version: ${ALTINTEGRATION_VERSION}"
       - name: add bitcoin ppa
         run: sudo add-apt-repository ppa:bitcoin/bitcoin
       - name: install build requirements
         run: sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3
       - name: install dependencies
         run: sudo apt-get install libevent-dev libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libminiupnpc-dev libzmq3-dev libdb4.8-dev libdb4.8++-dev
+      - name: install alt-integration-cpp
+        run: |
+          (
+          cd /opt;
+          wget https://github.com/VeriBlock/alt-integration-cpp/archive/${ALTINTEGRATION_VERSION}.tar.gz;
+          tar -xf ${ALTINTEGRATION_VERSION}.tar.gz;
+          cd alt-integration-cpp-${ALTINTEGRATION_VERSION};
+          mkdir build;
+          cd build;
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF;
+          make -j2 install
+          )
       - name: autogen
         run: ./autogen.sh
       - name: configure
@@ -73,18 +77,6 @@ jobs:
         run: PATH=$(echo "$PATH" | sed -e 's/:\/mnt.*//g')
       - name: set host variable and build dependencies for x86_64-w64
         run: cd depends && make -j2 HOST=x86_64-w64-mingw32 NO_QT=1
-      - name: checkout alt-integration-cpp
-        uses: actions/checkout@v2
-        with:
-          submodules: true
-          repository: veriblock/alt-integration-cpp
-          path: alt-integration-cpp
-      - name: configure alt-integration-cpp
-        run: cd alt-integration-cpp/ && cmake . -Bbuild -DFIND_ROCKSDB=OFF -DTESTING=OFF -DCMAKE_INSTALL_PREFIX=../depends/x86_64-w64-mingw32/ -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++
-      - name: make alt-integration-cpp
-        run: cd alt-integration-cpp/build && make -j$(nproc)
-      - name: install alt-integration-cpp
-        run: cd alt-integration-cpp/build && make install
       - name: autogen
         run: ./autogen.sh
       - name: configure
