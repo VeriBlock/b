@@ -81,7 +81,7 @@ jobs:
           repository: veriblock/alt-integration-cpp
           path: alt-integration-cpp
       - name: configure alt-integration-cpp
-        run: cd alt-integration-cpp/ && cmake . -Bbuild -DFIND_ROCKSDB=OFF -DCMAKE_INSTALL_PREFIX=../depends/x86_64-w64-mingw32/ -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++
+        run: cd alt-integration-cpp/ && cmake . -Bbuild -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DFIND_ROCKSDB=OFF -DCMAKE_INSTALL_PREFIX=../depends/x86_64-w64-mingw32/ -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++
       - name: make alt-integration-cpp
         run: cd alt-integration-cpp/build && make -j$(nproc)
       - name: install alt-integration-cpp
