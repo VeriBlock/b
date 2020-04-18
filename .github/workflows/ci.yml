@@ -22,7 +22,7 @@ jobs:
       - name: get version for alt-integration-cpp
         run: echo "::set-env name=ALTINTEGRATION_VERSION::$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/altintegration.mk | head -n1)"
       - name: alt-integration-cpp release version
-        run: echo "Using alt-integration-cpp version: ${ALTINTEGRATION_VERSION}"
+        run: echo Using alt-integration-cpp version: $ALTINTEGRATION_VERSION
       - name: add bitcoin ppa
         run: sudo add-apt-repository ppa:bitcoin/bitcoin
       - name: install build requirements
