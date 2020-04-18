@@ -3,80 +3,46 @@ name: CI
 on:
   push:
     branches:
-      - develop
       - master
+      - develop
   pull_request:
     branches:
-      - develop
       - master
+      - develop
 
 jobs:
   linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        host: ["x86_64-pc-linux-gnu", "x86_64-w64-mingw32"]
+    env:
+      NO_QT: 1
     steps:
-      - name: checkout
-        uses: actions/checkout@v1
+      - uses: actions/checkout@v1
         with:
-          path: main
-      - name: get version for alt-integration-cpp
-        run: echo "::set-env name=ALTINTEGRATION_VERSION::$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/altintegration.mk | head -n1)"
-      - name: alt-integration-cpp release version
-        run: echo Using alt-integration-cpp version $ALTINTEGRATION_VERSION
-      - name: add bitcoin ppa
-        run: sudo add-apt-repository ppa:bitcoin/bitcoin
-      - name: install build requirements
-        run: sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3
-      - name: install dependencies
-        run: sudo apt-get install libevent-dev libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libminiupnpc-dev libzmq3-dev libdb4.8-dev libdb4.8++-dev
-      - name: install alt-integration-cpp
+          submodules: true
+      - if: matrix.host == 'x86_64-w64-mingw32'
+        name: mingw preinstall script
         run: |
-          (
-          cd /opt;
-          wget https://github.com/VeriBlock/alt-integration-cpp/archive/${ALTINTEGRATION_VERSION}.tar.gz;
-          tar -xf ${ALTINTEGRATION_VERSION}.tar.gz;
-          cd alt-integration-cpp-${ALTINTEGRATION_VERSION};
-          mkdir build;
-          cd build;
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_ROCKSDB=OFF;
-          sudo make -j2 install
-          )
+          sudo apt-get install -y build-essential libtool autotools-dev automake pkg-config bsdmainutils curl git g++-mingw-w64-x86-64
+          sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
+          sudo update-alternatives --install /usr/bin/x86_64-w64-mingw32-g++ x86_64-w64-mingw32-g++ g++ 90
+          sudo update-alternatives --install /usr/bin/x86_64-w64-mingw32-gcc x86_64-w64-mingw32-gcc gcc 90
+      - name: install dependencies
+        run: |
+          cd depends
+          make HOST=${{ matrix.host }} -j
       - name: autogen
         run: ./autogen.sh
       - name: configure
-        run: ./configure
+        run: CONFIG_SITE=$PWD/depends/${{ matrix.host }}/share/config.site ./configure
           --without-gui
           --enable-werror
           --disable-bench
           --disable-gmock
       - name: make
         run: make -j2
-
-  x86_64-w64-mingw32:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v1
-        with:
-          path: main
-      - name: install build requirements
-        run: sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils curl git g++-mingw-w64-x86-64
-      - name: set the default mingw32 g++ compiler option to posix
-        run: sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
-      - name: strip out problematic Windows %PATH% imported var
-        run: PATH=$(echo "$PATH" | sed -e 's/:\/mnt.*//g')
-      - name: set host variable and build dependencies for x86_64-w64
-        env:
-          CC: x86_64-w64-mingw32-gcc
-          CXX: x86_64-w64-mingw32-g++
-          HOST: x86_64-w64-mingw32
-        run: cd depends && make -j2 NO_QT=1
-      - name: autogen
-        run: ./autogen.sh
-      - name: configure
-        run: CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure --prefix=/
-          --without-gui
-          --enable-werror
-          --disable-bench
-          --disable-gmock
-      - name: make
-        run: make -j2
+      - name: make check
+        timeout-minutes: 20
+        run: make check
