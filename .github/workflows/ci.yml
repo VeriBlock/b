@@ -39,7 +39,7 @@ jobs:
           mkdir build;
           cd build;
           cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF;
-          make -j2 install
+          sudo make -j2 install
           )
       - name: autogen
         run: ./autogen.sh
