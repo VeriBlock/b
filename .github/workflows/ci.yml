@@ -13,7 +13,6 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         host: ["x86_64-pc-linux-gnu", "x86_64-w64-mingw32"]
     env:
@@ -21,10 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: install dependencies
-        run: |
-          sudo add-apt-repository ppa:bitcoin/bitcoin
-          sudo apt-get install -y build-essential libtool autotools-dev automake pkg-config bsdmainutils curl git python3
-          sudo apt-get install -y libevent-dev libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libminiupnpc-dev libzmq3-dev libdb4.8-dev libdb4.8++-dev
+        run: sudo apt-get install -y build-essential libtool autotools-dev automake pkg-config bsdmainutils curl git
       - if: matrix.host == 'x86_64-w64-mingw32'
         name: mingw preinstall script
         run: |
