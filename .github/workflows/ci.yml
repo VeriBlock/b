@@ -65,6 +65,7 @@ jobs:
       - name: make
         run: make -j2
       - name: make check
+        timeout-minutes: 20
         run: make check
 
   x86_64-w64-mingw32:
@@ -118,5 +119,3 @@ jobs:
           --disable-gmock
       - name: make
         run: make -j2
-      - name: make check
-        run: make check
