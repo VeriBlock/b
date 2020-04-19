@@ -28,17 +28,6 @@
 
 namespace {
 
-altintegration::AltBlock cast(int nHeight, const CBlockHeader& block)
-{
-    altintegration::AltBlock alt;
-    alt.height = nHeight;
-    alt.timestamp = block.nTime;
-    alt.previousBlock = std::vector<uint8_t>(block.hashPrevBlock.begin(), block.hashPrevBlock.end());
-    auto hash = block.GetHash();
-    alt.hash = std::vector<uint8_t>(hash.begin(), hash.end());
-    return alt;
-}
-
 bool set_error(ScriptError* ret, const ScriptError serror)
 {
     if (ret)
@@ -233,7 +222,7 @@ bool PopServiceImpl::checkPopInputs(const CTransaction& tx, TxValidationState& s
 bool PopServiceImpl::acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    auto containing = cast(indexNew.nHeight, indexNew.GetBlockHeader());
+    auto containing = VeriBlock::blockToAltBlock(indexNew);
     altintegration::ValidationState instate;
     if (!altTree->acceptBlock(containing, instate)) {
         return state.Error(instate.GetDebugMessage());
@@ -245,16 +234,20 @@ bool PopServiceImpl::acceptBlock(const CBlockIndex& indexNew, BlockValidationSta
 bool PopServiceImpl::addAllBlockPayloads(const CBlockIndex& indexNew, const CBlock& connecting, BlockValidationState& state)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    auto containing = cast(indexNew.nHeight, indexNew.GetBlockHeader());
+    auto containing = VeriBlock::blockToAltBlock(indexNew);
 
     altintegration::ValidationState instate;
     std::vector<altintegration::AltPayloads> payloads;
     if (!parseBlockPopPayloads(connecting, indexNew, Params().GetConsensus(), state, &payloads)) {
-        return error("[%s] block %s failed stateless validation: %s, %s", __func__, connecting.GetHash().ToString(), instate.GetPath(), instate.GetDebugMessage());
+        return error("[%s] block %s failed stateless validation: %s", __func__, connecting.GetHash().ToString(), instate.toString());
+    }
+
+    if (!altTree->acceptBlock(containing, instate)) {
+        return error("[%s] block %s is not accepted by altTree: %s", __func__, connecting.GetHash().ToString(), instate.toString());
     }
 
     if (!payloads.empty() && !altTree->addPayloads(containing, payloads, instate)) {
-        return error("[%s] block %s failed stateful pop validation: %s, %s", __func__, connecting.GetHash().ToString(), instate.GetPath(), instate.GetDebugMessage());
+        return error("[%s] block %s failed stateful pop validation: %s", __func__, connecting.GetHash().ToString(), instate.toString());
     }
 
     return true;
@@ -435,8 +428,8 @@ bool PopServiceImpl::parseTxPopPayloads(const CBlock& block, const CTransaction&
     }
 
     payloads.containingTx = altintegration::uint256(txhash.asVector());
-    payloads.containingBlock = cast(pindexThis.nHeight, block.GetBlockHeader());
-    payloads.endorsed = cast(endorsedIndex->nHeight, endorsedHeader);
+    payloads.containingBlock = blockToAltBlock(pindexThis);
+    payloads.endorsed = blockToAltBlock(*endorsedIndex);
 
     return true;
 }
