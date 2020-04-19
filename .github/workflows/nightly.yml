@@ -78,7 +78,7 @@ jobs:
       - name: autogen
         run: ./autogen.sh
       - name: configure
-        run: CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure
+        run: CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure --prefix=/
           --enable-werror
           --disable-bench
           --disable-gmock
@@ -86,4 +86,4 @@ jobs:
         run: make -j2
       - name: make check
         timeout-minutes: 20
-        run: make check
+        run: make check && cat src/test-suite.log
