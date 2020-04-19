@@ -51,7 +51,8 @@ jobs:
           mkdir build;
           cd build;
           cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_ROCKSDB=OFF;
-          sudo make -j2 install
+          make -j2;
+          sudo make install
           )
       - name: autogen
         run: ./autogen.sh
@@ -62,7 +63,9 @@ jobs:
           --disable-bench
           --disable-gmock
       - name: make
-        run: sudo make -j2
+        run: make -j2
+      - name: make check
+        run: make check
 
   x86_64-w64-mingw32:
     runs-on: ubuntu-latest
@@ -114,4 +117,6 @@ jobs:
           --disable-bench
           --disable-gmock
       - name: make
-        run: sudo make -j2
+        run: make -j2
+      - name: make check
+        run: make check
