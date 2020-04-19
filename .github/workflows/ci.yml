@@ -42,8 +42,6 @@ jobs:
       - name: install dependencies
         run: sudo apt-get install libevent-dev libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libminiupnpc-dev libzmq3-dev libdb4.8-dev libdb4.8++-dev
       - name: install alt-integration-cpp
-        env:
-          CCACHE_UMASK: 000
         run: |
           (
           cd /opt;
@@ -64,7 +62,7 @@ jobs:
           --disable-bench
           --disable-gmock
       - name: make
-        run: make -j2
+        run: sudo make -j2
 
   x86_64-w64-mingw32:
     runs-on: ubuntu-latest
