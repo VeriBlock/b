@@ -209,9 +209,9 @@ BITCOIN_TESTS =\
   test/util_tests.cpp \
   test/validation_block_tests.cpp \
   test/versionbits_tests.cpp \
-  test/txvalidationcache_tests.cpp
-#  test/txindex_tests.cpp
-#   test/blockfilter_index_tests.cpp
+  test/txvalidationcache_tests.cpp \
+  test/txindex_tests.cpp \
+  test/blockfilter_index_tests.cpp
 
 if ENABLE_PROPERTY_TESTS
 BITCOIN_TESTS += \
