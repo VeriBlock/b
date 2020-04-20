@@ -26,7 +26,13 @@ struct E2eFixture : public TestChain100Setup {
         pop = &VeriBlock::getService<VeriBlock::PopService>();
     }
 
+
     CBlock endorseAltBlock(uint256 hash, size_t generateVtbs = 0)
+    {
+        return endorseAltBlock(hash, ChainActive().Tip()->GetBlockHash(), generateVtbs);
+    }
+
+    CBlock endorseAltBlock(uint256 hash, uint256 prevBlock, size_t generateVtbs = 0)
     {
         CBlockIndex* endorsed = nullptr;
         {
@@ -55,7 +61,7 @@ struct E2eFixture : public TestChain100Setup {
 
         auto tx = VeriBlock::MakePopTx(sig);
         bool isValid = false;
-        return CreateAndProcessBlock({tx}, cbKey, &isValid);
+        return CreateAndProcessBlock({tx}, prevBlock, cbKey, &isValid);
     }
 
     VTB endorseVbkTip()
@@ -130,7 +136,7 @@ struct E2eFixture : public TestChain100Setup {
 
 BOOST_AUTO_TEST_SUITE(e2e_poptx_tests)
 
-BOOST_FIXTURE_TEST_CASE(BlockWith10ValidPopTxes, E2eFixture)
+BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
 {
     // altintegration and popminer configured to use BTC/VBK/ALT regtest.
     auto tip = ChainActive().Tip();
@@ -157,9 +163,11 @@ BOOST_FIXTURE_TEST_CASE(BlockWith10ValidPopTxes, E2eFixture)
         BOOST_CHECK(vbk == popminer.vbk().getBestChain().tip()->getHash());
     }
 
+    // create block that is not on main chain
+    auto fork1tip = CreateAndProcessBlock({}, ChainActive().Tip()->pprev->pprev->GetBlockHash(), cbKey);
+
     // endorse block that is not on main chain
-    // TODO:
-    block = endorseAltBlock(uint256(), 1);
+    block = endorseAltBlock(fork1tip.GetHash(), 1);
     BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == lastHash);
 }
 
