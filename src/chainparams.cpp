@@ -23,7 +23,7 @@
 #include "bootstraps.h"
 #include <veriblock/blockchain/alt_chain_params.hpp>
 
-#define VBK_VERSION 0x0
+#define VBK_VERSION 0x0u
 
 /**
  * Main network
