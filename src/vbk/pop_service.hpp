@@ -32,6 +32,7 @@ using PoPRewards = std::map<CScript, CAmount>;
 
 struct PopService {
     virtual ~PopService() = default;
+    virtual altintegration::AltTree& getAltTree() = 0;
     virtual bool validatePopTxOutput(const CTxOut& out, TxValidationState& state) = 0;
     virtual bool validatePopTxInput(const CTxIn& in, TxValidationState& state) = 0;
     virtual PoPRewards getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) = 0;
@@ -48,8 +49,8 @@ struct PopService {
 
     virtual bool acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state) = 0;
     virtual bool addAllBlockPayloads(const CBlockIndex& indexNew, const CBlock& fullBlock, BlockValidationState& state) = 0;
-    virtual void disconnectBlock(const uint256& block) = 0;
-    virtual altintegration::AltTree& getAltTree() = 0;
+    virtual void invalidateBlockByHash(const uint256& block) = 0;
+    virtual bool setState(const uint256& block) = 0;
 
     virtual bool evalScript(const CScript& script, std::vector<std::vector<unsigned char>>& stack, ScriptError* serror, altintegration::AltPayloads* pub, altintegration::ValidationState& state, bool with_checks) = 0;
     virtual int compareForks(const CBlockIndex& left, const CBlockIndex& right) = 0;

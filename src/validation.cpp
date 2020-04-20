@@ -1719,8 +1719,14 @@ DisconnectResult CChainState::DisconnectBlock(const CBlock& block, const CBlockI
         }
     }
 
+    auto prevHash = pindex->pprev->GetBlockHash();
+    if (!VeriBlock::getService<VeriBlock::PopService>().setState(prevHash)) {
+        error("DisconnectBlock(): setState failed");
+        return DISCONNECT_FAILED;
+    }
+
     // move best block pointer to prevout block
-    view.SetBestBlock(pindex->pprev->GetBlockHash());
+    view.SetBestBlock(prevHash);
 
     return fClean ? DISCONNECT_OK : DISCONNECT_UNCLEAN;
 }
@@ -2469,9 +2475,6 @@ bool CChainState::DisconnectTip(BlockValidationState& state, const CChainParams&
             disconnectpool->removeEntry(it);
         }
     }
-
-    auto& pop = VeriBlock::getService<VeriBlock::PopService>();
-    pop.disconnectBlock(pindexDelete->GetBlockHash());
 
     m_chain.SetTip(pindexDelete->pprev);
 

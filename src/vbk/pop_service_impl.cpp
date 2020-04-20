@@ -262,9 +262,18 @@ int PopServiceImpl::compareForks(const CBlockIndex& leftForkTip, const CBlockInd
     }
 
     std::lock_guard<std::mutex> lock(mutex);
-    auto left = leftForkTip.GetBlockHash().asVector();
-    auto right = rightForkTip.GetBlockHash().asVector();
-    return altTree->compareTwoBranches(left, right);
+
+    auto left = blockToAltBlock(leftForkTip);
+    auto right = blockToAltBlock(leftForkTip);
+    auto state = altintegration::ValidationState();
+    if (!altTree->acceptBlock(left, state)) {
+        throw std::logic_error("compareForks: left fork tip can not be connected to altTree");
+    }
+    if (!altTree->acceptBlock(right, state)) {
+        throw std::logic_error("compareForks: right fork tip can not be connected to altTree");
+    }
+
+    return altTree->compareTwoBranches(left.hash, right.hash);
 }
 
 // Pop rewards
@@ -282,11 +291,18 @@ PopServiceImpl::PopServiceImpl(const altintegration::Config& config)
     altTree = std::make_shared<altintegration::AltTree>(std::move(tree));
 }
 
-void PopServiceImpl::disconnectBlock(const uint256& block)
+void PopServiceImpl::invalidateBlockByHash(const uint256& block)
 {
     std::lock_guard<std::mutex> lock(mutex);
     auto v = block.asVector();
     altTree->invalidateBlockByHash(v);
+}
+
+bool PopServiceImpl::setState(const uint256& block)
+{
+    std::lock_guard<std::mutex> lock(mutex);
+    altintegration::ValidationState state;
+    return altTree->setState(block.asVector(), state);
 }
 
 bool evalScriptImpl(const CScript& script, std::vector<std::vector<unsigned char>>& stack, ScriptError* serror, altintegration::AltPayloads* pub, altintegration::ValidationState& state, bool with_checks)

@@ -48,7 +48,8 @@ public:
 
     bool acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state) override;
     bool addAllBlockPayloads(const CBlockIndex& indexNew, const CBlock& fullBlock, BlockValidationState& state) override;
-    void disconnectBlock(const uint256& block) override;
+    void invalidateBlockByHash(const uint256& block) override;
+    bool setState(const uint256& block) override;
 
     bool evalScript(const CScript& script, std::vector<std::vector<unsigned char>>& stack, ScriptError* serror, altintegration::AltPayloads* pub, altintegration::ValidationState& state, bool with_checks) override;
     int compareForks(const CBlockIndex& left, const CBlockIndex& right) override;
