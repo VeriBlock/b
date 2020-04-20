@@ -64,6 +64,9 @@ jobs:
           --disable-gmock
       - name: make
         run: make -j2
+      - name: make deploy
+        if: success()
+        run: make deploy
       - name: make check
         timeout-minutes: 20
         run: make check
@@ -125,3 +128,6 @@ jobs:
           --disable-gmock
       - name: make
         run: make -j2
+      - name: make deploy
+        if: success()
+        run: make deploy
