@@ -117,12 +117,11 @@ jobs:
           CXX: x86_64-w64-mingw32-g++
           HOST: x86_64-w64-mingw32
           BASE_CACHE: ~/.depends_cache
-        run: cd depends && make -j2 NO_QT=1
+        run: cd depends && make -j2
       - name: autogen
         run: ./autogen.sh
       - name: configure
         run: CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure --prefix=/
-          --without-gui
           --enable-werror
           --disable-bench
           --disable-gmock
