@@ -22,7 +22,7 @@ jobs:
         id: extract_branch
         run: |
           echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
-          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
+          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
       - name: Prepare ccache timestamp
         id: cache_timestamp
         run: |
@@ -98,7 +98,7 @@ jobs:
         id: extract_branch
         run: |
           echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
-          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
+          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
       - name: Prepare ccache timestamp
         id: cache_timestamp
         run: |
