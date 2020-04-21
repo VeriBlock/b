@@ -1,10 +1,9 @@
 name: CI (nightly)
 
 on:
-  push:
-    branches:
-      - develop
-      - master
+  schedule:
+    # create nightly full builds at midnight
+    - cron:  '20 1 * * *'
 
 jobs:
   linux:
