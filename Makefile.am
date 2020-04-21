@@ -334,7 +334,7 @@ clean-local: clean-docs
 docker:
 	docker build -t docker-internal.veriblock.com/veriblock/vbtc --compress $(top_srcdir)
 
-deploy:
+linux-deploy:
 	$(MKDIR_P) $(top_builddir)/release
 	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIND_BIN) $(top_builddir)/release
 	if [ -f $(BITCOIN_QT_BIN) ]; then \

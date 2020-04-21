@@ -21,7 +21,7 @@ jobs:
       - name: Extract branch name & commit
         id: extract_branch
         run: |
-          echo "::set-output name=git_hash::$(git rev-parse --short "$GITHUB_SHA")"
+          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
           echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
       - name: Prepare ccache timestamp
         id: cache_timestamp
@@ -71,7 +71,7 @@ jobs:
         run: make -j2
       - name: make deploy
         if: success()
-        run: make deploy
+        run: make linux-deploy
       - name: create artifacts
         if: success()
         run: |
@@ -97,7 +97,7 @@ jobs:
       - name: Extract branch name & commit
         id: extract_branch
         run: |
-          echo "::set-output name=git_hash::$(git rev-parse --short "$GITHUB_SHA")"
+          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
           echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
       - name: Prepare ccache timestamp
         id: cache_timestamp
@@ -149,4 +149,4 @@ jobs:
         if: success()
         run: |
           mv ./release vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
-          tar czvf vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}.tar.gz vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}/
+          zip -r9 vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}.zip vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
