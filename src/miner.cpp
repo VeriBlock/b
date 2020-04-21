@@ -451,7 +451,7 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
                     failedPopTx.insert(iter);
                     continue;
                 }
-                if(!altTreeCopy.addPayloads(dummyContainingBlock, {p}, state, false)) {
+                if(!altTreeCopy.addPayloads(dummyContainingBlock, {p}, state, true)) {
                     LogPrint(BCLog::POP, "%s: tx %s is statefully invalid: %s", __func__, iter->GetTx().GetHash().ToString(), state.toString());
                     failedTx.insert(iter);
                     failedPopTx.insert(iter);
