@@ -13,6 +13,11 @@ jobs:
         uses: actions/checkout@v1
         with:
           path: main
+      - name: Extract branch name & commit
+        id: extract_branch
+        run: |
+          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
+          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
       - name: get version for alt-integration-cpp
         run: echo "::set-env name=ALTINTEGRATION_VERSION::$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/altintegration.mk | head -n1)"
       - name: alt-integration-cpp release version
@@ -49,7 +54,12 @@ jobs:
         run: make -j2
       - name: make deploy
         if: success()
-        run: make deploy
+        run: make linux-deploy
+      - name: create artifacts
+        if: success()
+        run: |
+          mv ./release vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
+          tar czvf vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}.tar.gz vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}/
       - name: make check
         timeout-minutes: 20
         run: make check
@@ -73,7 +83,11 @@ jobs:
         uses: actions/checkout@v1
         with:
           path: main
-
+      - name: Extract branch name & commit
+        id: extract_branch
+        run: |
+          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
+          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
       - name: install build requirements
         run: sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils curl git g++-mingw-w64-x86-64
       - name: set the default mingw32 g++ compiler option to posix
@@ -98,3 +112,8 @@ jobs:
       - name: make deploy
         if: success()
         run: make deploy
+      - name: create artifacts
+        if: success()
+        run: |
+          mv ./release vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
+          zip -r9 vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}.zip vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
