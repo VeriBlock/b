@@ -17,7 +17,7 @@ jobs:
         id: extract_branch
         run: |
           echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
-          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
+          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
       - name: get version for alt-integration-cpp
         run: echo "::set-env name=ALTINTEGRATION_VERSION::$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/altintegration.mk | head -n1)"
       - name: alt-integration-cpp release version
@@ -101,7 +101,7 @@ jobs:
         id: extract_branch
         run: |
           echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
-          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})"
+          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
       - name: install build requirements
         run: sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils curl git g++-mingw-w64-x86-64
       - name: set the default mingw32 g++ compiler option to posix
