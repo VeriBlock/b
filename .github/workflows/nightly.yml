@@ -3,7 +3,7 @@ name: CI (nightly)
 on:
   schedule:
     # create nightly full builds at midnight
-    - cron:  '20 1 * * *'
+    - cron:  '0 2 * * *'
 
 jobs:
   linux:
