@@ -82,7 +82,7 @@ jobs:
           key: ${{ secrets.ARTIFACT_KEY }}
           passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
           source: vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}.tar.gz
-          target: $ {{ secrets.ARTIFACT_PATH }}
+          target: ${{ secrets.ARTIFACT_PATH }}
       - name: make check
         timeout-minutes: 20
         run: make check
@@ -150,4 +150,4 @@ jobs:
           key: ${{ secrets.ARTIFACT_KEY }}
           passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
           source: vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}.zip
-          target: $ {{ secrets.ARTIFACT_PATH }}
+          target: ${{ secrets.ARTIFACT_PATH }}
