@@ -155,11 +155,11 @@ jobs:
       - name: Generate project files
         run: python build_msvc\msvc-autogen.py
       - name: Install alt-integration-cpp using vcpkg
+        if: steps.vcpkgcache.outputs.cache-hit != 'true'
         run: |
           Write-Host "Installing alt-integration-cpp."
           C:/vcpkg/vcpkg.exe install altintegration:x64-windows-static
       - name: vcpkg integration
-        if: steps.vcpkgcache.outputs.cache-hit != 'true'
         run: C:/vcpkg/vcpkg.exe integrate install
       - name: Build
         run: msbuild build_msvc\bitcoin.sln /m /v:n /p:Configuration=Release
