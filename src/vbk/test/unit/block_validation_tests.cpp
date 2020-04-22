@@ -1,26 +1,26 @@
-#include <boost/test/unit_test.hpp>
-#include <chainparams.h>
-#include <consensus/validation.h>
-#include <test/util/setup_common.h>
-#include <validation.h>
-
-#include <vbk/config.hpp>
-#include <vbk/init.hpp>
-#include <vbk/pop_service.hpp>
-#include <vbk/service_locator.hpp>
-#include <vbk/test/util/tx.hpp>
-#include <vbk/test/util/mock.hpp>
-
-#include <string>
-#include <gmock/gmock.h>
-
-using ::testing::Return;
-
-inline std::vector<uint8_t> operator""_v(const char* s, size_t size)
-{
-    return std::vector<uint8_t>{s, s + size};
-}
-
+//#include <boost/test/unit_test.hpp>
+//#include <chainparams.h>
+//#include <consensus/validation.h>
+//#include <test/util/setup_common.h>
+//#include <validation.h>
+//
+//#include <vbk/config.hpp>
+//#include <vbk/init.hpp>
+//#include <vbk/pop_service.hpp>
+//#include <vbk/service_locator.hpp>
+//#include <vbk/test/util/tx.hpp>
+//#include <vbk/test/util/mock.hpp>
+//
+//#include <string>
+//#include <gmock/gmock.h>
+//
+//using ::testing::Return;
+//
+//inline std::vector<uint8_t> operator""_v(const char* s, size_t size)
+//{
+//    return std::vector<uint8_t>{s, s + size};
+//}
+//
 //struct BlockValidationFixture : public TestChain100Setup {
 //    testing::NiceMock<VeriBlockTest::PopServiceImplMock> pop_impl_mock;
 //

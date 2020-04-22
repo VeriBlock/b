@@ -494,15 +494,15 @@ bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex&
     altintegration::ValidationState instate;
     std::vector<altintegration::AltPayloads> payloads;
     if (!parseBlockPopPayloadsImpl(block, indexNew, Params().GetConsensus(), state, &payloads)) {
-        return error("[%s] block %s failed stateless validation: %s", __func__, block.GetHash().ToString(), instate.toString());
+        return error("[%s] block %s failed stateless validation: %s", __func__, block.GetHash().ToString(), instate.GetPath());
     }
 
     if (!tree.acceptBlock(containing, instate)) {
-        return error("[%s] block %s is not accepted by altTree: %s", __func__, block.GetHash().ToString(), instate.toString());
+        return error("[%s] block %s is not accepted by altTree: %s", __func__, block.GetHash().ToString(), instate.GetPath());
     }
 
     if (!payloads.empty() && !tree.addPayloads(containing, payloads, instate)) {
-        return error("[%s] block %s failed stateful pop validation: %s", __func__, block.GetHash().ToString(), instate.toString());
+        return error("[%s] block %s failed stateful pop validation: %s", __func__, block.GetHash().ToString(), instate.GetPath());
     }
 
     return true;

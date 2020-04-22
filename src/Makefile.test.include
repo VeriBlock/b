@@ -120,6 +120,8 @@ if USE_GMOCK
   VBK_TESTS += vbk/test/unit/gmock_tests.cpp
 endif
 
+VBK_TESTS += vbk/test/unit/pop_tx_tests.cpp
+
 #  vbk/test/unit/rpc_service_tests.cpp \
 #  vbk/test/unit/genesis_block_tests.cpp \
 #  vbk/test/unit/pop_service_tests.cpp \
@@ -130,7 +132,6 @@ endif
 #  vbk/test/unit/pop_interpreter_tests.cpp \
 #  vbk/test/unit/block_validation_tests.cpp \
 #  vbk/test/unit/forkresolution_tests.cpp
-#  vbk/test/unit/pop_tx_tests.cpp
 #  vbk/test/unit/pop_reward_tests.cpp
 
 
