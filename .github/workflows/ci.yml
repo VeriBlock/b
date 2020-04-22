@@ -113,11 +113,11 @@ jobs:
           cd C:/vcpkg/ports
           git submodule add --name altintegration https://github.com/Warchant/alt-integration-cpp-vcpkg altintegration
       - uses: actions/checkout@v1
-      - name: Extract branch name & commit
-        id: extract_branch
-        run: |
-          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
-          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | %{$_ -replace "\/","\."}"
+#      - name: Extract branch name & commit
+#        id: extract_branch
+#        run: |
+#          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
+#          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | %{$_ -replace '\/','\.'}"
       - uses: actions/setup-python@v1
         with:
           python-version: '3.7'  # Needed for PEP 540
