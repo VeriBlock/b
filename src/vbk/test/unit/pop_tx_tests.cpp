@@ -215,5 +215,10 @@ BOOST_FIXTURE_TEST_CASE(No_mempool_for_bad_payloads_pop_tx_test, E2eFixture)
 //    uint256 res = tree.ExtractMatches(vMatch, vnIndex);
 //    BOOST_CHECK(res == uint256S("0x0000000000000000000000000000000000000000000123123123123123123123"));
 //}
+<<<<<<< HEAD
 
 BOOST_AUTO_TEST_SUITE_END()
+=======
+//
+//BOOST_AUTO_TEST_SUITE_END()
+>>>>>>> master
