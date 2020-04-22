@@ -1,3 +1,4 @@
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2018 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
@@ -51,6 +52,7 @@
 #include <vbk/pop_service.hpp>
 #include <vbk/service_locator.hpp>
 #include <vbk/util.hpp>
+#include <vbk/pop_service_impl.hpp>
 
 #include <string>
 
@@ -3839,7 +3841,7 @@ bool ProcessNewBlock(const CChainParams& chainparams, const std::shared_ptr<cons
     return true;
 }
 
-bool TestBlockValidity(BlockValidationState& state, const CChainParams& chainparams, const CBlock& block, CBlockIndex* pindexPrev, bool fCheckPOW, bool fCheckMerkleRoot)
+bool TestBlockValidity(BlockValidationState& state, const CChainParams& chainparams, const CBlock& block, CBlockIndex* pindexPrev, bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckPop)
 {
     AssertLockHeld(cs_main);
     assert(pindexPrev && pindexPrev == ::ChainActive().Tip());
@@ -3859,6 +3861,9 @@ bool TestBlockValidity(BlockValidationState& state, const CChainParams& chainpar
         return error("%s: Consensus::ContextualCheckBlock: %s", __func__, state.GetRejectReason());
     if (!::ChainstateActive().ConnectBlock(block, state, &indexDummy, viewNew, chainparams, true))
         return false;
+    if(fCheckPop && !VeriBlock::getService<VeriBlock::PopService>().checkPopPayloads(*pindexPrev, block, state)) {
+        return error("%s: Consensus::Pop: %s", __func__, state.GetRejectReason());
+    }
     assert(state.IsValid());
 
     return true;

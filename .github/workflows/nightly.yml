@@ -2,8 +2,8 @@ name: CI (nightly)
 
 on:
   schedule:
-    # create nightly full builds at midnight
-    - cron:  '0 0 * * *'
+    # create nightly full builds at 02:30 utc
+    - cron:  '30 2 * * *'
 
 jobs:
   linux:
@@ -13,6 +13,11 @@ jobs:
         uses: actions/checkout@v1
         with:
           path: main
+      - name: Extract branch name & commit
+        id: extract_branch
+        run: |
+          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
+          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
       - name: get version for alt-integration-cpp
         run: echo "::set-env name=ALTINTEGRATION_VERSION::$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/altintegration.mk | head -n1)"
       - name: alt-integration-cpp release version
@@ -22,7 +27,20 @@ jobs:
       - name: install build requirements
         run: sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3
       - name: install dependencies
-        run: sudo apt-get install libevent-dev libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libminiupnpc-dev libzmq3-dev libdb4.8-dev libdb4.8++-dev libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libqrencode-dev
+        run: sudo apt-get install libevent-dev libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libminiupnpc-dev libzmq3-dev libdb4.8-dev libdb4.8++-dev libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libqrencode-dev lcov gcovr
+      - name: install sonar
+        env:
+          SONAR_CLI_VERSION: 4.2.0.1873
+        run: |
+          (
+          set -e; \
+          mkdir -p /opt/sonar; \
+          curl -L -o /tmp/sonar.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_CLI_VERSION}-linux.zip; \
+          unzip -o -d /tmp/sonar-scanner /tmp/sonar.zip; \
+          mv /tmp/sonar-scanner/sonar-scanner-${SONAR_CLI_VERSION}-linux /opt/sonar/scanner; \
+          sudo ln -s -f /opt/sonar/scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner; \
+          rm -rf /tmp/sonar*
+          )
       - name: install alt-integration-cpp
         run: |
           (
@@ -47,14 +65,39 @@ jobs:
           --enable-lcov-branch-coverage
       - name: make
         run: make -j2
+      - name: make deploy
+        if: success()
+        run: make linux-deploy
+      - name: create artifacts
+        if: success()
+        run: |
+          mv ./release vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
+          tar czvf vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-linux.tar.gz vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}/
+      - name: upload artifacts
+        if: success()
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.ARTIFACT_HOST }}
+          username: ${{ secrets.ARTIFACT_USER }}
+          key: ${{ secrets.ARTIFACT_KEY }}
+          passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
+          source: vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-linux.tar.gz
+          target: ${{ secrets.ARTIFACT_PATH }}
       - name: make check
         timeout-minutes: 20
         run: make check
+      - name: upload logs
+        uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: test-suite.log
+          path: src/test-suite.log
       - name: Collect coverage
         run: |
           lcov -c -d src -o cov.info
-          gcovr --xml cov.xml -j2 -v -s -b -r src
+          gcovr --xml -v -s -b -r src
       - name: Run sonarqube
+        if: success()
         run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
   x86_64-w64-mingw32:
@@ -64,7 +107,11 @@ jobs:
         uses: actions/checkout@v1
         with:
           path: main
-
+      - name: Extract branch name & commit
+        id: extract_branch
+        run: |
+          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
+          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
       - name: install build requirements
         run: sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils curl git g++-mingw-w64-x86-64
       - name: set the default mingw32 g++ compiler option to posix
@@ -73,8 +120,6 @@ jobs:
         run: PATH=$(echo "$PATH" | sed -e 's/:\/mnt.*//g')
       - name: set variables and build dependencies for x86_64-w64
         env:
-          CC: x86_64-w64-mingw32-gcc
-          CXX: x86_64-w64-mingw32-g++
           HOST: x86_64-w64-mingw32
         run: cd depends && make -j2
       - name: autogen
@@ -86,3 +131,21 @@ jobs:
           --disable-gmock
       - name: make
         run: make -j2
+      - name: make deploy
+        if: success()
+        run: make deploy
+      - name: create artifacts
+        if: success()
+        run: |
+          mv ./release vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
+          zip -r9 vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-win64.zip vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
+      - name: upload artifacts
+        if: success()
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.ARTIFACT_HOST }}
+          username: ${{ secrets.ARTIFACT_USER }}
+          key: ${{ secrets.ARTIFACT_KEY }}
+          passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
+          source: vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-win64.zip
+          target: ${{ secrets.ARTIFACT_PATH }}
