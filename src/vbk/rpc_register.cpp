@@ -22,7 +22,7 @@ UniValue createPopTx(const CScript& scriptSig)
 {
     LOCK(cs_main);
 
-    auto tx = VeriBlock::MakePopTx(scriptSig);
+    auto tx = VeriBlock::MakePopTx2(scriptSig);
 
     const uint256& hashTx = tx.GetHash();
     if (!::mempool.exists(hashTx)) {

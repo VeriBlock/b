@@ -7,7 +7,7 @@
 #include <chain.h>
 #include <test/util/setup_common.h>
 #include <validation.h>
-#include <vbk/util.hpp>
+//#include <vbk/util.hpp>
 #include <veriblock/alt-util.hpp>
 #include <veriblock/mock_miner.hpp>
 

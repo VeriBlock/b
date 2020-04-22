@@ -1,23 +1,7 @@
 #include <boost/test/unit_test.hpp>
 
-#include <chainparams.h>
-#include <consensus/consensus.h>
-#include <consensus/tx_verify.h>
-#include <consensus/validation.h>
-#include <policy/policy.h>
-#include <script/interpreter.h>
-#include <script/sigcache.h>
-#include <test/util/setup_common.h>
-#include <validation.h>
-
-#include <vbk/init.hpp>
-#include <vbk/util.hpp>
-#include <vbk/pop_service.hpp>
-#include <vbk/test/util/mock.hpp>
-#include <vbk/test/util/tx.hpp>
 #include <vbk/test/util/e2e_fixture.hpp>
-
-#include <merkleblock.h>
+#include <vbk/test/util/tx.hpp>
 
 BOOST_AUTO_TEST_SUITE(pop_tx_tests)
 
@@ -29,7 +13,7 @@ BOOST_FIXTURE_TEST_CASE(No_mempool_for_bad_payloads_pop_tx_test, E2eFixture)
     CScript sig;
     sig << atv.toVbkEncoding() << OP_CHECKATV;
     sig << OP_CHECKPOP;
-    auto popTx = VeriBlock::makePopTx(sig);
+    auto popTx = VeriBlock::makePopTx2(sig);
 
     BOOST_CHECK(VeriBlock::isPopTx(CTransaction(popTx)));
 
@@ -220,10 +204,5 @@ BOOST_FIXTURE_TEST_CASE(No_mempool_for_bad_payloads_pop_tx_test, E2eFixture)
 //    uint256 res = tree.ExtractMatches(vMatch, vnIndex);
 //    BOOST_CHECK(res == uint256S("0x0000000000000000000000000000000000000000000123123123123123123123"));
 //}
-<<<<<<< HEAD
 
 BOOST_AUTO_TEST_SUITE_END()
-=======
-//
-//BOOST_AUTO_TEST_SUITE_END()
->>>>>>> master

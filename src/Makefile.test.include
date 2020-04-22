@@ -655,4 +655,3 @@ endif
 	 echo "};};"; \
 	} > "$@.new" && mv -f "$@.new" "$@"
 	@echo "Generated $@"
->>>>>>> master
