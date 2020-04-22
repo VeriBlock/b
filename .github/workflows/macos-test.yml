@@ -1,0 +1,29 @@
+name: macos
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+  pull_request:
+    branches:
+      - develop
+      - master
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - name: install alt-integration-cpp
+        run: |
+          (
+          cd /tmp;
+          wget https://github.com/VeriBlock/alt-integration-cpp/archive/56da423eb8c983131139a5f265fe185cfe6b083b.tar.gz;
+          tar -xf 56da423eb8c983131139a5f265fe185cfe6b083b.tar.gz;
+          cd alt-integration-cpp-56da423eb8c983131139a5f265fe185cfe6b083b;
+          mkdir build;
+          cd build;
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_ROCKSDB=OFF;
+          make -j2;
+          sudo make install
+          )
