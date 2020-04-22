@@ -154,6 +154,8 @@ jobs:
            }
       - name: Generate project files
         run: python build_msvc\msvc-autogen.py
+      - name: vcpkg install alt-integration-cpp
+        run: C:/vcpkg/vcpkg.exe install altintegration:x64-windows-static
       - name: vcpkg integration
         run: C:/vcpkg/vcpkg.exe integrate install
       - name: Build
