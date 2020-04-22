@@ -112,7 +112,7 @@ jobs:
 #        id: extract_branch
 #        run: |
 #          $env:git_hash = git.exe rev-parse --short=7 "$env:GITHUB_SHA"
-#          $env:branch = $env:GITHUB_REF#refs/heads/ | %{$_ -replace '\/','\.'}
+#          $env:branch = echo $env:GITHUB_REF#refs/heads/ | %{$_ -replace '\/','\.'}
       - uses: actions/setup-python@v1
         with:
           python-version: '3.7'  # Needed for PEP 540
