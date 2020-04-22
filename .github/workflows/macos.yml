@@ -43,7 +43,7 @@ jobs:
       - name: install homebrew
         run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
       - name: install dependencies
-        run: brew install automake berkeley-db4 libtool boost miniupnpc openssl pkg-config protobuf python3 libevent librsvg ccache
+        run: brew install automake berkeley-db4 libtool boost miniupnpc openssl pkg-config protobuf python3 libevent librsvg ccache qrencode qt zeromq
       - name: install alt-integration-cpp
         run: |
           (
@@ -61,7 +61,6 @@ jobs:
         run: ./autogen.sh
       - name: configure
         run: ./configure
-          --without-gui
           --enable-werror
           --disable-bench
           --disable-gmock
