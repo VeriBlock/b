@@ -505,7 +505,7 @@ bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex&
     }
 
     if (!tree.acceptBlock(containing, instate)) {
-        return error("[%s] block %s is not accepted by altTree: %s", __func__, block.GetHash().ToString(), instate.GetPath());
+        return error("[%s] block %s is not accepted by altTree: %s", __func__, block.GetHash().ToString(), instate.toString());
     }
 
     if (!payloads.empty() && !tree.addPayloads(containing, payloads, instate, atomic)) {
