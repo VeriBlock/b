@@ -24,7 +24,8 @@
           steps:
             - name: install alt-integration-cpp
               run: |
-                cd vcpkg/ports
+                Write-Host "installing alt-integration-cpp vcpkg"
+                cd C:/vcpkg/ports
                 git submodule add --name altintegration https://github.com/Warchant/alt-integration-cpp-vcpkg altintegration
 
             - uses: actions/checkout@v1
