@@ -107,17 +107,12 @@ jobs:
       VCPKG_INSTALL_PATH: "$env:VCPKG_INSTALLATION_ROOT/installed"
       PLATFORM: x64
     steps:
-      - name: Clone alt-integration-cpp
-        run: |
-          Write-Host "Cloning alt-integration-cpp-vcpkg."
-          cd C:/vcpkg/ports
-          git submodule add --name altintegration https://github.com/Warchant/alt-integration-cpp-vcpkg altintegration
       - uses: actions/checkout@v1
 #      - name: Extract branch name & commit
 #        id: extract_branch
 #        run: |
-#          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
-#          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | %{$_ -replace '\/','\.'}"
+#          $env:git_hash = git.exe rev-parse --short=7 "$env:GITHUB_SHA"
+#          $env:branch = $env:GITHUB_REF#refs/heads/ | %{$_ -replace '\/','\.'}
       - uses: actions/setup-python@v1
         with:
           python-version: '3.7'  # Needed for PEP 540
@@ -130,6 +125,12 @@ jobs:
         with:
           path: C:/vcpkg/installed
           key: ${{ runner.os }}-vcpkg-${{ hashFiles('MSBuild_version') }}
+      - name: Clone alt-integration-cpp
+        if: steps.vcpkgcache.outputs.cache-hit != 'true'
+        run: |
+          Write-Host "Cloning alt-integration-cpp-vcpkg."
+          cd C:/vcpkg/ports
+          git submodule add --name altintegration https://github.com/Warchant/alt-integration-cpp-vcpkg altintegration
       - name: Update vcpkg and install packages
         if: steps.vcpkgcache.outputs.cache-hit != 'true'
         run: |
