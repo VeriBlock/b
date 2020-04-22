@@ -89,7 +89,7 @@ inline CAmount getCoinbaseSubsidy(const CAmount& subsidy)
     return subsidy * (100 - VeriBlock::getService<VeriBlock::Config>().POP_REWARD_PERCENTAGE) / 100;
 }
 
-inline CMutableTransaction MakePopTx2(const CScript& scriptSig)
+inline CMutableTransaction MakePopTx(const CScript& scriptSig)
 {
     CMutableTransaction tx;
 

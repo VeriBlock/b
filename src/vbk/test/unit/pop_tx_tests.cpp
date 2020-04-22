@@ -13,7 +13,7 @@ BOOST_FIXTURE_TEST_CASE(No_mempool_for_bad_payloads_pop_tx_test, E2eFixture)
     CScript sig;
     sig << atv.toVbkEncoding() << OP_CHECKATV;
     sig << OP_CHECKPOP;
-    auto popTx = VeriBlock::makePopTx2(sig);
+    auto popTx = VeriBlock::MakePopTx(sig);
 
     BOOST_CHECK(VeriBlock::isPopTx(CTransaction(popTx)));
 
