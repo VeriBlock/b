@@ -76,7 +76,7 @@ jobs:
         if: success()
         run: |
           mv ./release vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
-          tar czvf vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-linux.tar.gz vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}/
+          tar czvf vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-linux-x64.tar.gz vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}/
 #      - name: upload artifacts
 #        if: success()
 #        uses: appleboy/scp-action@master
@@ -85,7 +85,7 @@ jobs:
 #          username: ${{ secrets.ARTIFACT_USER }}
 #          key: ${{ secrets.ARTIFACT_KEY }}
 #          passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
-#          source: vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-linux.tar.gz
+#          source: vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-linux-x64.tar.gz
 #          target: ${{ secrets.ARTIFACT_PATH }}
       - name: make check
         timeout-minutes: 20
@@ -101,13 +101,13 @@ jobs:
     runs-on: windows-latest
     env:
       PYTHONUTF8: 1
-      QT_DOWNLOAD_URL: 'https://github.com/sipsorcery/qt_win_binary/releases/download/v1.6/Qt5.9.8_x64_static_vs2019.zip'
-      QT_DOWNLOAD_HASH: '9a8c6eb20967873785057fdcd329a657c7f922b0af08c5fde105cc597dd37e21'
-      QT_LOCAL_PATH: 'C:\Qt5.9.8_x64_static_vs2019'
+      QT_DOWNLOAD_URL: 'https://github.com/sipsorcery/qt_win_binary/releases/download/v1.7/Qt5.12.6_x64_static_vs2019.zip'
+      QT_DOWNLOAD_HASH: '9ed2fd7a6d9dedd350967b730a96405fe8d6377cdeaf51b566aec4522c05f794'
+      QT_LOCAL_PATH: 'C:\Qt5.12.6_x64_static_vs2019'
       VCPKG_INSTALL_PATH: "$env:VCPKG_INSTALLATION_ROOT/installed"
       PLATFORM: x64
     steps:
-      - name: install alt-integration-cpp
+      - name: clone alt-integration-cpp
         run: |
           Write-Host "installing alt-integration-cpp vcpkg"
           cd C:/vcpkg/ports
@@ -236,7 +236,7 @@ jobs:
         if: success()
         run: |
           mv ./release vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
-          zip -r9 vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-win64.zip vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
+          zip -r9 vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-windows-qt-x64.zip vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
 #      - name: upload artifacts
 #        if: success()
 #        uses: appleboy/scp-action@master
@@ -245,5 +245,5 @@ jobs:
 #          username: ${{ secrets.ARTIFACT_USER }}
 #          key: ${{ secrets.ARTIFACT_KEY }}
 #          passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
-#          source: vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-win64.zip
+#          source: vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-windows-qt-x64.zip
 #          target: ${{ secrets.ARTIFACT_PATH }}

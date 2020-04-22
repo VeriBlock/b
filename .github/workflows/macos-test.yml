@@ -23,7 +23,7 @@ jobs:
           cd alt-integration-cpp-56da423eb8c983131139a5f265fe185cfe6b083b;
           mkdir build;
           cd build;
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_ROCKSDB=OFF -DWERROR=OFF;
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_ROCKSDB=OFF;
           make -j2;
           sudo make install
           )
