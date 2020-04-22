@@ -76,7 +76,17 @@ jobs:
         if: success()
         run: |
           mv ./release vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
-          tar czvf vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}.tar.gz vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}/
+          tar czvf vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-linux.tar.gz vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}/
+      - name: upload artifacts
+        if: success()
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.ARTIFACT_HOST }}
+          username: ${{ secrets.ARTIFACT_USER }}
+          key: ${{ secrets.ARTIFACT_KEY }}
+          passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
+          source: vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-linux.tar.gz
+          target: ${{ secrets.ARTIFACT_PATH }}
       - name: make check
         timeout-minutes: 20
         run: make check
@@ -128,8 +138,6 @@ jobs:
         run: PATH=$(echo "$PATH" | sed -e 's/:\/mnt.*//g')
       - name: set variables and build dependencies for x86_64-w64
         env:
-          CC: x86_64-w64-mingw32-gcc
-          CXX: x86_64-w64-mingw32-g++
           HOST: x86_64-w64-mingw32
           BASE_CACHE: ~/.depends_cache
         run: cd depends && make -j2
@@ -149,4 +157,14 @@ jobs:
         if: success()
         run: |
           mv ./release vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
-          zip -r9 vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}.zip vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
+          zip -r9 vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-win64.zip vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}
+      - name: upload artifacts
+        if: success()
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.ARTIFACT_HOST }}
+          username: ${{ secrets.ARTIFACT_USER }}
+          key: ${{ secrets.ARTIFACT_KEY }}
+          passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
+          source: vbtc-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.git_hash }}-win64.zip
+          target: ${{ secrets.ARTIFACT_PATH }}
