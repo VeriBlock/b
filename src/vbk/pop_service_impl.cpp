@@ -235,7 +235,7 @@ bool PopServiceImpl::checkPopPayloads(const CBlockIndex& indexPrev, const CBlock
 {
     // does not modify internal state, so no locking required
     altintegration::AltTree copy = *altTree;
-    return addAllPayloadsToBlockImpl(copy, indexPrev, fullBlock, state, true);
+    return addAllPayloadsToBlockImpl(copy, indexPrev, fullBlock, state, true, true);
 }
 
 bool PopServiceImpl::addAllBlockPayloads(const CBlockIndex& indexPrev, const CBlock& connecting, BlockValidationState& state)
