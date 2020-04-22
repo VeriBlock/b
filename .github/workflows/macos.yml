@@ -49,7 +49,6 @@ jobs:
           (
           cd /tmp;
           wget https://github.com/overcookedpanda/alt-integration-cpp/archive/${ALTINTEGRATION_VERSION}.tar.gz;
-#          wget https://github.com/VeriBlock/alt-integration-cpp/archive/${ALTINTEGRATION_VERSION}.tar.gz;
           tar -xf ${ALTINTEGRATION_VERSION}.tar.gz;
           cd alt-integration-cpp-${ALTINTEGRATION_VERSION};
           mkdir build;
