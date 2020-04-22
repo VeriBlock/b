@@ -11,11 +11,11 @@
 #include <validation.h>
 
 #include <vbk/init.hpp>
+#include <vbk/util.hpp>
 #include <vbk/pop_service.hpp>
 #include <vbk/test/util/mock.hpp>
 #include <vbk/test/util/tx.hpp>
 #include <vbk/test/util/e2e_fixture.hpp>
-#include <vbk/util.hpp>
 
 #include <merkleblock.h>
 
@@ -23,8 +23,13 @@ BOOST_AUTO_TEST_SUITE(pop_tx_tests)
 
 BOOST_FIXTURE_TEST_CASE(No_mempool_for_bad_payloads_pop_tx_test, E2eFixture)
 {
-    auto dummyATV = std::vector<unsigned char>(80, 1);
-    CMutableTransaction popTx = VeriBlockTest::makePopTx(dummyATV, {{2}});
+    auto tip = ChainActive().Tip();
+    BOOST_CHECK(tip != nullptr);
+    auto atv = endorseAltBlock(tip->GetBlockHash(), tip->pprev->GetBlockHash(), {});
+    CScript sig;
+    sig << atv.toVbkEncoding() << OP_CHECKATV;
+    sig << OP_CHECKPOP;
+    auto popTx = VeriBlock::makePopTx(sig);
 
     BOOST_CHECK(VeriBlock::isPopTx(CTransaction(popTx)));
 

@@ -17,6 +17,7 @@ using altintegration::MockMiner;
 using altintegration::PublicationData;
 using altintegration::VbkBlock;
 using altintegration::VTB;
+using altintegration::ATV;
 
 struct E2eFixture : public TestChain100Setup {
     CScript cbKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
@@ -29,13 +30,7 @@ struct E2eFixture : public TestChain100Setup {
         pop = &VeriBlock::getService<VeriBlock::PopService>();
     }
 
-
-    CBlock endorseAltBlock(uint256 hash, size_t generateVtbs = 0)
-    {
-        return endorseAltBlock(hash, ChainActive().Tip()->GetBlockHash(), generateVtbs);
-    }
-
-    CBlock endorseAltBlock(uint256 hash, uint256 prevBlock, size_t generateVtbs = 0)
+    ATV endorseAltBlock(uint256 hash, uint256 prevBlock, const std::vector<VTB>& vtbs)
     {
         CBlockIndex* endorsed = nullptr;
         {
@@ -44,16 +39,26 @@ struct E2eFixture : public TestChain100Setup {
             BOOST_CHECK(endorsed != nullptr);
         }
 
+        auto publicationdata = createPublicationData(endorsed);
+        auto vbktx = popminer.endorseAltBlock(publicationdata);
+        auto atv = popminer.generateATV(vbktx, getLastKnownVBKblock(), state);
+        BOOST_CHECK(state.IsValid());
+        return atv;
+    }
+
+    CBlock endorseAltBlockAndMine(uint256 hash, size_t generateVtbs = 0)
+    {
+        return endorseAltBlockAndMine(hash, ChainActive().Tip()->GetBlockHash(), generateVtbs);
+    }
+
+    CBlock endorseAltBlockAndMine(uint256 hash, uint256 prevBlock, size_t generateVtbs = 0)
+    {
         std::vector<VTB> vtbs;
         vtbs.reserve(generateVtbs);
         std::generate_n(std::back_inserter(vtbs), generateVtbs, [&]() {
             return endorseVbkTip();
         });
-
-        auto publicationdata = createPublicationData(endorsed);
-        auto vbktx = popminer.endorseAltBlock(publicationdata);
-        auto atv = popminer.generateATV(vbktx, getLastKnownVBKblock(), state);
-        BOOST_CHECK(state.IsValid());
+        auto atv = endorseAltBlock(hash, prevBlock, vtbs);
 
         CScript sig;
         sig << atv.toVbkEncoding() << OP_CHECKATV;

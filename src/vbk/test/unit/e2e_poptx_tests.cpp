@@ -25,7 +25,7 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
     BOOST_CHECK(tip != nullptr);
 
     // endorse tip
-    CBlock block = endorseAltBlock(tip->GetBlockHash(), 10);
+    CBlock block = endorseAltBlockAndMine(tip->GetBlockHash(), 10);
     {
         BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == block.GetHash());
         auto btc = pop->getLastKnownBTCBlocks(1)[0];
@@ -35,7 +35,7 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
     }
 
     // endorse another tip
-    block = endorseAltBlock(tip->GetBlockHash(), 1);
+    block = endorseAltBlockAndMine(tip->GetBlockHash(), 1);
     auto lastHash = ChainActive().Tip()->GetBlockHash();
     {
         BOOST_CHECK(lastHash == block.GetHash());
@@ -49,7 +49,7 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
     auto fork1tip = CreateAndProcessBlock({}, ChainActive().Tip()->pprev->pprev->GetBlockHash(), cbKey);
 
     // endorse block that is not on main chain
-    block = endorseAltBlock(fork1tip.GetHash(), 1);
+    block = endorseAltBlockAndMine(fork1tip.GetHash(), 1);
     BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == lastHash);
 }
 
