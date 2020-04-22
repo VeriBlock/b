@@ -453,7 +453,7 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
                     failedPopTx.insert(iter);
                     continue;
                 }
-                if(!altTreeCopy.addPayloads(dummyContainingBlock, {p}, state, true)) {
+                if (!altTreeCopy.addPayloads(dummyContainingBlock, {p}, state, true)) {
                     LogPrint(BCLog::POP, "%s: tx %s is statefully invalid: %s\n", __func__, iter->GetTx().GetHash().ToString(), state.toString());
                     failedTx.insert(iter);
                     failedPopTx.insert(iter);
@@ -486,15 +486,14 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
     }
 
     // delete invalid PoP transactions
-    for (auto & tx: failedPopTx) {
+    for (auto& tx : failedPopTx) {
         mempool.removeRecursive(tx->GetTx(), MemPoolRemovalReason::BLOCK); // FIXME: a more appropriate removal reason
     }
 
     // TODO(VeriBlock): this is temporal fix
-    std::for_each(addedPayloads.rbegin(), addedPayloads.rend(), [&](const altintegration::AltPayloads& p){
+    std::for_each(addedPayloads.rbegin(), addedPayloads.rend(), [&](const altintegration::AltPayloads& p) {
         altTreeCopy.removePayloads(dummyContainingBlock, {p});
     });
-
 }
 
 template void BlockAssembler::addPackageTxs<ancestor_score>(int &nPackagesSelected, int &nDescendantsUpdated, CBlockIndex& prevIndex);
