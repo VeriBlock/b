@@ -325,6 +325,7 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
     altintegration::ValidationState state;
     bool ret = altTreeCopy.acceptBlock(dummyContainingBlock, state);
     assert(ret);
+    (void) ret;
 
     // mapModifiedTx will store sorted packages after they are modified
     // because some of their txs are already in the block
