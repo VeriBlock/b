@@ -66,7 +66,7 @@
     </ProjectReference>
   </ItemGroup>
 
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\libbitcoin_qt\$(GeneratedFilesOutDir)\..\;$(QtIncludeDir)\QtTest;$(QtIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -75,7 +75,7 @@
     </Link>
   </ItemDefinitionGroup>
 
-    <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
       <AdditionalIncludeDirectories>..\libbitcoin_qt\$(GeneratedFilesOutDir)\..\;$(QtIncludeDir)\QtTest;$(QtIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>

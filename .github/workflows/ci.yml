@@ -107,9 +107,9 @@ jobs:
       VCPKG_INSTALL_PATH: "$env:VCPKG_INSTALLATION_ROOT/installed"
       PLATFORM: x64
     steps:
-      - name: clone alt-integration-cpp
+      - name: Clone alt-integration-cpp
         run: |
-          Write-Host "installing alt-integration-cpp vcpkg"
+          Write-Host "Cloning alt-integration-cpp-vcpkg."
           cd C:/vcpkg/ports
           git submodule add --name altintegration https://github.com/Warchant/alt-integration-cpp-vcpkg altintegration
       - uses: actions/checkout@v1
@@ -154,28 +154,30 @@ jobs:
            }
       - name: Generate project files
         run: python build_msvc\msvc-autogen.py
-      - name: vcpkg install alt-integration-cpp
-        run: C:/vcpkg/vcpkg.exe install altintegration:x64-windows-static
+      - name: Install alt-integration-cpp using vcpkg
+        run: |
+          Write-Host "Installing alt-integration-cpp."
+          C:/vcpkg/vcpkg.exe install altintegration:x64-windows-static
       - name: vcpkg integration
         if: steps.vcpkgcache.outputs.cache-hit != 'true'
         run: C:/vcpkg/vcpkg.exe integrate install
-#      - name: Build
-#        run: msbuild build_msvc\bitcoin.sln /m /v:n /p:Configuration=Release
-#      - name: Run test_bitcoin
-#        shell: cmd
-#        run: src\test_bitcoin.exe -k stdout -e stdout 2> NUL
-#      - name: Run bench_bitcoin
-#        shell: cmd
-#        run: src\bench_bitcoin.exe -evals=1 -scaling=0 > NUL
-#      - name: bitcoin-util-test
-#        run: python test\util\bitcoin-util-test.py
-#      - name: rpcauth-test
-#        shell: cmd
-#        run: python test\util\rpcauth-test.py
-#      - name: test_runner
-#        shell: cmd
-#        run: |
-#          python test\functional\test_runner.py --ansi --ci --quiet --combinedlogslen=4000 --failfast --exclude feature_fee_estimation
+      - name: Build
+        run: msbuild build_msvc\bitcoin.sln /m /v:n /p:Configuration=Release
+      - name: Run test_bitcoin
+        shell: cmd
+        run: src\test_bitcoin.exe -k stdout -e stdout 2> NUL
+      - name: Run bench_bitcoin
+        shell: cmd
+        run: src\bench_bitcoin.exe -evals=1 -scaling=0 > NUL
+      - name: bitcoin-util-test
+        run: python test\util\bitcoin-util-test.py
+      - name: rpcauth-test
+        shell: cmd
+        run: python test\util\rpcauth-test.py
+      - name: test_runner
+        shell: cmd
+        run: |
+          python test\functional\test_runner.py --ansi --ci --quiet --combinedlogslen=4000 --failfast --exclude feature_fee_estimation
 
   x86_64-w64-mingw32:
     runs-on: ubuntu-latest
