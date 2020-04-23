@@ -21,11 +21,14 @@ BOOST_FIXTURE_TEST_CASE(No_mempool_for_bad_payloads_pop_tx_test, E2eFixture)
 
     BOOST_CHECK(VeriBlock::isPopTx(CTransaction(popTx)));
 
-    auto tx_ref = MakeTransactionRef<const CMutableTransaction&>(popTx);
     TxValidationState state;
-    auto result = AcceptToMemoryPool(mempool, state, tx_ref,
-        nullptr /* plTxnReplaced */, false /* bypass_limits */, 0 /* nAbsurdFee */, false /* test accept */);
-    BOOST_CHECK(!result);
+    auto tx_ref = MakeTransactionRef<const CMutableTransaction&>(popTx);
+    {
+        LOCK(cs_main);
+        auto result = AcceptToMemoryPool(mempool, state, tx_ref,
+            nullptr /* plTxnReplaced */, false /* bypass_limits */, 0 /* nAbsurdFee */, false /* test accept */);
+        BOOST_CHECK(!result);
+    }
     BOOST_CHECK_EQUAL(mempool.size(), initialPoolSize);
 }
 
