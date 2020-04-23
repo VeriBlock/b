@@ -8,10 +8,12 @@ BOOST_AUTO_TEST_SUITE(pop_tx_tests)
 
 BOOST_FIXTURE_TEST_CASE(No_mempool_for_bad_payloads_pop_tx_test, E2eFixture)
 {
+    unsigned int initialPoolSize = mempool.size();
     auto tip = ChainActive().Tip();
     BOOST_CHECK(tip != nullptr);
     auto atv = endorseAltBlock(tip->GetBlockHash(), tip->pprev->GetBlockHash(), {});
-    atv.containingBlock.difficulty = 0;
+    // erase signature to make ATV check fail
+    atv.transaction.signature = std::vector<unsigned char>(atv.transaction.signature.size(), 0);
     CScript sig;
     sig << atv.toVbkEncoding() << OP_CHECKATV;
     sig << OP_CHECKPOP;
@@ -19,20 +21,12 @@ BOOST_FIXTURE_TEST_CASE(No_mempool_for_bad_payloads_pop_tx_test, E2eFixture)
 
     BOOST_CHECK(VeriBlock::isPopTx(CTransaction(popTx)));
 
-    CScript scriptPubKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
-    CBlock block = CreateAndProcessBlock({popTx}, scriptPubKey);
-
-    TxValidationState state;
     auto tx_ref = MakeTransactionRef<const CMutableTransaction&>(popTx);
-
-    TxValidationState txstate;
-    altintegration::AltPayloads p;
-    bool ret = VeriBlock::parseTxPopPayloadsImpl(*tx_ref, Params().GetConsensus(), txstate, p);
-    BOOST_CHECK(!ret);
-
+    TxValidationState state;
     auto result = AcceptToMemoryPool(mempool, state, tx_ref,
         nullptr /* plTxnReplaced */, false /* bypass_limits */, 0 /* nAbsurdFee */, false /* test accept */);
-    BOOST_CHECK(result);
+    BOOST_CHECK(!result);
+    BOOST_CHECK_EQUAL(mempool.size(), initialPoolSize);
 }
 
 //
