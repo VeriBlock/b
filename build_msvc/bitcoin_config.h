@@ -20,13 +20,13 @@
 #define CLIENT_VERSION_REVISION 99
 
 /* Copyright holder(s) before %s replacement */
-#define COPYRIGHT_HOLDERS "The %s developers"
+#define COPYRIGHT_HOLDERS "%s"
 
 /* Copyright holder(s) */
-#define COPYRIGHT_HOLDERS_FINAL "The Bitcoin Core developers"
+#define COPYRIGHT_HOLDERS_FINAL "Xenios SEZC"
 
 /* Replacement for %s in copyright holders string */
-#define COPYRIGHT_HOLDERS_SUBSTITUTION "Bitcoin Core"
+#define COPYRIGHT_HOLDERS_SUBSTITUTION "Xenios SEZC"
 
 /* Copyright year */
 #define COPYRIGHT_YEAR 2019
@@ -340,7 +340,7 @@
 #define LT_OBJDIR ".libs/"
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "https://github.com/bitcoin/bitcoin/issues"
+#define PACKAGE_BUGREPORT "https://github.com/VeriBlock/vbk-ri-btc/issues"
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "VeriBlock Bitcoin Core"
