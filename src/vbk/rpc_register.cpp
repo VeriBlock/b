@@ -186,6 +186,8 @@ UniValue submitpop(const JSONRPCRequest& request)
     }
     wallet->BlockUntilSyncedToCurrentChain();
 
+    auto& config = VeriBlock::getService<VeriBlock::Config>();
+    UniValue popTxs(UniValue::VARR);
     CScript script;
 
     const UniValue& vtb_array = request.params[1].get_array();
@@ -193,18 +195,50 @@ UniValue submitpop(const JSONRPCRequest& request)
     for (uint32_t idx = 0u, size = vtb_array.size(); idx < size; ++idx) {
         auto& vtbhex = vtb_array[idx];
         auto vtb = ParseHexV(vtbhex, "vtb[" + std::to_string(idx) + "]");
+
+        CScript appendedScript = script;
+        appendedScript << vtb << OP_CHECKVTB << OP_CHECKPOP;
+        if (::GetSerializeSize(VeriBlock::MakePopTx(appendedScript),
+                               PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) > config.max_pop_tx_weight) {
+            if (script.empty()) {
+                std::ostringstream err;
+                err << "VTB[" << idx << "] size exceeds the maximum allowed PoP transaction size";
+                throw JSONRPCError(RPC_INVALID_PARAMETER, err.str());
+            }
+            LogPrint(BCLog::POP, "Creating a split PoP transaction; starting the next transaction at index %d", idx);
+            script << OP_CHECKPOP;
+            popTxs.push_back(createPopTx(script));
+            script = CScript{};
+        }
+
         script << vtb << OP_CHECKVTB;
         LogPrint(BCLog::POP, "VTB%d=\"%s\"\n", idx, vtbhex.get_str());
     }
 
     auto& atvhex = request.params[0];
     auto atv = ParseHexV(atvhex, "atv");
+
+    CScript appendedScript = script;
+    appendedScript << atv << OP_CHECKATV << OP_CHECKPOP;
+    if (::GetSerializeSize(VeriBlock::MakePopTx(appendedScript),
+                           PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) > config.max_pop_tx_weight) {
+        if (script.empty()) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                               "ATV size exceeds the maximum allowed PoP transaction size");
+        }
+        LogPrint(BCLog::POP, "Creating a split PoP transaction; putting the ATV into a separate transaction");
+        script << OP_CHECKPOP;
+        popTxs.push_back(createPopTx(script));
+        script = CScript{};
+    }
+
     script << atv << OP_CHECKATV;
     script << OP_CHECKPOP;
 
     LogPrint(BCLog::POP, "ATV=\"%s\"\n", atvhex.get_str());
+    popTxs.push_back(createPopTx(script));
 
-    return createPopTx(script);
+    return popTxs;
 }
 
 
