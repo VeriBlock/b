@@ -343,19 +343,19 @@
 #define PACKAGE_BUGREPORT "https://github.com/bitcoin/bitcoin/issues"
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "Bitcoin Core"
+#define PACKAGE_NAME "VeriBlock Bitcoin Core"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "Bitcoin Core 0.19.99"
+#define PACKAGE_STRING "VeriBlock Bitcoin Core 0.0.3"
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "bitcoin"
+#define PACKAGE_TARNAME "vbitcoin"
 
 /* Define to the home page for this package. */
-#define PACKAGE_URL "https://bitcoincore.org/"
+#define PACKAGE_URL "https://www.veriblock.org/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "0.19.99"
+#define PACKAGE_VERSION "0.0.3"
 
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
