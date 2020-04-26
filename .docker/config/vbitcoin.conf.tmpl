@@ -22,6 +22,7 @@ rpcpassword={{ .Env.RPC_PASSWORD }}
 {{ end }}
 {{ if .Env.RPC_ALLOWIP }}
 rpcallowip={{ .Env.RPC_ALLOWIP }}
+{{ end }}
 rpcthreads={{ default .Env.RPC_THREADS "15" }}
 rpcworkqueue={{ default .Env.RPC_WORK_QUEUE "256" }}
 
