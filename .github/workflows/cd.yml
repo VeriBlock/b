@@ -11,7 +11,7 @@ on:
     branches:
     - master
 
-#jobs:
+jobs:
 #  ubuntu-base:
 #    runs-on: ubuntu-latest
 #    steps:
