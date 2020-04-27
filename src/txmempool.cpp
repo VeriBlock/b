@@ -961,7 +961,7 @@ int CTxMemPool::ExpirePop()
         TxValidationState state;
         altintegration::AltPayloads payloads;
         bool ret = VeriBlock::parseTxPopPayloadsImpl(it->GetTx(), Params().GetConsensus(), state, payloads);
-        if (ret && (payloads.endorsed.height + /*config.POP_REWARD_SETTLEMENT_INTERVAL*/50 < tipHeight)) {
+        if (ret && (payloads.endorsed.height + config.popconfig.alt->getEndorsementSettlementInterval() < tipHeight)) {
             toremove.insert(mapTx.project<0>(it));
         }
         it++;
