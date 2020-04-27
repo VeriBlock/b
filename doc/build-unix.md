@@ -77,7 +77,7 @@ Finally, clang (often less resource hungry) can be used instead of gcc, which is
 
 Build requirements:
 
-    sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3
+    sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 cmake
 
 Now, you can either build from self-compiled [depends](/depends/README.md) or install the required dependencies:
 
@@ -85,7 +85,7 @@ Now, you can either build from self-compiled [depends](/depends/README.md) or in
 
 alt-integration-cpp is required.
     
-    ```export ALTINTEGRATION_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/altintegration.mk | head -n1)"
+    export ALTINTEGRATION_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/altintegration.mk | head -n1)"
     cd opt;
     wget https://github.com/VeriBlock/alt-integration-cpp/archive/${ALTINTEGRATION_VERSION}.tar.gz;
     tar -xf ${ALTINTEGRATION_VERSION}.tar.gz;
@@ -94,7 +94,7 @@ alt-integration-cpp is required.
     cd build;
     cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_ROCKSDB=OFF;
     make -j2;
-    sudo make install```
+    sudo make install
 
 BerkeleyDB is required for the wallet.
 
