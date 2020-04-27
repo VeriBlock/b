@@ -144,3 +144,5 @@ struct E2eFixture : public TestChain100Setup {
         return p;
     }
 };
+
+#endif //BITCOIN_SRC_VBK_TEST_UTIL_E2E_FIXTURE_HPP
