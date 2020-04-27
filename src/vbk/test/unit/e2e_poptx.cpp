@@ -237,9 +237,6 @@ BOOST_FIXTURE_TEST_CASE(LargePoPTxIsSplit, E2eFixture)
 
     //check that submitpop creates multiple transactions
     BOOST_CHECK_EQUAL(result.get_array().size(), expectedTransactionCount);
-    auto resultArray = result.get_array();
-    for (auto i = 0u; i < resultArray.size(); i++)
-        std::cerr<<resultArray[i].get_str()<<std::endl;
     BOOST_CHECK_EQUAL(mempool.size(), expectedTransactionCount);
 
     // check that the created transactions are successfully added to a block

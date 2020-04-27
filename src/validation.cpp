@@ -277,23 +277,23 @@ bool CheckSequenceLocks(const CTxMemPool& pool, const CTransaction& tx, int flag
         // CoinsTip() contains the UTXO set for ::ChainActive().Tip()
         CCoinsViewMemPool viewMemPool(&::ChainstateActive().CoinsTip(), pool);
         std::vector<int> prevheights;
+        prevheights.resize(tx.vin.size());
         if (VeriBlock::isPopTx(tx)) {
-            assert(tx.vin.size() == 1);
-            prevheights.push_back(tip->nHeight + 1);
-        } else {
-            prevheights.resize(tx.vin.size());
-            for (size_t txinIndex = 0; txinIndex < tx.vin.size(); txinIndex++) {
-                const CTxIn& txin = tx.vin[txinIndex];
-                Coin coin;
-                if (!viewMemPool.GetCoin(txin.prevout, coin)) {
-                    return error("%s: Missing input", __func__);
-                }
-                if (coin.nHeight == MEMPOOL_HEIGHT) {
-                    // Assume all mempool transaction confirm in the next block
-                    prevheights[txinIndex] = tip->nHeight + 1;
-                } else {
-                    prevheights[txinIndex] = coin.nHeight;
-                }
+            prevheights[0] = tip->nHeight + 1;
+        }
+        for (size_t txinIndex = VeriBlock::isPopTx(tx) ? 1 : 0;
+                txinIndex < tx.vin.size(); txinIndex++)
+        {
+            const CTxIn& txin = tx.vin[txinIndex];
+            Coin coin;
+            if (!viewMemPool.GetCoin(txin.prevout, coin)) {
+                return error("%s: Missing input", __func__);
+            }
+            if (coin.nHeight == MEMPOOL_HEIGHT) {
+                // Assume all mempool transaction confirm in the next block
+                prevheights[txinIndex] = tip->nHeight + 1;
+            } else {
+                prevheights[txinIndex] = coin.nHeight;
             }
         }
         lockPair = CalculateSequenceLocks(tx, flags, &prevheights, index);
@@ -419,28 +419,31 @@ static bool CheckInputsFromMempoolAndCache(const CTransaction& tx, TxValidationS
     LOCK(pool.cs);
 
     assert(!tx.IsCoinBase());
-    if (!VeriBlock::isPopTx(tx)) {
-        for (const CTxIn& txin : tx.vin) {
-            const Coin& coin = view.AccessCoin(txin.prevout);
 
-            // At this point we haven't actually checked if the coins are all
-            // available (or shouldn't assume we have, since CheckInputs does).
-            // So we just return failure if the inputs are not available here,
-            // and then only have to check equivalence for available inputs.
-            if (coin.IsSpent()) return false;
+    for (unsigned int i = VeriBlock::isPopTx(tx) ? 1 : 0;
+         i < tx.vin.size(); i++)
+    {
+        const auto &txin = tx.vin[i];
+        const Coin& coin = view.AccessCoin(txin.prevout);
 
-            const CTransactionRef& txFrom = pool.get(txin.prevout.hash);
-            if (txFrom) {
-                assert(txFrom->GetHash() == txin.prevout.hash);
-                assert(txFrom->vout.size() > txin.prevout.n);
-                assert(txFrom->vout[txin.prevout.n] == coin.out);
-            } else {
-                const Coin& coinFromDisk = ::ChainstateActive().CoinsTip().AccessCoin(txin.prevout);
-                assert(!coinFromDisk.IsSpent());
-                assert(coinFromDisk.out == coin.out);
-            }
+        // At this point we haven't actually checked if the coins are all
+        // available (or shouldn't assume we have, since CheckInputs does).
+        // So we just return failure if the inputs are not available here,
+        // and then only have to check equivalence for available inputs.
+        if (coin.IsSpent()) return false;
+
+        const CTransactionRef& txFrom = pool.get(txin.prevout.hash);
+        if (txFrom) {
+            assert(txFrom->GetHash() == txin.prevout.hash);
+            assert(txFrom->vout.size() > txin.prevout.n);
+            assert(txFrom->vout[txin.prevout.n] == coin.out);
+        } else {
+            const Coin& coinFromDisk = ::ChainstateActive().CoinsTip().AccessCoin(txin.prevout);
+            assert(!coinFromDisk.IsSpent());
+            assert(coinFromDisk.out == coin.out);
         }
     }
+
     // Call CheckInputs() to cache signature and script validity against current tip consensus rules.
     return CheckInputs(tx, state, view, flags, /* cacheSigStore = */ true, /* cacheFullSciptStore = */ true, txdata);
 }
@@ -603,36 +606,37 @@ bool MemPoolAccept::PreChecks(ATMPArgs& args, Workspace& ws)
 
     // Check for conflicts with in-memory transactions
 
-    if (!VeriBlock::isPopTx(tx)) {
-        for (const CTxIn& txin : tx.vin) {
-            const CTransaction* ptxConflicting = m_pool.GetConflictTx(txin.prevout);
-            if (ptxConflicting) {
-                if (!setConflicts.count(ptxConflicting->GetHash())) {
-                    // Allow opt-out of transaction replacement by setting
-                    // nSequence > MAX_BIP125_RBF_SEQUENCE (SEQUENCE_FINAL-2) on all inputs.
-                    //
-                    // SEQUENCE_FINAL-1 is picked to still allow use of nLockTime by
-                    // non-replaceable transactions. All inputs rather than just one
-                    // is for the sake of multi-party protocols, where we don't
-                    // want a single party to be able to disable replacement.
-                    //
-                    // The opt-out ignores descendants as anyone relying on
-                    // first-seen mempool behavior should be checking all
-                    // unconfirmed ancestors anyway; doing otherwise is hopelessly
-                    // insecure.
-                    bool fReplacementOptOut = true;
-                    for (const CTxIn& _txin : ptxConflicting->vin) {
-                        if (_txin.nSequence <= MAX_BIP125_RBF_SEQUENCE) {
-                            fReplacementOptOut = false;
-                            break;
-                        }
+    for (unsigned int i = VeriBlock::isPopTx(tx) ? 1 : 0;
+         i < tx.vin.size(); i++)
+    {
+        const auto & txin = tx.vin[i];
+        const CTransaction* ptxConflicting = m_pool.GetConflictTx(txin.prevout);
+        if (ptxConflicting) {
+            if (!setConflicts.count(ptxConflicting->GetHash())) {
+                // Allow opt-out of transaction replacement by setting
+                // nSequence > MAX_BIP125_RBF_SEQUENCE (SEQUENCE_FINAL-2) on all inputs.
+                //
+                // SEQUENCE_FINAL-1 is picked to still allow use of nLockTime by
+                // non-replaceable transactions. All inputs rather than just one
+                // is for the sake of multi-party protocols, where we don't
+                // want a single party to be able to disable replacement.
+                //
+                // The opt-out ignores descendants as anyone relying on
+                // first-seen mempool behavior should be checking all
+                // unconfirmed ancestors anyway; doing otherwise is hopelessly
+                // insecure.
+                bool fReplacementOptOut = true;
+                for (const CTxIn& _txin : ptxConflicting->vin) {
+                    if (_txin.nSequence <= MAX_BIP125_RBF_SEQUENCE) {
+                        fReplacementOptOut = false;
+                        break;
                     }
-                    if (fReplacementOptOut) {
-                        return state.Invalid(TxValidationResult::TX_MEMPOOL_POLICY, "txn-mempool-conflict");
-                    }
-
-                    setConflicts.insert(ptxConflicting->GetHash());
                 }
+                if (fReplacementOptOut) {
+                    return state.Invalid(TxValidationResult::TX_MEMPOOL_POLICY, "txn-mempool-conflict");
+                }
+
+                setConflicts.insert(ptxConflicting->GetHash());
             }
         }
     }
@@ -642,26 +646,28 @@ bool MemPoolAccept::PreChecks(ATMPArgs& args, Workspace& ws)
 
     CCoinsViewCache& coins_cache = ::ChainstateActive().CoinsTip();
     // do all inputs exist?
-    if (!VeriBlock::isPopTx(tx)) {
-        for (const CTxIn& txin : tx.vin) {
-            if (!coins_cache.HaveCoinInCache(txin.prevout)) {
-                coins_to_uncache.push_back(txin.prevout);
-            }
+    for (unsigned int i = VeriBlock::isPopTx(tx) ? 1 : 0;
+         i < tx.vin.size(); i++)
+    {
+        const auto & txin = tx.vin[i];
 
-            // Note: this call may add txin.prevout to the coins cache
-            // (coins_cache.cacheCoins) by way of FetchCoin(). It should be removed
-            // later (via coins_to_uncache) if this tx turns out to be invalid.
-            if (!m_view.HaveCoin(txin.prevout)) {
-                // Are inputs missing because we already have the tx?
-                for (size_t out = 0; out < tx.vout.size(); out++) {
-                    // Optimistically just do efficient check of cache for outputs
-                    if (coins_cache.HaveCoinInCache(COutPoint(hash, out))) {
-                        return state.Invalid(TxValidationResult::TX_CONFLICT, "txn-already-known");
-                    }
+        if (!coins_cache.HaveCoinInCache(txin.prevout)) {
+            coins_to_uncache.push_back(txin.prevout);
+        }
+
+        // Note: this call may add txin.prevout to the coins cache
+        // (coins_cache.cacheCoins) by way of FetchCoin(). It should be removed
+        // later (via coins_to_uncache) if this tx turns out to be invalid.
+        if (!m_view.HaveCoin(txin.prevout)) {
+            // Are inputs missing because we already have the tx?
+            for (size_t out = 0; out < tx.vout.size(); out++) {
+                // Optimistically just do efficient check of cache for outputs
+                if (coins_cache.HaveCoinInCache(COutPoint(hash, out))) {
+                    return state.Invalid(TxValidationResult::TX_CONFLICT, "txn-already-known");
                 }
-                // Otherwise assume this might be an orphan tx for which we just haven't seen parents yet
-                return state.Invalid(TxValidationResult::TX_MISSING_INPUTS, "bad-txns-inputs-missingorspent");
             }
+            // Otherwise assume this might be an orphan tx for which we just haven't seen parents yet
+            return state.Invalid(TxValidationResult::TX_MISSING_INPUTS, "bad-txns-inputs-missingorspent");
         }
     }
 
@@ -682,7 +688,7 @@ bool MemPoolAccept::PreChecks(ATMPArgs& args, Workspace& ws)
         return state.Invalid(TxValidationResult::TX_PREMATURE_SPEND, "non-BIP68-final");
 
     CAmount nFees = 0;
-    if (!VeriBlock::isPopTx(tx) && !Consensus::CheckTxInputs(tx, state, m_view, GetSpendHeight(m_view), nFees)) {
+    if (!Consensus::CheckTxInputs(tx, state, m_view, GetSpendHeight(m_view), nFees)) {
         return error("%s: Consensus::CheckTxInputs: %s, %s", __func__, tx.GetHash().ToString(), FormatStateMessage(state));
     }
 
@@ -1416,9 +1422,12 @@ void CChainState::InvalidBlockFound(CBlockIndex* pindex, const BlockValidationSt
 void UpdateCoins(const CTransaction& tx, CCoinsViewCache& inputs, CTxUndo& txundo, int nHeight)
 {
     // mark inputs spent
-    if (!tx.IsCoinBase() && !VeriBlock::isPopTx(tx)) {
+    if (!tx.IsCoinBase()) {
         txundo.vprevout.reserve(tx.vin.size());
-        for (const CTxIn& txin : tx.vin) {
+        for (unsigned int i = VeriBlock::isPopTx(tx) ? 1 : 0;
+             i < tx.vin.size(); i++)
+        {
+            const auto &txin = tx.vin[i];
             txundo.vprevout.emplace_back();
             bool is_spent = inputs.SpendCoin(txin.prevout, &txundo.vprevout.back());
             assert(is_spent);
@@ -1483,8 +1492,12 @@ bool CheckInputs(const CTransaction& tx, TxValidationState& state, const CCoinsV
 {
     if (tx.IsCoinBase()) return true;
 
-    if (VeriBlock::isPopTx(tx))
-        return VeriBlock::getService<VeriBlock::PopService>().checkPopInputs(tx, state, flags, cacheSigStore, txdata);
+    // additional pop-specific checks
+    if (VeriBlock::isPopTx(tx) &&
+        !VeriBlock::getService<VeriBlock::PopService>().checkPopInputs(tx, state, flags, cacheSigStore, txdata)) {
+        //state is already set
+        return false;
+    };
 
     if (pvChecks) {
         pvChecks->reserve(tx.vin.size());
@@ -1505,7 +1518,9 @@ bool CheckInputs(const CTransaction& tx, TxValidationState& state, const CCoinsV
         return true;
     }
 
-    for (unsigned int i = 0; i < tx.vin.size(); i++) {
+    for (unsigned int i = VeriBlock::isPopTx(tx) ? 1 : 0;
+         i < tx.vin.size(); i++)
+    {
         const COutPoint& prevout = tx.vin[i].prevout;
         const Coin& coin = inputs.AccessCoin(prevout);
         assert(!coin.IsSpent());
@@ -1706,13 +1721,14 @@ DisconnectResult CChainState::DisconnectBlock(const CBlock& block, const CBlockI
         }
 
         // restore inputs
-        if (i > 0 && !VeriBlock::isPopTx(tx)) { // not coinbases
+        if (i > 0) { // not coinbases
+            unsigned int vinStart = VeriBlock::isPopTx(tx) ? 1 : 0;
             CTxUndo& txundo = blockUndo.vtxundo[i - 1];
-            if (txundo.vprevout.size() != tx.vin.size()) {
+            if (txundo.vprevout.size() != tx.vin.size() - vinStart) {
                 error("DisconnectBlock(): transaction and undo data inconsistent");
                 return DISCONNECT_FAILED;
             }
-            for (unsigned int j = tx.vin.size(); j-- > 0;) {
+            for (unsigned int j = tx.vin.size(); j-- > vinStart;) {
                 const COutPoint& out = tx.vin[j].prevout;
                 int res = ApplyTxInUndo(std::move(txundo.vprevout[j]), view, out);
                 if (res == DISCONNECT_FAILED) return DISCONNECT_FAILED;
@@ -2094,7 +2110,7 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
 
         nInputs += tx.vin.size();
 
-        if (!tx.IsCoinBase() && !VeriBlock::isPopTx(tx)) {
+        if (!tx.IsCoinBase()) {
             CAmount txfee = 0;
             TxValidationState tx_state;
             if (!Consensus::CheckTxInputs(tx, tx_state, view, pindex->nHeight, txfee)) {
@@ -2113,7 +2129,11 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
             // BIP68 lock checks (as opposed to nLockTime checks) must
             // be in ConnectBlock because they require the UTXO set
             prevheights.resize(tx.vin.size());
-            for (size_t j = 0; j < tx.vin.size(); j++) {
+            if (VeriBlock::isPopTx(tx)) {
+                prevheights[0] = pindex->nHeight;
+            }
+            for (size_t j = VeriBlock::isPopTx(tx) ? 1 : 0;
+                 j < tx.vin.size(); j++) {
                 prevheights[j] = view.AccessCoin(tx.vin[j].prevout).nHeight;
             }
 

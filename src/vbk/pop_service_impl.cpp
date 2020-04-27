@@ -169,11 +169,15 @@ bool PopServiceImpl::validatePopTx(const CTransaction& tx, TxValidationState& st
 {
     // validate input
     {
-        if (tx.vin.size() != 1) {
-            return state.Invalid(TxValidationResult::TX_CONSENSUS, "bad-pop-vin-not-single", strprintf("Expected 1 input, got %d", tx.vin.size()));
+        if (tx.vin.size() != 1 && tx.vin.size() != 2) {
+            return state.Invalid(TxValidationResult::TX_CONSENSUS, "bad-pop-vin-count", strprintf("Expected 1 or 2 inputs, got %d", tx.vin.size()));
         }
         if (!validatePopTxInput(tx.vin[0], state)) {
             return false; // reason already set by ValidatePopTxInput
+        }
+        // the second input must point to a real output
+        if (tx.vin.size() == 2 && tx.vin[1].prevout.IsNull()) {
+                return state.Invalid(TxValidationResult::TX_CONSENSUS, "bad-txns-prevout-null");
         }
     }
 
@@ -206,11 +210,19 @@ bool PopServiceImpl::validatePopTxInput(const CTxIn& in, TxValidationState& stat
 
 bool PopServiceImpl::validatePopTxOutput(const CTxOut& out, TxValidationState& state)
 {
-    if (out.scriptPubKey.size() != 1) {
-        return state.Invalid(TxValidationResult::TX_CONSENSUS, "bad-pop-out-scriptpubkey-not-single");
-    }
-    if (out.scriptPubKey[0] != OP_RETURN) {
-        return state.Invalid(TxValidationResult::TX_CONSENSUS, "bad-pop-out-scriptpubkey-unexpected");
+    // a real pop output used for chaining pop transactions
+    if (out.scriptPubKey.size() == 0) {
+        if(out.nValue != 0) {
+            return state.Invalid(TxValidationResult::TX_CONSENSUS, "bad-pop-out-vout-negative");
+        }
+    } else {
+        // an OP_RETURN output
+        if (out.scriptPubKey.size() != 1) {
+            return state.Invalid(TxValidationResult::TX_CONSENSUS, "bad-pop-out-scriptpubkey-not-single");
+        }
+        if (out.scriptPubKey[0] != OP_RETURN) {
+            return state.Invalid(TxValidationResult::TX_CONSENSUS, "bad-pop-out-scriptpubkey-unexpected");
+        }
     }
     return true;
 }
@@ -474,29 +486,32 @@ bool parseTxPopPayloadsImpl(const CTransaction& tx, const Consensus::Params& par
             "[" + txhash.ToString() + "] scriptSig of POP tx is invalid: " + ScriptErrorString(serror) + ", " + instate.GetPath() + ", " + instate.GetDebugMessage());
     }
 
-    const altintegration::PublicationData& publicationData = payloads.atv.transaction.publicationData;
+    if (payloads.hasAtv) {
+        const altintegration::PublicationData& publicationData = payloads.atv.transaction.publicationData;
 
-    CBlockHeader endorsedHeader;
+        CBlockHeader endorsedHeader;
 
-    // parse endorsed header
-    try {
-        endorsedHeader = headerFromBytes(publicationData.header);
-    } catch (const std::exception& e) {
-        return state.Invalid(TxValidationResult::TX_BAD_POP_DATA, "pop-tx-alt-block-invalid", "[" + txhash.ToString() + "] can't deserialize endorsed block header: " + e.what());
-    }
+        // parse endorsed header
+        try {
+            endorsedHeader = headerFromBytes(publicationData.header);
+        } catch (const std::exception& e) {
+            return state.Invalid(TxValidationResult::TX_BAD_POP_DATA, "pop-tx-alt-block-invalid", "[" + txhash.ToString() + "] can't deserialize endorsed block header: " + e.what());
+        }
 
-    // set endorsed header
-    AssertLockHeld(cs_main);
-    CBlockIndex* endorsedIndex = LookupBlockIndex(endorsedHeader.GetHash());
-    if (!endorsedIndex) {
-        return state.Invalid(
-            TxValidationResult::TX_BAD_POP_DATA,
-            "pop-tx-endorsed-block-missing",
-            "[ " + txhash.ToString() + "]: endorsed block " + endorsedHeader.GetHash().ToString() + " is missing");
+        // set endorsed header
+        AssertLockHeld(cs_main);
+        CBlockIndex* endorsedIndex = LookupBlockIndex(endorsedHeader.GetHash());
+        if (!endorsedIndex) {
+            return state.Invalid(
+                TxValidationResult::TX_BAD_POP_DATA,
+                "pop-tx-endorsed-block-missing",
+                "[ " + txhash.ToString() + "]: endorsed block " + endorsedHeader.GetHash().ToString() + " is missing");
+        }
+        payloads.endorsed = blockToAltBlock(*endorsedIndex);
     }
 
     payloads.containingTx = altintegration::uint256(txhash.asVector());
-    payloads.endorsed = blockToAltBlock(*endorsedIndex);
+
 
     return true;
 }

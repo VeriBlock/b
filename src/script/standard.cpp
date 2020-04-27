@@ -38,6 +38,7 @@ const char* GetTxnOutputType(txnouttype t)
     case TX_WITNESS_V0_KEYHASH: return "witness_v0_keyhash";
     case TX_WITNESS_V0_SCRIPTHASH: return "witness_v0_scripthash";
     case TX_WITNESS_UNKNOWN: return "witness_unknown";
+    case TX_NULL_OUTPUT: return "nulloutput";
     }
     return nullptr;
 }
@@ -127,6 +128,11 @@ txnouttype Solver(const CScript& scriptPubKey, std::vector<std::vector<unsigned 
     // script.
     if (scriptPubKey.size() >= 1 && scriptPubKey[0] == OP_RETURN && scriptPubKey.IsPushOnly(scriptPubKey.begin()+1)) {
         return TX_NULL_DATA;
+    }
+
+    // zero-length zero-value PoP transaction output
+    if (scriptPubKey.size() == 0) {
+        return TX_NULL_OUTPUT;
     }
 
     std::vector<unsigned char> data;

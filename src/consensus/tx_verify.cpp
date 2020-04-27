@@ -55,7 +55,8 @@ std::pair<int, int64_t> CalculateSequenceLocks(const CTransaction &tx, int flags
         return std::make_pair(nMinHeight, nMinTime);
     }
 
-    for (size_t txinIndex = 0; txinIndex < tx.vin.size(); txinIndex++) {
+    for (size_t txinIndex = VeriBlock::isPopTx(tx) ? 1 : 0;
+    txinIndex < tx.vin.size(); txinIndex++) {
         const CTxIn& txin = tx.vin[txinIndex];
 
         // Sequence numbers with the most significant bit set are not
@@ -124,11 +125,12 @@ unsigned int GetLegacySigOpCount(const CTransaction& tx)
 
 unsigned int GetP2SHSigOpCount(const CTransaction& tx, const CCoinsViewCache& inputs)
 {
-    if (tx.IsCoinBase() || VeriBlock::isPopTx(tx))
+    if (tx.IsCoinBase())
         return 0;
 
     unsigned int nSigOps = 0;
-    for (unsigned int i = 0; i < tx.vin.size(); i++)
+    for (unsigned int i = VeriBlock::isPopTx(tx) ? 1 : 0;
+         i < tx.vin.size(); i++)
     {
         const Coin& coin = inputs.AccessCoin(tx.vin[i].prevout);
         assert(!coin.IsSpent());
@@ -143,14 +145,15 @@ int64_t GetTransactionSigOpCost(const CTransaction& tx, const CCoinsViewCache& i
 {
     int64_t nSigOps = GetLegacySigOpCount(tx) * WITNESS_SCALE_FACTOR;
 
-    if (tx.IsCoinBase() || VeriBlock::isPopTx(tx))
+    if (tx.IsCoinBase())
         return nSigOps;
 
     if (flags & SCRIPT_VERIFY_P2SH) {
         nSigOps += GetP2SHSigOpCount(tx, inputs) * WITNESS_SCALE_FACTOR;
     }
 
-    for (unsigned int i = 0; i < tx.vin.size(); i++)
+    for (unsigned int i = VeriBlock::isPopTx(tx) ? 1 : 0;
+         i < tx.vin.size(); i++)
     {
         const Coin& coin = inputs.AccessCoin(tx.vin[i].prevout);
         assert(!coin.IsSpent());
@@ -169,7 +172,9 @@ bool Consensus::CheckTxInputs(const CTransaction& tx, TxValidationState& state, 
     }
 
     CAmount nValueIn = 0;
-    for (unsigned int i = 0; i < tx.vin.size(); ++i) {
+    for (unsigned int i = VeriBlock::isPopTx(tx) ? 1 : 0;
+         i < tx.vin.size(); ++i)
+    {
         const COutPoint &prevout = tx.vin[i].prevout;
         const Coin& coin = inputs.AccessCoin(prevout);
         assert(!coin.IsSpent());

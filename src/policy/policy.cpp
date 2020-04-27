@@ -175,10 +175,8 @@ bool AreInputsStandard(const CTransaction& tx, const CCoinsViewCache& mapInputs)
     if (tx.IsCoinBase())
         return true; // Coinbases don't use vin normally
 
-    if (VeriBlock::isPopTx(tx))
-        return true; // VBK POP tx doesn't have a linked preout, not spending anything.
-
-    for (unsigned int i = 0; i < tx.vin.size(); i++)
+    for (unsigned int i = VeriBlock::isPopTx(tx) ? 1 : 0;
+         i < tx.vin.size(); i++)
     {
         const CTxOut& prev = mapInputs.AccessCoin(tx.vin[i].prevout).out;
 

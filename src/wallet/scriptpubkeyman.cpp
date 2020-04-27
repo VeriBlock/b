@@ -82,6 +82,7 @@ IsMineResult IsMineInner(const LegacyScriptPubKeyMan& keystore, const CScript& s
     {
     case TX_NONSTANDARD:
     case TX_NULL_DATA:
+    case TX_NULL_OUTPUT:
     case TX_WITNESS_UNKNOWN:
         break;
     case TX_PUBKEY:

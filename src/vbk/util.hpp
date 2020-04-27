@@ -35,8 +35,8 @@ inline bool isVBKNoInput(const COutPoint& out) noexcept
 
 inline bool isPopTx(const CTransaction& tx) noexcept
 {
-    // pop tx has 1 input
-    if (tx.vin.size() != 1) {
+    // pop tx has 1 or 2 inputs
+    if (tx.vin.size() != 1 && tx.vin.size() != 2) {
         return false;
     }
 
@@ -58,10 +58,13 @@ inline bool isPopTx(const CTransaction& tx) noexcept
     }
 
     auto& out = tx.vout[0];
-
-    // size of scriptsig is 1 operator, and it is OP_RETURN
     auto& script = out.scriptPubKey;
-    return script.size() == 1 && script[0] == OP_RETURN;
+
+    // the size of scriptSig is 1 operator, and it is OP_RETURN
+    // or the scriptSig is empty and the output has zero value
+
+    return (script.size() == 1 && script[0] == OP_RETURN)
+        || (script.size() == 0 && out.nValue == 0);
 }
 
 inline size_t RegularTxesTotalSize(const std::vector<CTransactionRef>& vtx)
