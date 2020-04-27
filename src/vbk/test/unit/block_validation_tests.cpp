@@ -1,26 +1,33 @@
-//#include <boost/test/unit_test.hpp>
-//#include <chainparams.h>
-//#include <consensus/validation.h>
-//#include <test/util/setup_common.h>
-//#include <validation.h>
-//
-//#include <vbk/config.hpp>
-//#include <vbk/init.hpp>
-//#include <vbk/pop_service.hpp>
-//#include <vbk/service_locator.hpp>
-//#include <vbk/test/util/tx.hpp>
-//#include <vbk/test/util/mock.hpp>
-//
-//#include <string>
-//#include <gmock/gmock.h>
-//
-//using ::testing::Return;
-//
-//inline std::vector<uint8_t> operator""_v(const char* s, size_t size)
-//{
-//    return std::vector<uint8_t>{s, s + size};
-//}
-//
+// VeriBlock Blockchain Project
+// Copyright 2017-2018 VeriBlock, Inc
+// Copyright 2018-2019 Xenios SEZC
+// All rights reserved.
+// https://www.veriblock.org
+// Distributed under the MIT software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
+#include <boost/test/unit_test.hpp>
+#include <chainparams.h>
+#include <consensus/validation.h>
+#include <test/util/setup_common.h>
+#include <validation.h>
+
+#include <vbk/config.hpp>
+#include <vbk/init.hpp>
+#include <vbk/pop_service.hpp>
+#include <vbk/service_locator.hpp>
+#include <vbk/test/util/tx.hpp>
+#include <vbk/test/util/mock.hpp>
+
+#include <string>
+#include <gmock/gmock.h>
+
+using ::testing::Return;
+
+inline std::vector<uint8_t> operator""_v(const char* s, size_t size)
+{
+    return std::vector<uint8_t>{s, s + size};
+}
+
 //struct BlockValidationFixture : public TestChain100Setup {
 //    testing::NiceMock<VeriBlockTest::PopServiceImplMock> pop_impl_mock;
 //
@@ -109,4 +116,5 @@
 //    BOOST_CHECK(*block.vtx[2] == CTransaction(pubtx));
 //}
 //
-//BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE_END()

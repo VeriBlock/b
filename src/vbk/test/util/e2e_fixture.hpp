@@ -1,3 +1,7 @@
+// Copyright (c) 2019-2020 Xenios SEZC
+// https://www.veriblock.org
+// Distributed under the MIT software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #ifndef BITCOIN_SRC_VBK_TEST_UTIL_E2E_FIXTURE_HPP
 #define BITCOIN_SRC_VBK_TEST_UTIL_E2E_FIXTURE_HPP
 
@@ -7,7 +11,7 @@
 #include <chain.h>
 #include <test/util/setup_common.h>
 #include <validation.h>
-//#include <vbk/util.hpp>
+#include <vbk/util.hpp>
 #include <veriblock/alt-util.hpp>
 #include <veriblock/mock_miner.hpp>
 
@@ -59,7 +63,6 @@ struct E2eFixture : public TestChain100Setup {
             return endorseVbkTip();
         });
         auto atv = endorseAltBlock(hash, prevBlock, vtbs);
-
         CScript sig;
         sig << atv.toVbkEncoding() << OP_CHECKATV;
         for (const auto& v : vtbs) {
@@ -141,5 +144,3 @@ struct E2eFixture : public TestChain100Setup {
         return p;
     }
 };
-
-#endif //BITCOIN_SRC_VBK_TEST_UTIL_E2E_FIXTURE_HPP
