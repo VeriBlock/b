@@ -41,6 +41,18 @@ BOOST_FIXTURE_TEST_CASE(No_mempool_for_bad_payloads_pop_tx_test, E2eFixture)
 
 BOOST_FIXTURE_TEST_CASE(Payloads_expiration_pop_tx_test, E2eFixture)
 {
+    // Generate a 500-block chain:
+    coinbaseKey.MakeNewKey(true);
+    CScript scriptPubKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
+    for (int i = 0; i < 400; i++) {
+        std::vector<CMutableTransaction> noTxns;
+        CBlock b = CreateAndProcessBlock(noTxns, scriptPubKey);
+        m_coinbase_txns.push_back(b.vtx[0]);
+    }
+
+    assert(ChainActive().Tip() != nullptr);
+    assert(ChainActive().Tip()->nHeight == 500);
+
     unsigned int initialPoolSize = mempool.size();
     auto tip = ChainActive().Tip();
     BOOST_CHECK(tip != nullptr);
@@ -59,8 +71,27 @@ BOOST_FIXTURE_TEST_CASE(Payloads_expiration_pop_tx_test, E2eFixture)
         auto result = AcceptToMemoryPool(mempool, state, tx_ref,
             nullptr /* plTxnReplaced */, false /* bypass_limits */, 0 /* nAbsurdFee */, false /* test accept */);
         BOOST_CHECK(result);
+        BOOST_CHECK_EQUAL(mempool.size(), initialPoolSize + 1);
+        mempool.clear();
     }
-    BOOST_CHECK_EQUAL(mempool.size(), initialPoolSize + 1);
+
+    atv = endorseAltBlock(tip->GetAncestor(40)->GetBlockHash(), tip->GetAncestor(40)->pprev->GetBlockHash(), {});
+    sig.clear();
+    sig << atv.toVbkEncoding() << OP_CHECKATV;
+    sig << OP_CHECKPOP;
+    popTx = VeriBlock::MakePopTx(sig);
+
+    BOOST_CHECK(VeriBlock::isPopTx(CTransaction(popTx)));
+
+    tx_ref = MakeTransactionRef<const CMutableTransaction&>(popTx);
+    {
+        LOCK(cs_main);
+        auto result = AcceptToMemoryPool(mempool, state, tx_ref,
+            nullptr /* plTxnReplaced */, false /* bypass_limits */, 0 /* nAbsurdFee */, false /* test accept */);
+        BOOST_CHECK(!result);
+        BOOST_CHECK_EQUAL(mempool.size(), initialPoolSize);
+        mempool.clear();
+    }
 }
 
 //
