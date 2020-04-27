@@ -1,16 +1,22 @@
-//#include <boost/test/unit_test.hpp>
-//#include <chainparams.h>
-//#include <consensus/validation.h>
-//#include <test/util/setup_common.h>
-//#include <validation.h>
-//
-//#include <vbk/config.hpp>
-//#include <vbk/pop_service.hpp>
-//#include <vbk/service_locator.hpp>
-//#include <vbk/test/util/mock.hpp>
-//#include <vbk/test/util/tx.hpp>
-//
-//
+// VeriBlock Blockchain Project
+// Copyright 2017-2018 VeriBlock, Inc
+// Copyright 2018-2019 Xenios SEZC
+// All rights reserved.
+// https://www.veriblock.org
+// Distributed under the MIT software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
+#include <boost/test/unit_test.hpp>
+#include <chainparams.h>
+#include <consensus/validation.h>
+#include <test/util/setup_common.h>
+#include <validation.h>
+
+#include <vbk/config.hpp>
+#include <vbk/pop_service.hpp>
+#include <vbk/service_locator.hpp>
+#include <vbk/test/util/mock.hpp>
+#include <vbk/test/util/tx.hpp>
+
 //static CBlock CreateTestBlock(TestChain100Setup& test, std::vector<CMutableTransaction> trxs = {})
 //{
 //    test.coinbaseKey.MakeNewKey(true);

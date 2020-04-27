@@ -1,35 +1,42 @@
-//#include <boost/test/unit_test.hpp>
-//#include <consensus/validation.h>
-//#include <script/interpreter.h>
-//#include <string>
-//#include <test/util/setup_common.h>
-//#include <validation.h>
-//#include <vbk/config.hpp>
-//#include <vbk/init.hpp>
-//#include <vbk/pop_service.hpp>
-//#include <vbk/service_locator.hpp>
-//#include <vbk/test/util/mock.hpp>
-//#include <vbk/test/util/tx.hpp>
-//#include <vbk/util.hpp>
-//#include <vbk/pop_service_impl.hpp>
-//
-//#include <gmock/gmock.h>
-//
-//using ::testing::Return;
-//
-//BOOST_AUTO_TEST_SUITE(pop_interpreter_tests)
-//
-//template <typename Stream>
-//Stream& operator<<(Stream&& s, std::string data)
-//{
-//    return s << std::vector<uint8_t>{data.begin(), data.end()};
-//}
-//
-//inline std::vector<uint8_t> operator""_v(const char* c, size_t s)
-//{
-//    return std::vector<uint8_t>{c, c + s};
-//}
-//
+// VeriBlock Blockchain Project
+// Copyright 2017-2018 VeriBlock, Inc
+// Copyright 2018-2019 Xenios SEZC
+// All rights reserved.
+// https://www.veriblock.org
+// Distributed under the MIT software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
+#include <boost/test/unit_test.hpp>
+#include <consensus/validation.h>
+#include <script/interpreter.h>
+#include <string>
+#include <test/util/setup_common.h>
+#include <validation.h>
+#include <vbk/config.hpp>
+#include <vbk/init.hpp>
+#include <vbk/pop_service.hpp>
+#include <vbk/service_locator.hpp>
+#include <vbk/test/util/mock.hpp>
+#include <vbk/test/util/tx.hpp>
+#include <vbk/util.hpp>
+#include <vbk/pop_service_impl.hpp>
+
+#include <gmock/gmock.h>
+
+using ::testing::Return;
+
+BOOST_AUTO_TEST_SUITE(pop_interpreter_tests)
+
+template <typename Stream>
+Stream& operator<<(Stream&& s, std::string data)
+{
+    return s << std::vector<uint8_t>{data.begin(), data.end()};
+}
+
+inline std::vector<uint8_t> operator""_v(const char* c, size_t s)
+{
+    return std::vector<uint8_t>{c, c + s};
+}
+
 //struct EvalScriptFixture {
 //    static std::string str(const std::vector<uint8_t>& v)
 //    {
@@ -202,6 +209,5 @@
 //    BOOST_CHECK(!util.EvalScript(script, stack, &serror, nullptr, nullptr, nullptr, false));
 //    BOOST_CHECK(serror == SCRIPT_ERR_PUSH_SIZE);
 //}
-//
-//
-//BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE_END()
