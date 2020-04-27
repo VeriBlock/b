@@ -15,6 +15,7 @@
 #include <key_io.h>
 #include <rpc/server.h>
 #include <rpc/util.h>
+#include <index/txindex.h>
 #include <util/validation.h>
 #include <validation.h>
 #include <wallet/rpcwallet.h>
@@ -35,12 +36,11 @@ UniValue createPopTx(const CScript& scriptSig)
     if (!::mempool.exists(hashTx)) {
         TxValidationState state;
         auto tx_ref = MakeTransactionRef<const CMutableTransaction&>(tx);
-
         auto result = AcceptToMemoryPool(mempool, state, tx_ref,
             nullptr /* plTxnReplaced */, false /* bypass_limits */, 0 /* nAbsurdFee */, false /* test accept */);
         if (result) {
             std::string err;
-            if(!g_rpc_chain->broadcastTransaction(tx_ref, err, 0, true)){
+            if(g_rpc_chain && !g_rpc_chain->broadcastTransaction(tx_ref, err, 0, true)){
                 throw JSONRPCError(RPC_TRANSACTION_ERROR, err);
             }
 //            RelayTransaction(hashTx, *this->connman);
@@ -108,18 +108,9 @@ UniValue getpopdata(const JSONRPCRequest& request)
             "\nExamples:\n" +
             HelpExampleCli("getpopdata", "1000") + HelpExampleRpc("getpopdata", "1000"));
 
-    auto wallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(wallet.get(), request.fHelp)) {
-        return NullUniValue;
-    }
-
-    // Make sure the results are valid at least up to the most recent block
-    // the user could have gotten from another RPC command prior to now
-    wallet->BlockUntilSyncedToCurrentChain();
-
     int height = request.params[0].get_int();
 
-    LOCK2(cs_main, wallet->cs_wallet);
+    LOCK(cs_main);
 
     uint256 blockhash = GetBlockHashByHeight(height);
 
@@ -130,6 +121,15 @@ UniValue getpopdata(const JSONRPCRequest& request)
 
     if (!pBlockIndex) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
+    }
+
+    bool txindexReady = false;
+    if (g_txindex) {
+        txindexReady = g_txindex->BlockUntilSyncedToCurrentChain();
+    }
+
+    if(!txindexReady) {
+        throw JSONRPCError(RPC_MISC_ERROR, "Blockchain transactions are still in the process of being indexed");
     }
 
     CDataStream ssBlock(SER_NETWORK, PROTOCOL_VERSION);
@@ -180,11 +180,14 @@ UniValue submitpop(const JSONRPCRequest& request)
 
     RPCTypeCheck(request.params, {UniValue::VSTR, UniValue::VARR});
 
-    auto wallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(wallet.get(), request.fHelp)) {
-        return NullUniValue;
-    }
-    wallet->BlockUntilSyncedToCurrentChain();
+//     bool txindexReady = false;
+//     if (g_txindex) {
+//         txindexReady = g_txindex->BlockUntilSyncedToCurrentChain();
+//     }
+//
+//     if(!txindexReady) {
+//         throw JSONRPCError(RPC_MISC_ERROR, "Blockchain transactions are still in the process of being indexed");
+//     }
 
     auto& config = VeriBlock::getService<VeriBlock::Config>();
     UniValue popTxs(UniValue::VARR);
