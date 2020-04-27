@@ -116,5 +116,4 @@ inline std::vector<uint8_t> operator""_v(const char* s, size_t size)
 //    BOOST_CHECK(*block.vtx[2] == CTransaction(pubtx));
 //}
 //
-
-BOOST_AUTO_TEST_SUITE_END()
+//BOOST_AUTO_TEST_SUITE_END()

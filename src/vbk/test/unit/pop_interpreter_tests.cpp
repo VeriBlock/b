@@ -209,7 +209,5 @@ inline std::vector<uint8_t> operator""_v(const char* c, size_t s)
 //    BOOST_CHECK(!util.EvalScript(script, stack, &serror, nullptr, nullptr, nullptr, false));
 //    BOOST_CHECK(serror == SCRIPT_ERR_PUSH_SIZE);
 //}
-//
-//
 
 BOOST_AUTO_TEST_SUITE_END()
