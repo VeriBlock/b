@@ -19,7 +19,7 @@ To Build
 
 ```bash
 ./autogen.sh
-./configure
+./configure --disable-gmock
 make
 make install # optional
 ```
@@ -31,10 +31,11 @@ Dependencies
 
 These dependencies are required:
 
- Library     | Purpose          | Description
- ------------|------------------|----------------------
- libboost    | Utility          | Library for threading, data structures, etc
- libevent    | Networking       | OS independent asynchronous networking
+ Library               | Purpose          | Description
+ ----------------------|------------------|----------------------
+ alt-integration-cpp   | Utility          | Library for VeriBlock PoP Integration
+ libboost              | Utility          | Library for threading, data structures, etc
+ libevent              | Networking       | OS independent asynchronous networking
 
 Optional dependencies:
 
@@ -81,6 +82,19 @@ Build requirements:
 Now, you can either build from self-compiled [depends](/depends/README.md) or install the required dependencies:
 
     sudo apt-get install libevent-dev libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-test-dev libboost-thread-dev
+
+alt-integration-cpp is required.
+    
+    ```export ALTINTEGRATION_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/altintegration.mk | head -n1)"
+    cd opt;
+    wget https://github.com/VeriBlock/alt-integration-cpp/archive/${ALTINTEGRATION_VERSION}.tar.gz;
+    tar -xf ${ALTINTEGRATION_VERSION}.tar.gz;
+    cd alt-integration-cpp-${ALTINTEGRATION_VERSION};
+    mkdir build;
+    cd build;
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_ROCKSDB=OFF;
+    make -j2;
+    sudo make install```
 
 BerkeleyDB is required for the wallet.
 
