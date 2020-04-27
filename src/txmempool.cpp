@@ -946,6 +946,26 @@ int CTxMemPool::Expire(std::chrono::seconds time)
     return stage.size();
 }
 
+int CTxMemPool::ExpirePop()
+{
+    AssertLockHeld(cs);
+    indexed_transaction_set::index<entry_time>::type::iterator it = mapTx.get<entry_time>().begin();
+    setEntries toremove;
+    auto tipHeight = ChainActive().Tip()->nHeight;
+    auto& config = VeriBlock::getService<VeriBlock::Config>();
+    while (it != mapTx.get<entry_time>().end() && VeriBlock::isPopTx(it->GetTx())) {
+        if (it->GetHeight() + config.POP_REWARD_SETTLEMENT_INTERVAL >= tipHeight) continue;
+        toremove.insert(mapTx.project<0>(it));
+        it++;
+    }
+    setEntries stage;
+    for (txiter removeit : toremove) {
+        CalculateDescendants(removeit, stage);
+    }
+    RemoveStaged(stage, false, MemPoolRemovalReason::EXPIRY);
+    return stage.size();
+}
+
 void CTxMemPool::addUnchecked(const CTxMemPoolEntry &entry, bool validFeeEstimate)
 {
     setEntries setAncestors;

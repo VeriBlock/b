@@ -32,6 +32,30 @@ BOOST_FIXTURE_TEST_CASE(No_mempool_for_bad_payloads_pop_tx_test, E2eFixture)
     BOOST_CHECK_EQUAL(mempool.size(), initialPoolSize);
 }
 
+BOOST_FIXTURE_TEST_CASE(Payloads_expiration_pop_tx_test, E2eFixture)
+{
+    unsigned int initialPoolSize = mempool.size();
+    auto tip = ChainActive().Tip();
+    BOOST_CHECK(tip != nullptr);
+    auto atv = endorseAltBlock(tip->GetBlockHash(), tip->pprev->GetBlockHash(), {});
+    CScript sig;
+    sig << atv.toVbkEncoding() << OP_CHECKATV;
+    sig << OP_CHECKPOP;
+    auto popTx = VeriBlock::MakePopTx(sig);
+
+    BOOST_CHECK(VeriBlock::isPopTx(CTransaction(popTx)));
+
+    TxValidationState state;
+    auto tx_ref = MakeTransactionRef<const CMutableTransaction&>(popTx);
+    {
+        LOCK(cs_main);
+        auto result = AcceptToMemoryPool(mempool, state, tx_ref,
+            nullptr /* plTxnReplaced */, false /* bypass_limits */, 0 /* nAbsurdFee */, false /* test accept */);
+        BOOST_CHECK(result);
+    }
+    BOOST_CHECK_EQUAL(mempool.size(), initialPoolSize + 1);
+}
+
 //
 //BOOST_FIXTURE_TEST_CASE(DisconnectBlock_restore_iputs_ignore_pop_tx_test, TestChain100Setup)
 //{
