@@ -9,7 +9,10 @@
 
 #include <bootstraps.h>
 #include <chain.h>
+#include <miner.h>
 #include <test/util/setup_common.h>
+#include <rpc/request.h>
+#include <rpc/server.h>
 #include <validation.h>
 #include <vbk/util.hpp>
 #include <veriblock/alt-util.hpp>
@@ -176,6 +179,73 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
     // endorse block that is not on main chain
     block = endorseAltBlock(fork1tip.GetHash(), 1);
     BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == lastHash);
+}
+
+BOOST_FIXTURE_TEST_CASE(LargePoPTxIsSplit, E2eFixture)
+{
+    constexpr auto vtbCount = 3;
+    std::vector<VTB> vtbs;
+    vtbs.reserve(vtbCount);
+    std::generate_n(std::back_inserter(vtbs), vtbCount, [&]() {
+        return endorseVbkTip();
+    });
+
+    auto tip = ChainActive().Tip();
+    BOOST_CHECK_NE(tip, nullptr);
+    auto endorsed = tip;
+
+    auto publicationData = createPublicationData(endorsed);
+    auto vbkTx = popminer.endorseAltBlock(publicationData);
+    auto atv = popminer.generateATV(vbkTx, getLastKnownVBKblock(), state);
+    BOOST_CHECK(state.IsValid());
+
+    CScript script;
+    script << vtbs[0].toVbkEncoding() << OP_CHECKVTB
+           << vtbs[1].toVbkEncoding() << OP_CHECKVTB
+           << vtbs[2].toVbkEncoding() << OP_CHECKVTB << OP_CHECKPOP;
+    auto max_weight = 20 // a small random value
+                    + ::GetSerializeSize(VeriBlock::MakePopTx(script),
+                                         PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS);
+
+    VeriBlock::getService<VeriBlock::Config>().max_pop_tx_weight = max_weight;
+
+    JSONRPCRequest request;
+    request.strMethod = "submitpop";
+    request.params = UniValue(UniValue::VARR);
+    request.fHelp = false;
+
+    UniValue vtbArray(UniValue::VARR);
+    for (const auto &vtb : vtbs) {
+        vtbArray.push_back(HexStr(vtb.toVbkEncoding()));
+    }
+
+    request.params.push_back(HexStr(atv.toVbkEncoding()));
+    request.params.push_back(vtbArray);
+
+    if (RPCIsInWarmup(nullptr)) SetRPCWarmupFinished();
+
+    UniValue result;
+    try {
+        result = tableRPC.execute(request);
+    } catch( const UniValue &e) {
+        std::cerr<<find_value(e, "code").get_int()<<" "<< find_value(e, "message").get_str()<<std::endl;
+        throw;
+    };
+    BOOST_CHECK(result.isArray());
+
+    constexpr auto expectedTransactionCount = 2;
+
+    //check that submitpop creates multiple transactions
+    BOOST_CHECK_EQUAL(result.get_array().size(), expectedTransactionCount);
+    auto resultArray = result.get_array();
+    for (auto i = 0u; i < resultArray.size(); i++)
+        std::cerr<<resultArray[i].get_str()<<std::endl;
+    BOOST_CHECK_EQUAL(mempool.size(), expectedTransactionCount);
+
+    // check that the created transactions are successfully added to a block
+    // FIXME: doesn't yet happen
+//    auto &block = BlockAssembler(Params()).CreateNewBlock(cbKey)->block;
+//    BOOST_CHECK_EQUAL(block.vtx.size(), expectedTransactionCount + 1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
