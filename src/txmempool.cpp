@@ -12,6 +12,7 @@
 #include <consensus/validation.h>
 #include <optional.h>
 #include <validation.h>
+#include <chainparams.h>
 #include <policy/policy.h>
 #include <policy/fees.h>
 #include <policy/settings.h>
@@ -21,6 +22,7 @@
 #include <util/time.h>
 #include <validationinterface.h>
 
+#include <vbk/pop_service_impl.hpp>
 #include <vbk/util.hpp>
 
 CTxMemPoolEntry::CTxMemPoolEntry(const CTransactionRef& _tx, const CAmount& _nFee,
@@ -956,8 +958,12 @@ int CTxMemPool::ExpirePop()
     auto tipHeight = ChainActive().Tip()->nHeight;
     auto& config = VeriBlock::getService<VeriBlock::Config>();
     while (it != mapTx.get<entry_time>().end() && VeriBlock::isPopTx(it->GetTx())) {
-        if (it->GetHeight() + config.POP_REWARD_SETTLEMENT_INTERVAL >= tipHeight) continue;
-        toremove.insert(mapTx.project<0>(it));
+        TxValidationState state;
+        altintegration::AltPayloads payloads;
+        bool ret = VeriBlock::parseTxPopPayloadsImpl(it->GetTx(), Params().GetConsensus(), state, payloads);
+        if (ret && (payloads.endorsed.height + config.POP_REWARD_SETTLEMENT_INTERVAL < tipHeight)) {
+            toremove.insert(mapTx.project<0>(it));
+        }
         it++;
     }
     setEntries stage;
