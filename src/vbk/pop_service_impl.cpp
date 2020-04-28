@@ -129,8 +129,31 @@ bool PopServiceImpl::checkCoinbaseTxWithPopRewards(const CTransaction& tx, const
 
 PoPRewards PopServiceImpl::getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams)
 {
+    auto& config = getService<Config>();
+    if (pindexPrev.nHeight < config.popconfig.alt->getRewardParams().rewardSettlementInterval()) return {};
+    auto state = altintegration::ValidationState();
+    auto rewards = altTree->getPopPayout(pindexPrev.GetBlockHash().asVector(), state);
+    if (state.IsError()) {
+        throw std::logic_error(state.GetDebugMessage());
+    }
+
+    int halvings = (pindexPrev.nHeight + 1) / consensusParams.nSubsidyHalvingInterval;
+    PoPRewards btcRewards{};
+    //erase rewards, that pay 0 satoshis and halve rewards
+    for (auto it = rewards.begin(), end = rewards.end(); it != end;) {
+        auto rewardValue = it->second;
+        rewardValue >>= halvings;
+        if ((rewardValue != 0) && (halvings < 64)) {
+            CScript key = CScript(it->first.begin(), it->first.end());
+            btcRewards[key] = rewardValue;
+        }
+        ++it;
+    }
+    
+    return btcRewards;
+
     // TODO: implement
-    return {};
+    //return {};
     //    int halvings = (pindexPrev.nHeight + 1) / consensusParams.nSubsidyHalvingInterval;
     //
     //    PoPRewards rewards;

@@ -6,24 +6,11 @@
 // Distributed under the MIT software license, see the accompanying
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include <boost/test/unit_test.hpp>
-#include <chainparams.h>
-#include <interfaces/chain.h>
-#include <script/interpreter.h>
-#include <test/util/setup_common.h>
-#include <validation.h>
-#include <wallet/wallet.h>
-
-#include <vbk/config.hpp>
+#include <vbk/test/util/e2e_fixture.hpp>
+#include <vbk/test/util/tx.hpp>
 #include <vbk/pop_service_impl.hpp>
-#include <vbk/service_locator.hpp>
-#include <vbk/test/util/mock.hpp>
 
-#include <gmock/gmock.h>
-
-using ::testing::Return;
-
-struct PopRewardsTestFixture : public TestChain100Setup {
-
+struct PopRewardsTestFixture : public E2eFixture {
 };
 
 BOOST_AUTO_TEST_SUITE(pop_reward_tests)
@@ -42,6 +29,39 @@ static VeriBlock::PoPRewards getRewards()
     rewards[payout4] = 56;
 
     return rewards;
+}
+
+BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
+{
+    auto tip = ChainActive().Tip();
+    BOOST_CHECK(tip != nullptr);
+    CBlock block = endorseAltBlockAndMine(tip->GetAncestor(0)->GetBlockHash(), 0);
+    {
+        BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == block.GetHash());
+    }
+
+     // Generate a 400-block chain:
+    CScript scriptPubKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
+    int rewardInterval = (int)VeriBlock::getService<VeriBlock::Config>().popconfig.alt->getRewardParams().rewardSettlementInterval();
+    // we already have 101 blocks
+    // do not add block with rewards
+    for (int i = 0; i < (rewardInterval - 102); i++) {
+        std::vector<CMutableTransaction> noTxns;
+        CBlock b = CreateAndProcessBlock(noTxns, scriptPubKey);
+        m_coinbase_txns.push_back(b.vtx[0]);
+    }
+
+    CBlock payoutBlock = CreateAndProcessBlock({}, scriptPubKey);
+
+    BOOST_CHECK(ChainActive().Tip() != nullptr);
+    BOOST_CHECK(ChainActive().Tip()->nHeight == rewardInterval);
+
+    int n = 0;
+    for (const auto& out : payoutBlock.vtx[0]->vout) {
+        if (out.nValue > 0) n++;
+    }
+
+    BOOST_CHECK(n > 1);
 }
 
 //BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)

@@ -34,7 +34,7 @@ struct E2eFixture : public TestChain100Setup {
         pop = &VeriBlock::getService<VeriBlock::PopService>();
     }
 
-    ATV endorseAltBlock(uint256 hash, uint256 prevBlock, const std::vector<VTB>& vtbs)
+    ATV endorseAltBlock(uint256 hash, const std::vector<VTB>& vtbs)
     {
         CBlockIndex* endorsed = nullptr;
         {
@@ -62,7 +62,7 @@ struct E2eFixture : public TestChain100Setup {
         std::generate_n(std::back_inserter(vtbs), generateVtbs, [&]() {
             return endorseVbkTip();
         });
-        auto atv = endorseAltBlock(hash, prevBlock, vtbs);
+        auto atv = endorseAltBlock(hash, vtbs);
         CScript sig;
         sig << atv.toVbkEncoding() << OP_CHECKATV;
         for (const auto& v : vtbs) {
