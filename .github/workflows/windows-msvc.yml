@@ -79,7 +79,7 @@ jobs:
       - name: Build
         run: msbuild build_msvc\bitcoin.sln /m /v:n /p:Configuration=Release
       - name: Run test_bitcoin
-        if: succeed()
+        if: success()
         shell: cmd
         run: src\test_bitcoin.exe -k stdout -e stdout 2> NUL
       - name: bitcoin-util-test
