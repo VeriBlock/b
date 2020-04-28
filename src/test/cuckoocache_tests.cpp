@@ -29,18 +29,18 @@ BOOST_AUTO_TEST_SUITE(cuckoocache_tests);
  * There are no repeats in the first 200000 insecure_GetRandHash calls
  */
 BOOST_AUTO_TEST_CASE(test_cuckoocache_no_fakes)
-        {
-                SeedInsecureRand(SeedRand::ZEROS);
-        CuckooCache::cache<uint256, SignatureCacheHasher> cc{};
-        size_t megabytes = 4;
-        cc.setup_bytes(megabytes << 20);
-        for (int x = 0; x < 100000; ++x) {
-            cc.insert(InsecureRand256());
-        }
-        for (int x = 0; x < 100000; ++x) {
-            BOOST_CHECK(!cc.contains(InsecureRand256(), false));
-        }
-        };
+{
+        SeedInsecureRand(SeedRand::ZEROS);
+CuckooCache::cache<uint256, SignatureCacheHasher> cc{};
+size_t megabytes = 4;
+cc.setup_bytes(megabytes << 20);
+for (int x = 0; x < 100000; ++x) {
+    cc.insert(InsecureRand256());
+}
+for (int x = 0; x < 100000; ++x) {
+    BOOST_CHECK(!cc.contains(InsecureRand256(), false));
+}
+};
 
 /** This helper returns the hit rate when megabytes*load worth of entries are
  * inserted into a megabytes sized cache
@@ -100,17 +100,17 @@ static double normalize_hit_rate(double hits, double load)
 
 /** Check the hit rate on loads ranging from 0.1 to 1.6 */
 BOOST_AUTO_TEST_CASE(cuckoocache_hit_rate_ok)
-        {
-                /** Arbitrarily selected Hit Rate threshold that happens to work for this test
-                 * as a lower bound on performance.
-                 */
-                double HitRateThresh = 0.98;
-        size_t megabytes = 4;
-        for (double load = 0.1; load < 2; load *= 2) {
-            double hits = test_cache<CuckooCache::cache<uint256, SignatureCacheHasher>>(megabytes, load);
-            BOOST_CHECK(normalize_hit_rate(hits, load) > HitRateThresh);
-        }
-        }
+{
+        /** Arbitrarily selected Hit Rate threshold that happens to work for this test
+         * as a lower bound on performance.
+         */
+        double HitRateThresh = 0.98;
+size_t megabytes = 4;
+for (double load = 0.1; load < 2; load *= 2) {
+    double hits = test_cache<CuckooCache::cache<uint256, SignatureCacheHasher>>(megabytes, load);
+    BOOST_CHECK(normalize_hit_rate(hits, load) > HitRateThresh);
+}
+}
 
 
 /** This helper checks that erased elements are preferentially inserted onto and
@@ -173,10 +173,10 @@ static void test_cache_erase(size_t megabytes)
 }
 
 BOOST_AUTO_TEST_CASE(cuckoocache_erase_ok)
-        {
-                size_t megabytes = 4;
-        test_cache_erase<CuckooCache::cache<uint256, SignatureCacheHasher>>(megabytes);
-        }
+{
+        size_t megabytes = 4;
+test_cache_erase<CuckooCache::cache<uint256, SignatureCacheHasher>>(megabytes);
+}
 
 template <typename Cache>
 static void test_cache_erase_parallel(size_t megabytes)
@@ -262,10 +262,10 @@ static void test_cache_erase_parallel(size_t megabytes)
     BOOST_CHECK(hit_rate_stale > 2 * hit_rate_erased_but_contained);
 }
 BOOST_AUTO_TEST_CASE(cuckoocache_erase_parallel_ok)
-        {
-                size_t megabytes = 4;
-        test_cache_erase_parallel<CuckooCache::cache<uint256, SignatureCacheHasher>>(megabytes);
-        }
+{
+        size_t megabytes = 4;
+test_cache_erase_parallel<CuckooCache::cache<uint256, SignatureCacheHasher>>(megabytes);
+}
 
 
 template <typename Cache>
@@ -359,8 +359,8 @@ static void test_cache_generations()
     BOOST_CHECK(double(out_of_tight_tolerance) / double(total) < max_rate_less_than_tight_hit_rate);
 }
 BOOST_AUTO_TEST_CASE(cuckoocache_generations)
-        {
-                test_cache_generations<CuckooCache::cache<uint256, SignatureCacheHasher>>();
-        }
+{
+        test_cache_generations<CuckooCache::cache<uint256, SignatureCacheHasher>>();
+}
 
 BOOST_AUTO_TEST_SUITE_END();
