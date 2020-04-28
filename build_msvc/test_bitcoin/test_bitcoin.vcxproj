@@ -62,7 +62,6 @@
     </PropertyGroup>
     <ItemGroup>
       <JsonTestFile Include="..\..\src\test\data\*.json" />
-      <RawTestFile Include="..\..\src\test\data\*.raw" />
     </ItemGroup>
     <HeaderFromHexdump RawFilePath="%(JsonTestFile.FullPath)" HeaderFilePath="%(JsonTestFile.FullPath).h" SourceHeader="namespace json_tests{ static unsigned const char %(JsonTestFile.Filename)[] = {" SourceFooter="};}" />
   </Target>
