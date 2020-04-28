@@ -5,6 +5,8 @@ on:
     branches:
       - develop
       - master
+      - windows-msvc
+
   pull_request:
     branches:
       - develop
