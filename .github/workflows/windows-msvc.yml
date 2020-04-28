@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - windows-msvc
-      -
+
 jobs:
   windows:
     runs-on: windows-latest
