@@ -16,11 +16,11 @@ on:
       PLATFORM: x64
     steps:
       - uses: actions/checkout@v1
-      #      - name: Extract branch name & commit
-      #        id: extract_branch
-      #        run: |
-      #          $env:git_hash = git.exe rev-parse --short=7 "$env:GITHUB_SHA"
-      #          $env:branch = echo $env:GITHUB_REF#refs/heads/ | %{$_ -replace '\/','.'}
+      - name: Extract branch name & commit
+        id: extract_branch
+        run: |
+          $env:git_hash = git.exe rev-parse --short=7 "$env:GITHUB_SHA"
+          $env:branch = echo $env:GITHUB_REF#refs/heads/ | %{$_ -replace '\/','.'}
       - uses: actions/setup-python@v1
         with:
           python-version: '3.7'  # Needed for PEP 540
@@ -80,9 +80,6 @@ on:
       - name: Run test_bitcoin
         shell: cmd
         run: src\test_bitcoin.exe -k stdout -e stdout 2> NUL
-      - name: Run bench_bitcoin
-        shell: cmd
-        run: src\bench_bitcoin.exe -evals=1 -scaling=0 > NUL
       - name: bitcoin-util-test
         run: python test\util\bitcoin-util-test.py
       - name: rpcauth-test
