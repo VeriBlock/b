@@ -132,7 +132,8 @@ PoPRewards PopServiceImpl::getPopRewards(const CBlockIndex& pindexPrev, const Co
     auto& config = getService<Config>();
     if (pindexPrev.nHeight < config.popconfig.alt->getRewardParams().rewardSettlementInterval()) return {};
     auto state = altintegration::ValidationState();
-    auto rewards = altTree->getPopPayout(pindexPrev.GetBlockHash().asVector(), state);
+    auto blockHash = pindexPrev.GetBlockHash();
+    auto rewards = altTree->getPopPayout(blockHash.asVector(), state);
     if (state.IsError()) {
         throw std::logic_error(state.GetDebugMessage());
     }
@@ -151,41 +152,6 @@ PoPRewards PopServiceImpl::getPopRewards(const CBlockIndex& pindexPrev, const Co
     }
     
     return btcRewards;
-
-    // TODO: implement
-    //return {};
-    //    int halvings = (pindexPrev.nHeight + 1) / consensusParams.nSubsidyHalvingInterval;
-    //
-    //    PoPRewards rewards;
-    //    auto& config = getService<Config>();
-    //    auto& pop_service = VeriBlock::getService<VeriBlock::PopService>();
-    //
-    //    int nextBlockHeight = pindexPrev.nHeight + 1;
-    //    if (nextBlockHeight > config.POP_REWARD_PAYMENT_DELAY) {
-    //        int32_t checkHeight = nextBlockHeight - config.POP_REWARD_PAYMENT_DELAY;
-    //        const CBlockIndex* endorsedBlock = pindexPrev.GetAncestor(checkHeight);
-    //        const CBlockIndex* contaningBlocksTip = pindexPrev.GetAncestor(checkHeight + config.POP_REWARD_SETTLEMENT_INTERVAL);
-    //        const CBlockIndex* difficultyBlockStart = pindexPrev.GetAncestor(checkHeight - config.POP_DIFFICULTY_AVERAGING_INTERVAL);
-    //        const CBlockIndex* difficultyBlockEnd = pindexPrev.GetAncestor(checkHeight + config.POP_REWARD_SETTLEMENT_INTERVAL - 1);
-    //
-    //        if (!endorsedBlock) {
-    //            return rewards;
-    //        }
-    //
-    //        pop_service.rewardsCalculateOutputs(checkHeight, *endorsedBlock, *contaningBlocksTip, difficultyBlockStart, difficultyBlockEnd, rewards);
-    //    }
-    //
-    //    // erase rewards, that pay 0 satoshis and halve rewards
-    //    for (auto it = rewards.begin(), end = rewards.end(); it != end;) {
-    //        it->second >>= halvings;
-    //        if (it->second == 0 || halvings >= 64) {
-    //            it = rewards.erase(it);
-    //        } else {
-    //            ++it;
-    //        }
-    //    }
-    //
-    //    return rewards;
 }
 
 bool PopServiceImpl::validatePopTx(const CTransaction& tx, TxValidationState& state)
@@ -323,9 +289,7 @@ void PopServiceImpl::rewardsCalculateOutputs(const int& blockHeight, const CBloc
 PopServiceImpl::PopServiceImpl(const altintegration::Config& config)
 {
     config.validate();
-
-    auto tree = altintegration::Altintegration::create(config);
-    altTree = std::make_shared<altintegration::AltTree>(std::move(tree));
+    altTree = altintegration::Altintegration::create(config);
 }
 
 void PopServiceImpl::invalidateBlockByHash(const uint256& block)
@@ -374,7 +338,7 @@ bool evalScriptImpl(const CScript& script, std::vector<std::vector<unsigned char
             switch (opcode) {
             case OP_CHECKATV: {
                 // tx has zero or one ATV
-                if (publication.hasAtv) {
+                if (publication.altPopTx.hasAtv) {
                     return set_error(serror, SCRIPT_ERR_INVALID_STACK_OPERATION);
                 }
 
@@ -386,9 +350,9 @@ bool evalScriptImpl(const CScript& script, std::vector<std::vector<unsigned char
 
                 // validate ATV content
                 try {
-                    publication.atv = altintegration::ATV::fromVbkEncoding(el);
-                    publication.hasAtv = true;
-                    if (with_checks && !altintegration::checkATV(publication.atv, state, altp, vbkp)) {
+                    publication.altPopTx.atv = altintegration::ATV::fromVbkEncoding(el);
+                    publication.altPopTx.hasAtv = true;
+                    if (with_checks && !altintegration::checkATV(publication.altPopTx.atv, state, altp, vbkp)) {
                         return set_error(serror, SCRIPT_ERR_VBK_ATVFAIL);
                     }
                 } catch (...) {
@@ -410,7 +374,7 @@ bool evalScriptImpl(const CScript& script, std::vector<std::vector<unsigned char
                     if (with_checks && !altintegration::checkVTB(vtb, state, vbkp, btcp)) {
                         return set_error(serror, SCRIPT_ERR_VBK_VTBFAIL);
                     }
-                    publication.vtbs.push_back(std::move(vtb));
+                    publication.altPopTx.vtbs.push_back(std::move(vtb));
                 } catch (...) {
                     return set_error(serror, SCRIPT_ERR_VBK_VTBFAIL);
                 }
@@ -497,7 +461,7 @@ bool parseTxPopPayloadsImpl(const CTransaction& tx, const Consensus::Params& par
             "[" + txhash.ToString() + "] scriptSig of POP tx is invalid: " + ScriptErrorString(serror) + ", " + instate.GetPath() + ", " + instate.GetDebugMessage());
     }
 
-    const altintegration::PublicationData& publicationData = payloads.atv.transaction.publicationData;
+    const altintegration::PublicationData& publicationData = payloads.altPopTx.atv.transaction.publicationData;
 
     CBlockHeader endorsedHeader;
 
