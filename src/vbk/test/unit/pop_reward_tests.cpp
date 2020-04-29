@@ -42,10 +42,11 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
 
      // Generate a 400-block chain:
     CScript scriptPubKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
-    int rewardInterval = (int)VeriBlock::getService<VeriBlock::Config>().popconfig.alt->getRewardParams().rewardSettlementInterval();
+    int rewardInterval = /*(int)VeriBlock::getService<VeriBlock::Config>().popconfig.alt->getRewardParams().rewardSettlementInterval()*/105;
     // we already have 101 blocks
     // do not add block with rewards
-    for (int i = 0; i < (rewardInterval - 102); i++) {
+    // add additional block since reward is being paid in the next block
+    for (int i = 0; i < (rewardInterval - 102 + 1); i++) {
         std::vector<CMutableTransaction> noTxns;
         CBlock b = CreateAndProcessBlock(noTxns, scriptPubKey);
         m_coinbase_txns.push_back(b.vtx[0]);
