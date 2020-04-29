@@ -24,7 +24,7 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
         BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == block.GetHash());
     }
 
-     // Generate a 400-block chain:
+     // Generate a chain whith rewardInterval of blocks:
     CScript scriptPubKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
     int rewardInterval = (int)VeriBlock::getService<VeriBlock::Config>().popconfig.alt->getRewardParams().rewardSettlementInterval();
     // we already have 101 blocks
@@ -57,6 +57,34 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
 
     // we've got additional coinbase out
     BOOST_CHECK(n > 1);
+
+    // assume POP reward is the output after the POW reward
+    BOOST_CHECK(payoutBlock.vtx[0]->vout[1].scriptPubKey == CScript(defaultPayoutInfo.begin(), defaultPayoutInfo.end()));
+    BOOST_CHECK(payoutBlock.vtx[0]->vout[1].nValue > 0);
+
+    CMutableTransaction spending;
+    spending.nVersion = 1;
+    spending.vin.resize(1);
+    spending.vin[0].prevout.hash = payoutBlock.vtx[0]->GetHash();
+    spending.vin[0].prevout.n = 1;
+    spending.vout.resize(1);
+    spending.vout[0].nValue = 100;
+    spending.vout[0].scriptPubKey = scriptPubKey;
+
+    std::vector<unsigned char> vchSig;
+    uint256 hash = SignatureHash(scriptPubKey, spending, 0, SIGHASH_ALL, 0, SigVersion::BASE);
+    BOOST_CHECK(coinbaseKey.Sign(hash, vchSig));
+    vchSig.push_back((unsigned char)SIGHASH_ALL);
+    spending.vin[0].scriptSig << vchSig;
+
+    CBlock spendingBlock;
+    spendingBlock = CreateAndProcessBlock({spending}, scriptPubKey);
+    {
+        LOCK(cs_main);
+        ///TODO: does not allow to spend coinbase transaction until maturity period eg
+        ///      100 blocks. Probably the same is applied to POP payouts.
+        //BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == spendingBlock.GetHash());
+    }
 }
 
 //BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)

@@ -28,6 +28,7 @@ struct E2eFixture : public TestChain100Setup {
     MockMiner popminer;
     altintegration::ValidationState state;
     VeriBlock::PopService* pop;
+    std::vector<uint8_t> defaultPayoutInfo = {1, 2, 3, 4, 5};
 
     E2eFixture()
     {
@@ -134,7 +135,7 @@ struct E2eFixture : public TestChain100Setup {
         auto& config = VeriBlock::getService<VeriBlock::Config>();
         p.identifier = config.popconfig.alt->getIdentifier();
         // TODO: pass valid payout info
-        p.payoutInfo = std::vector<uint8_t>{1, 2, 3, 4, 5};
+        p.payoutInfo = defaultPayoutInfo;
 
         // serialize block header
         CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
