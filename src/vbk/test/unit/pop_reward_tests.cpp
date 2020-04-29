@@ -15,22 +15,6 @@ struct PopRewardsTestFixture : public E2eFixture {
 
 BOOST_AUTO_TEST_SUITE(pop_reward_tests)
 
-static VeriBlock::PoPRewards getRewards()
-{
-    CScript payout1 = CScript() << std::vector<uint8_t>(5, 1);
-    CScript payout2 = CScript() << std::vector<uint8_t>(5, 2);
-    CScript payout3 = CScript() << std::vector<uint8_t>(5, 3);
-    CScript payout4 = CScript() << std::vector<uint8_t>(5, 4);
-
-    VeriBlock::PoPRewards rewards;
-    rewards[payout1] = 24;
-    rewards[payout2] = 13;
-    rewards[payout3] = 12;
-    rewards[payout4] = 56;
-
-    return rewards;
-}
-
 BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
 {
     auto tip = ChainActive().Tip();
@@ -42,26 +26,36 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
 
      // Generate a 400-block chain:
     CScript scriptPubKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
-    int rewardInterval = /*(int)VeriBlock::getService<VeriBlock::Config>().popconfig.alt->getRewardParams().rewardSettlementInterval()*/105;
+    int rewardInterval = (int)VeriBlock::getService<VeriBlock::Config>().popconfig.alt->getRewardParams().rewardSettlementInterval();
     // we already have 101 blocks
     // do not add block with rewards
-    // add additional block since reward is being paid in the next block
-    for (int i = 0; i < (rewardInterval - 102 + 1); i++) {
+    // do not add block before block with rewards
+    for (int i = 0; i < (rewardInterval - 103); i++) {
         std::vector<CMutableTransaction> noTxns;
         CBlock b = CreateAndProcessBlock(noTxns, scriptPubKey);
         m_coinbase_txns.push_back(b.vtx[0]);
     }
 
-    CBlock payoutBlock = CreateAndProcessBlock({}, scriptPubKey);
+    CBlock beforePayoutBlock = CreateAndProcessBlock({}, scriptPubKey);
+    BOOST_CHECK(ChainActive().Tip() != nullptr);
+    BOOST_CHECK(ChainActive().Tip()->nHeight + 1 == rewardInterval);
 
+    int n = 0;
+    for (const auto& out : beforePayoutBlock.vtx[0]->vout) {
+        if (out.nValue > 0) n++;
+    }
+    BOOST_CHECK(n == 1);
+
+    CBlock payoutBlock = CreateAndProcessBlock({}, scriptPubKey);
     BOOST_CHECK(ChainActive().Tip() != nullptr);
     BOOST_CHECK(ChainActive().Tip()->nHeight == rewardInterval);
 
-    int n = 0;
+    n = 0;
     for (const auto& out : payoutBlock.vtx[0]->vout) {
         if (out.nValue > 0) n++;
     }
 
+    // we've got additional coinbase out
     BOOST_CHECK(n > 1);
 }
 
