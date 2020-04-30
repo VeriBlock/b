@@ -17,22 +17,23 @@ BOOST_AUTO_TEST_SUITE(pop_reward_tests)
 
 BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
 {
+    CScript scriptPubKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
+
     auto tip = ChainActive().Tip();
     BOOST_CHECK(tip != nullptr);
-    CBlock block = endorseAltBlockAndMine(tip->GetAncestor(0)->GetBlockHash(), 0);
+    std::vector<uint8_t> payoutInfo{scriptPubKey.begin(), scriptPubKey.end()};
+    CBlock block = endorseAltBlockAndMine(tip->GetAncestor(0)->GetBlockHash(), ChainActive().Tip()->GetBlockHash(), payoutInfo, 0);
     {
         BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == block.GetHash());
     }
 
-     // Generate a chain whith rewardInterval of blocks:
-    CScript scriptPubKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
+    // Generate a chain whith rewardInterval of blocks
     int rewardInterval = (int)VeriBlock::getService<VeriBlock::Config>().popconfig.alt->getRewardParams().rewardSettlementInterval();
     // we already have 101 blocks
     // do not add block with rewards
     // do not add block before block with rewards
     for (int i = 0; i < (rewardInterval - 103); i++) {
-        std::vector<CMutableTransaction> noTxns;
-        CBlock b = CreateAndProcessBlock(noTxns, scriptPubKey);
+        CBlock b = CreateAndProcessBlock({}, scriptPubKey);
         m_coinbase_txns.push_back(b.vtx[0]);
     }
 
@@ -59,13 +60,14 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
     BOOST_CHECK(n > 1);
 
     // assume POP reward is the output after the POW reward
-    BOOST_CHECK(payoutBlock.vtx[0]->vout[1].scriptPubKey == CScript(defaultPayoutInfo.begin(), defaultPayoutInfo.end()));
+    BOOST_CHECK(payoutBlock.vtx[0]->vout[1].scriptPubKey == scriptPubKey);
     BOOST_CHECK(payoutBlock.vtx[0]->vout[1].nValue > 0);
 
     CMutableTransaction spending;
     spending.nVersion = 1;
     spending.vin.resize(1);
     spending.vin[0].prevout.hash = payoutBlock.vtx[0]->GetHash();
+    // use POP payout as an input
     spending.vin[0].prevout.n = 1;
     spending.vout.resize(1);
     spending.vout[0].nValue = 100;
@@ -78,12 +80,22 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
     spending.vin[0].scriptSig << vchSig;
 
     CBlock spendingBlock;
+    // make sure we cannot spend till coinbase maturity
     spendingBlock = CreateAndProcessBlock({spending}, scriptPubKey);
     {
         LOCK(cs_main);
-        ///TODO: does not allow to spend coinbase transaction until maturity period eg
-        ///      100 blocks. Probably the same is applied to POP payouts.
-        //BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == spendingBlock.GetHash());
+        BOOST_CHECK(ChainActive().Tip()->GetBlockHash() != spendingBlock.GetHash());
+    }
+
+    for (int i = 0; i < 100; i++) {
+        CBlock b = CreateAndProcessBlock({}, scriptPubKey);
+        m_coinbase_txns.push_back(b.vtx[0]);
+    }
+
+    spendingBlock = CreateAndProcessBlock({spending}, scriptPubKey);
+    {
+        LOCK(cs_main);
+        BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == spendingBlock.GetHash());
     }
 }
 
