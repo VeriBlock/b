@@ -87,7 +87,7 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
         BOOST_CHECK(ChainActive().Tip()->GetBlockHash() != spendingBlock.GetHash());
     }
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < COINBASE_MATURITY; i++) {
         CBlock b = CreateAndProcessBlock({}, scriptPubKey);
         m_coinbase_txns.push_back(b.vtx[0]);
     }
