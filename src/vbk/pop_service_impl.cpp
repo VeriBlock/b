@@ -141,14 +141,13 @@ PoPRewards PopServiceImpl::getPopRewards(const CBlockIndex& pindexPrev, const Co
     int halvings = (pindexPrev.nHeight + 1) / consensusParams.nSubsidyHalvingInterval;
     PoPRewards btcRewards{};
     //erase rewards, that pay 0 satoshis and halve rewards
-    for (auto it = rewards.begin(), end = rewards.end(); it != end;) {
-        auto rewardValue = it->second;
+    for (const auto& r : rewards) {
+        auto rewardValue = r.second;
         rewardValue >>= halvings;
         if ((rewardValue != 0) && (halvings < 64)) {
-            CScript key = CScript(it->first.begin(), it->first.end());
+            CScript key = CScript(r.first.begin(), r.first.end());
             btcRewards[key] = rewardValue;
         }
-        ++it;
     }
 
     return btcRewards;
