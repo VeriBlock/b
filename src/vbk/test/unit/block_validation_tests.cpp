@@ -15,7 +15,6 @@
 #include <vbk/init.hpp>
 #include <vbk/pop_service.hpp>
 #include <vbk/service_locator.hpp>
-#include <vbk/test/util/tx.hpp>
 #include <vbk/test/util/mock.hpp>
 
 #include <string>

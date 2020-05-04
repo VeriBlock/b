@@ -19,15 +19,13 @@
 #include <vbk/pop_service_impl.hpp>
 #include <vbk/service_locator.hpp>
 #include <vbk/test/util/mock.hpp>
-#include <vbk/test/util/tx.hpp>
 
 using ::testing::Return;
 
 static CBlock createBlockWithPopTx(TestChain100Setup& test)
 {
-    CMutableTransaction popTx = VeriBlockTest::makePopTx({1}, {{2}});
     CScript scriptPubKey = CScript() << ToByteVector(test.coinbaseKey.GetPubKey()) << OP_CHECKSIG;
-    return test.CreateAndProcessBlock({popTx}, scriptPubKey);
+    return test.CreateAndProcessBlock({}, scriptPubKey);
 }
 
 inline void setPublicationData(altintegration::PublicationData& pub, const CDataStream& stream, const int64_t& index)

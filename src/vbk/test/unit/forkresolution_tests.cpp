@@ -15,7 +15,6 @@
 #include <vbk/pop_service.hpp>
 #include <vbk/service_locator.hpp>
 #include <vbk/test/util/mock.hpp>
-#include <vbk/test/util/tx.hpp>
 
 //static CBlock CreateTestBlock(TestChain100Setup& test, std::vector<CMutableTransaction> trxs = {})
 //{

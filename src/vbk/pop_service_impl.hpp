@@ -35,15 +35,9 @@ public:
 
     ~PopServiceImpl() override = default;
 
-    bool validatePopTxInput(const CTxIn& in, TxValidationState& state) override;
-
-    bool validatePopTxOutput(const CTxOut& out, TxValidationState& state) override;
     PoPRewards getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) override;
     void addPopPayoutsIntoCoinbaseTx(CMutableTransaction& coinbaseTx, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) override;
     bool checkCoinbaseTxWithPopRewards(const CTransaction& tx, const CAmount& PoWBlockReward, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams, BlockValidationState& state) override;
-    bool validatePopTx(const CTransaction& tx, TxValidationState& state) override;
-
-    bool checkPopInputs(const CTransaction& tx, TxValidationState& state, unsigned int flags, bool cacheSigStore, PrecomputedTransactionData& txdata) override;
 
     std::vector<BlockBytes> getLastKnownVBKBlocks(size_t blocks) override;
     std::vector<BlockBytes> getLastKnownBTCBlocks(size_t blocks) override;
@@ -56,13 +50,9 @@ public:
     void invalidateBlockByHash(const uint256& block) override;
     bool setState(const uint256& block) override;
 
-    bool evalScript(const CScript& script, std::vector<std::vector<unsigned char>>& stack, ScriptError* serror, altintegration::AltPayloads* pub, altintegration::ValidationState& state, bool with_checks) override;
     int compareForks(const CBlockIndex& left, const CBlockIndex& right) override;
 };
 
-bool parseTxPopPayloadsImpl(const CTransaction& tx, const Consensus::Params& params, TxValidationState& state, altintegration::AltPayloads& payloads);
-bool parseBlockPopPayloadsImpl(const CBlock& block, const CBlockIndex& indexPrev, const Consensus::Params& params, BlockValidationState& state, std::vector<altintegration::AltPayloads>* payloads);
-bool evalScriptImpl(const CScript& script, std::vector<std::vector<unsigned char>>& stack, ScriptError* serror, altintegration::AltPayloads* pub, altintegration::ValidationState& state, bool with_checks);
 bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex& indexPrev, const CBlock& block, BlockValidationState& state, bool atomic = true, bool cleanupAfter = false);
 
 } // namespace VeriBlock

@@ -25,38 +25,6 @@ namespace VeriBlock {
 
 namespace {
 
-UniValue createPopTx(const CScript& scriptSig)
-{
-    LOCK(cs_main);
-
-    auto tx = VeriBlock::MakePopTx(scriptSig);
-
-    const uint256& hashTx = tx.GetHash();
-    if (!::mempool.exists(hashTx)) {
-        TxValidationState state;
-        auto tx_ref = MakeTransactionRef<const CMutableTransaction&>(tx);
-
-        auto result = AcceptToMemoryPool(mempool, state, tx_ref,
-            nullptr /* plTxnReplaced */, false /* bypass_limits */, 0 /* nAbsurdFee */, false /* test accept */);
-        if (result) {
-            std::string err;
-            if(!g_rpc_chain->broadcastTransaction(tx_ref, err, 0, true)){
-                throw JSONRPCError(RPC_TRANSACTION_ERROR, err);
-            }
-//            RelayTransaction(hashTx, *this->connman);
-            return hashTx.GetHex();
-        }
-
-        if (state.IsInvalid()) {
-            throw JSONRPCError(RPC_TRANSACTION_REJECTED, FormatStateMessage(state));
-        }
-
-        throw JSONRPCError(RPC_TRANSACTION_ERROR, FormatStateMessage(state));
-    }
-
-    return hashTx.GetHex();
-}
-
 uint256 GetBlockHashByHeight(const int height)
 {
     if (height < 0 || height > ChainActive().Height())
@@ -188,23 +156,22 @@ UniValue submitpop(const JSONRPCRequest& request)
 
     CScript script;
 
+    // TODO put atv and vtbs into the mempool
     const UniValue& vtb_array = request.params[1].get_array();
     LogPrint(BCLog::POP, "VeriBlock-PoP: submitpop RPC called with 1 ATV and %d VTBs\n", vtb_array.size());
     for (uint32_t idx = 0u, size = vtb_array.size(); idx < size; ++idx) {
         auto& vtbhex = vtb_array[idx];
         auto vtb = ParseHexV(vtbhex, "vtb[" + std::to_string(idx) + "]");
-        script << vtb << OP_CHECKVTB;
+        
         LogPrint(BCLog::POP, "VeriBlock-PoP: VTB%d=\"%s\"\n", idx, vtbhex.get_str());
     }
 
     auto& atvhex = request.params[0];
     auto atv = ParseHexV(atvhex, "atv");
-    script << atv << OP_CHECKATV;
-    script << OP_CHECKPOP;
 
     LogPrint(BCLog::POP, "VeriBlock-PoP: ATV=\"%s\"\n", atvhex.get_str());
 
-    return createPopTx(script);
+    return "has added";
 }
 
 
