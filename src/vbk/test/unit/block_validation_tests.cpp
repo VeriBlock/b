@@ -10,12 +10,14 @@
 #include <consensus/validation.h>
 #include <test/util/setup_common.h>
 #include <validation.h>
+#include <consensus/validation.h>
 
 #include <vbk/config.hpp>
 #include <vbk/init.hpp>
 #include <vbk/pop_service.hpp>
 #include <vbk/service_locator.hpp>
 #include <vbk/test/util/mock.hpp>
+#include <vbk/test/util/util.hpp>
 
 #include <string>
 #include <gmock/gmock.h>
@@ -62,8 +64,8 @@ inline std::vector<uint8_t> operator""_v(const char* s, size_t size)
 //    std::shared_ptr<CDataStream> stream;
 //};
 //
-//BOOST_AUTO_TEST_SUITE(block_validation_tests)
-//
+BOOST_AUTO_TEST_SUITE(block_validation_tests)
+
 //BOOST_FIXTURE_TEST_CASE(BlockWithTooManyPublicationTxes, BlockValidationFixture)
 //{
 //    std::vector<CMutableTransaction> pubs;
@@ -114,5 +116,79 @@ inline std::vector<uint8_t> operator""_v(const char* s, size_t size)
 //    BOOST_CHECK(*block.vtx[1] == CTransaction(ctxtx));
 //    BOOST_CHECK(*block.vtx[2] == CTransaction(pubtx));
 //}
-//
-//BOOST_AUTO_TEST_SUITE_END()
+
+static altintegration::PopData generateRandPopData() {
+    // add PopData
+    auto atvBytes = altintegration::ParseHex(VeriBlockTest::defaultAtvEncoded);
+    auto streamATV = altintegration::ReadStream(atvBytes);
+    auto atv = altintegration::ATV::fromVbkEncoding(streamATV);
+
+    auto vtbBytes = altintegration::ParseHex(VeriBlockTest::defaultVtbEncoded);
+    auto streamVTB = altintegration::ReadStream(vtbBytes);
+    auto vtb = altintegration::VTB::fromVbkEncoding(streamVTB);
+
+
+    altintegration::PopData popData;
+    popData.atv = atv;
+    popData.vtbs = { vtb, vtb, vtb };
+
+    return popData;
+}
+
+BOOST_AUTO_TEST_CASE(GetBlockWeight_test) {
+
+    // Create random block
+    CBlock block;
+    block.hashMerkleRoot.SetNull();
+    block.hashPrevBlock.SetNull();
+    block.nBits = 10000;
+    block.nNonce = 10000;
+    block.nTime = 10000;
+    block.nVersion = 1;
+
+    int64_t expected_block_weight = GetBlockWeight(block);
+
+    BOOST_CHECK(expected_block_weight > 0);
+
+    altintegration::PopData popData = generateRandPopData();
+
+    int64_t popDataWeight = GetPopDataWeight(popData);
+
+    BOOST_CHECK(popDataWeight > 0);
+
+    // put PopData into block
+    block.v_popData = { popData, popData };
+
+    int64_t new_block_weight = GetBlockWeight(block);
+    BOOST_CHECK_EQUAL(new_block_weight, expected_block_weight);
+}
+
+BOOST_AUTO_TEST_CASE(block_serialization_test) {
+
+    // Create random block
+    CBlock block;
+    block.hashMerkleRoot.SetNull();
+    block.hashPrevBlock.SetNull();
+    block.nBits = 10000;
+    block.nNonce = 10000;
+    block.nTime = 10000;
+    block.nVersion = 1;
+
+    altintegration::PopData popData = generateRandPopData();
+
+    block.v_popData = { popData, popData };
+
+    CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
+    BOOST_CHECK(stream.size() == 0);
+    stream << block;
+    BOOST_CHECK(stream.size() != 0);
+
+    CBlock decoded_block;
+    stream >> decoded_block;
+
+    BOOST_CHECK(decoded_block.GetHash() == block.GetHash());
+    BOOST_CHECK(decoded_block.v_popData[0] == block.v_popData[0]);
+    BOOST_CHECK(decoded_block.v_popData[1] == block.v_popData[1]);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
