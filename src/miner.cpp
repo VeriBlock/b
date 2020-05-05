@@ -308,23 +308,6 @@ void BlockAssembler::SortForBlock(const CTxMemPool::setEntries& package, std::ve
 template<typename MempoolComparatorTagName>
 void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpdated, CBlockIndex& prevIndex)
 {
-    auto& config = VeriBlock::getService<VeriBlock::Config>();
-    auto& pop = VeriBlock::getService<VeriBlock::PopService>();
-    // do a full copy of alt tree, and do stateful validation against this tree.
-    // then, discard this copy
-    altintegration::AltTree altTreeCopy = pop.getAltTree();
-
-    // dummy pop tx containing block
-    altintegration::AltBlock dummyContainingBlock{};
-    dummyContainingBlock.height = prevIndex.nHeight + 1;
-    dummyContainingBlock.previousBlock = prevIndex.GetBlockHash().asVector();
-    dummyContainingBlock.timestamp = pblock->GetBlockTime();
-
-    altintegration::ValidationState state;
-    bool ret = altTreeCopy.acceptBlock(dummyContainingBlock, state);
-    assert(ret);
-    (void) ret;
-
     // mapModifiedTx will store sorted packages after they are modified
     // because some of their txs are already in the block
     indexed_modified_transaction_set mapModifiedTx;
