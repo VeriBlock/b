@@ -34,7 +34,7 @@
 #include <veriblock/validation_state.hpp>
 
 namespace {
-
+/*
 bool set_error(ScriptError* ret, const ScriptError serror)
 {
     if (ret)
@@ -50,7 +50,7 @@ void popstack(std::vector<valtype>& stack)
         throw std::runtime_error("popstack(): stack empty");
     stack.pop_back();
 }
-
+*/
 } // namespace
 
 
