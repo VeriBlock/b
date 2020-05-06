@@ -7,7 +7,7 @@ on:
 
 jobs:
 
-  cross:
+  ${{ matrix.host }}:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -46,6 +46,8 @@ jobs:
           key: ${{ matrix.host }}-ccache-${{ steps.cache_timestamp.outputs.timestamp }}
           restore-keys: |
             ${{ matrix.host }}-ccache-
+      - name: run apt-get update
+        run: sudo apt-get update
       - name: install build requirements
         run: sudo apt-get install make automake cmake curl g++-multilib libtool binutils-gold bsdmainutils pkg-config python3 patch ccache
       - name: install additional dependencies
