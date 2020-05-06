@@ -73,7 +73,7 @@ jobs:
         run: sudo apt-get install g++-powerpc64le-linux-gnu binutils-powerpc64le-linux-gnu
       - name: install additional dependencies
         if: matrix.host == 'riscv64-linux-gnu'
-        run: sudo apt-get install sudo apt-get install g++-riscv64-linux-gnu binutils-riscv64-linux-gnu
+        run: sudo apt-get install g++-riscv64-linux-gnu binutils-riscv64-linux-gnu
       - name: install additional dependencies
         if: matrix.host == 's390x-linux-gnu'
         run: sudo apt-get install g++-s390x-linux-gnu binutils-s390x-linux-gnu
