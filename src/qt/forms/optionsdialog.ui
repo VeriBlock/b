@@ -730,7 +730,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="bfiDataSourceUrl">
+          <widget class="QLineEdit" name="bfiDataSourceUrls">
            <property name="toolTip">
             <string>... tool tip </string>
            </property>

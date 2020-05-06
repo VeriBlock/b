@@ -189,7 +189,7 @@ void OptionsDialog::setModel(OptionsModel *_model)
 
 
 	/* VBK BFI */
-	connect(ui->bfiDataSourceUrls, &QLineEdit::textChanged, this, &OptionsDialog::bfiChanged );
+	//connect(ui->bfiDataSourceUrls, &QLineEdit::textChanged, this, &OptionsDialog::bfiChanged );
 	/* VBK BFI */
 
 
