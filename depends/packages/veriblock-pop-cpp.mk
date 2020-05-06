@@ -28,6 +28,11 @@ else ifeq ($(HOST), x86_64-pc-linux-gnu)
     cmake -DCMAKE_INSTALL_PREFIX=$(host_prefix) -DCMAKE_BUILD_TYPE=Release \
     -DTESTING=OFF -DWITH_ROCKSDB=OFF -DSHARED=OFF ..
   endef
+else ifeq ($(HOST), i686-pc-linux-gnu)
+  define $(package)_config_cmds
+    cmake -DCMAKE_INSTALL_PREFIX=$(host_prefix) -DCMAKE_BUILD_TYPE=Release \
+    -DTESTING=OFF -DWITH_ROCKSDB=OFF -DSHARED=OFF ..
+  endef
 else
   define $(package)_config_cmds
     cmake -DCMAKE_C_COMPILER=$(HOST)-gcc -DCMAKE_CXX_COMPILER=$(HOST)-g++ \
