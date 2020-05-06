@@ -273,13 +273,13 @@ void OptionsDialog::on_resetButton_clicked()
 
 // VBK
 void OptionsDialog::bfiChanged(const QString &str){
-		try { 
-			QMessageBox msgBoxC;
-			msgBoxC.setText("BFI setup url changed:" + str);
-			msgBoxC.exec();	
-		} catch(...) { 
-		
-		}
+		//try { 
+		//	QMessageBox msgBoxC;
+		//	msgBoxC.setText("BFI setup url changed:" + str);
+		//	msgBoxC.exec();	
+		//} catch(...) { 
+		//
+		//}
 }
 // VBK
 	
