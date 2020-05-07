@@ -13,6 +13,8 @@
 #include <serialize.h>
 #include <uint256.h>
 
+#include "veriblock/entities/popdata.hpp"
+
 /** Nodes collect new transactions into a block, hash them into a hash tree,
  * and scan through nonce values to make the block's hash satisfy proof-of-work
  * requirements.  When they solve the proof-of-work, they broadcast the block
@@ -77,6 +79,7 @@ class CBlock : public CBlockHeader
 public:
     // network and disk
     std::vector<CTransactionRef> vtx;
+    std::vector<altintegration::PopData> v_popData;
 
     // memory only
     mutable bool fChecked;
@@ -98,6 +101,7 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITEAS(CBlockHeader, *this);
         READWRITE(vtx);
+        READWRITE(v_popData);
     }
 
     void SetNull()

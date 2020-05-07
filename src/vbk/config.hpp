@@ -25,7 +25,6 @@ struct Config {
 
     uint32_t btc_header_size = 80;
     uint32_t vbk_header_size = 64;
-    uint32_t max_pop_script_size = 150000; // TODO: figure out number
     uint32_t max_vtb_size = 100000;        // TODO: figure out number
     uint32_t min_vtb_size = 1;             // TODO: figure out number
     uint32_t max_atv_size = 100000;        // TODO: figure out numer

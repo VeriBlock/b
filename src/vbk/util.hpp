@@ -20,56 +20,6 @@
 
 
 namespace VeriBlock {
-
-
-inline void setVBKNoInput(COutPoint& out) noexcept
-{
-    out.hash.SetHex("56424b206973207468652062657374");
-    out.n = uint32_t(-1);
-}
-
-inline bool isVBKNoInput(const COutPoint& out) noexcept
-{
-    return ("000000000000000000000000000000000056424b206973207468652062657374" == out.hash.GetHex() && out.n == uint32_t(-1));
-}
-
-inline bool isPopTx(const CTransaction& tx) noexcept
-{
-    // pop tx has 1 input
-    if (tx.vin.size() != 1) {
-        return false;
-    }
-
-    auto& in = tx.vin[0];
-
-    // scriptSig is not empty
-    if (in.scriptSig.empty()) {
-        return false;
-    }
-
-    // output of this single input is "no input"
-    if (!isVBKNoInput(in.prevout)) {
-        return false;
-    }
-
-    // pop tx has 1 output
-    if (tx.vout.size() != 1) {
-        return false;
-    }
-
-    auto& out = tx.vout[0];
-
-    // size of scriptsig is 1 operator, and it is OP_RETURN
-    auto& script = out.scriptPubKey;
-    return script.size() == 1 && script[0] == OP_RETURN;
-}
-
-inline size_t RegularTxesTotalSize(const std::vector<CTransactionRef>& vtx)
-{
-    return std::count_if(vtx.begin(), vtx.end(), [](const CTransactionRef& tx) {
-        return !isPopTx(*tx);
-    });
-}
 /**
  * Create new Container with elements filtered elements of original container. All elements for which pred returns false will be removed.
  * @tparam Container any container, such as std::vector
@@ -92,49 +42,6 @@ inline CAmount getCoinbaseSubsidy(const CAmount& subsidy)
 {
     return subsidy * (100 - VeriBlock::getService<VeriBlock::Config>().POP_REWARD_PERCENTAGE) / 100;
 }
-
-inline CMutableTransaction MakePopTx(const CScript& scriptSig)
-{
-    CMutableTransaction tx;
-
-    tx.vout.resize(1);
-    tx.vout[0].nValue = 0;
-    tx.vout[0].scriptPubKey << OP_RETURN;
-
-    tx.vin.resize(1);
-    VeriBlock::setVBKNoInput(tx.vin[0].prevout);
-    tx.vin[0].scriptSig = scriptSig;
-
-    assert(VeriBlock::isPopTx(CTransaction(tx)));
-
-    return tx;
-}
-
-template <typename DefaultComparatorTag>
-struct poptx_priority {
-};
-
-/** \class CompareTxMemPoolEntryByPoPtxPriority
- *
- *  Sort an entry that PoP transaction has a higher priority, if both transaction are standart compared by DefaultComparator
- */
-template <typename DefaultComparator>
-class CompareTxMemPoolEntryByPoPtxPriority
-{
-public:
-    template <typename T>
-    bool operator()(const T& a, const T& b) const
-    {
-        if (isPopTx(a.GetTx()))
-            return true;
-
-        if (isPopTx(b.GetTx()))
-            return false;
-
-        DefaultComparator defaultComparator;
-        return defaultComparator(a, b);
-    }
-};
 
 inline CBlockHeader headerFromBytes(const std::vector<uint8_t>& v)
 {
