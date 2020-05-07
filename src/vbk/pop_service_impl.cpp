@@ -173,11 +173,11 @@ bool PopServiceImpl::validatePopTx(const CTransaction& tx, TxValidationState& st
         }
     }
 
-    // check size
-    auto& config = getService<Config>();
-    if (::GetSerializeSize(tx, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) > config.max_pop_tx_weight) {
-        return state.Invalid(TxValidationResult::TX_CONSENSUS, "bad-pop-txns-oversize");
-    }
+//    // check size
+//    auto& config = getService<Config>();
+//    if (::GetSerializeSize(tx, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) > config.max_pop_tx_weight) {
+//        return state.Invalid(TxValidationResult::TX_CONSENSUS, "bad-pop-txns-oversize");
+//    }
 
     return true;
 }

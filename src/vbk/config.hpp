@@ -34,7 +34,7 @@ struct Config {
     uint32_t max_future_block_time = 10 * 60; // 10 minutes
 
     /// The maximum allowed weight for the PoP transaction
-    uint32_t max_pop_tx_weight = 150000;
+//    uint32_t max_pop_tx_weight = 150000;
 
     /// The maximum allowed number of PoP transaction in a block
     uint32_t max_pop_tx_amount = 50;
