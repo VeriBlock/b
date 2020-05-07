@@ -131,7 +131,6 @@ BOOST_AUTO_TEST_CASE(blockfilters_json_test)
     //std::string json_data(json_tests::blockfilters,
     //                      json_tests::blockfilters + sizeof(json_tests::blockfilters));
 
-    //BOOST_TEST_MESSAGE(json_data);
     //if (!json.read(json_data) || !json.isArray()) {
     //    BOOST_ERROR("Parse error.");
     //    return;
