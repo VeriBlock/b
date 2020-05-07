@@ -316,29 +316,39 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
     auto& pop = VeriBlock::getService<VeriBlock::PopService>();
     // do a full copy of alt tree, and do stateful validation against this tree.
     // then, discard this copy
-    altintegration::AltTree altTreeCopy = pop.getAltTree();
+    altintegration::AltTree& altTree = pop.getAltTree();
 
     // dummy pop tx containing block
     altintegration::AltBlock dummyContainingBlock{};
+    dummyContainingBlock.hash = std::vector<uint8_t>(32, 1);
     dummyContainingBlock.height = prevIndex.nHeight + 1;
     dummyContainingBlock.previousBlock = prevIndex.GetBlockHash().asVector();
     dummyContainingBlock.timestamp = pblock->GetBlockTime();
 
-    altintegration::ValidationState state;
-    bool ret = altTreeCopy.acceptBlock(dummyContainingBlock, state);
-    assert(ret);
-    (void) ret;
+    {
+        altintegration::ValidationState state;
+        bool ret = altTree.acceptBlock(dummyContainingBlock, state);
+        assert(ret);
+        (void)ret;
+    }
+
+    CTxMemPool::setEntries failedPopTx;
+
+    auto finalized = altintegration::Finalizer([&]() {
+      LOCK(mempool.cs);
+      // delete invalid PoP transactions
+      for (auto& tx : failedPopTx) {
+          mempool.removeRecursive(tx->GetTx(), MemPoolRemovalReason::BLOCK); // FIXME: a more appropriate removal reason
+      }
+
+      altTree.removeSubtree(dummyContainingBlock.getHash());
+    });
 
     // mapModifiedTx will store sorted packages after they are modified
     // because some of their txs are already in the block
     indexed_modified_transaction_set mapModifiedTx;
     // Keep track of entries that failed inclusion, to avoid duplicate work
     CTxMemPool::setEntries failedTx;
-
-    // A list of failed PoP transactions to delete after we finish assembling the block
-    CTxMemPool::setEntries failedPopTx;
-    // TODO(VeriBlock): temporary fix. remove
-    std::vector<altintegration::AltPayloads> addedPayloads;
 
     // Start by adding all descendants of previously added txs to mapModifiedTx
     // and modifying them for their already included ancestors
@@ -449,6 +459,7 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
 
             if (nPopTx < config.max_pop_tx_amount) {
                 altintegration::AltPayloads p;
+                altintegration::ValidationState _state;
                 // do a stateless validation of pop payloads
                 if (!VeriBlock::parseTxPopPayloadsImpl(iter->GetTx(), chainparams.GetConsensus(), txstate, p)) {
                     LogPrint(BCLog::POP, "VeriBlock-PoP: %s: tx %s is statelessly invalid: %s\n", __func__, iter->GetTx().GetHash().ToString(), txstate.GetRejectReason());
@@ -456,14 +467,12 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
                     failedPopTx.insert(iter);
                     continue;
                 }
-                if (!altTreeCopy.addPayloads(dummyContainingBlock, {p}, state, true)) {
-                    LogPrint(BCLog::POP, "VeriBlock-PoP: %s: tx %s is statefully invalid: %s\n", __func__, iter->GetTx().GetHash().ToString(), state.toString());
+                if (!altTree.addPayloads(dummyContainingBlock, {p}, _state)) {
+                    LogPrint(BCLog::POP, "VeriBlock-PoP: %s: tx %s is statefully invalid: %s\n", __func__, iter->GetTx().GetHash().ToString(), _state.toString());
                     failedTx.insert(iter);
                     failedPopTx.insert(iter);
                     continue;
                 }
-
-                addedPayloads.push_back(std::move(p));
             }
         }
 
@@ -487,16 +496,6 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
         // Update transactions that depend on each of these
         nDescendantsUpdated += UpdatePackagesForAdded(ancestors, mapModifiedTx);
     }
-
-    // delete invalid PoP transactions
-    for (auto& tx : failedPopTx) {
-        mempool.removeRecursive(tx->GetTx(), MemPoolRemovalReason::BLOCK); // FIXME: a more appropriate removal reason
-    }
-
-    // TODO(VeriBlock): this is temporal fix
-    std::for_each(addedPayloads.rbegin(), addedPayloads.rend(), [&](const altintegration::AltPayloads& p) {
-        altTreeCopy.removePayloads(dummyContainingBlock, {p});
-    });
 }
 
 template void BlockAssembler::addPackageTxs<ancestor_score>(int &nPackagesSelected, int &nDescendantsUpdated, CBlockIndex& prevIndex);
