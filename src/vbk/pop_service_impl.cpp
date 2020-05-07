@@ -302,10 +302,6 @@ bool evalScriptImpl(const CScript& script, std::vector<std::vector<unsigned char
     auto& btcp = *config.popconfig.btc.params;
     altintegration::AltPayloads publication;
 
-    if (script.size() > config.max_pop_script_size) {
-        return set_error(serror, SCRIPT_ERR_SCRIPT_SIZE);
-    }
-
     try {
         while (pc < pend) {
             if (!script.GetOp(pc, opcode, vchPushValue)) {
