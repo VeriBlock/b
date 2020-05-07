@@ -176,21 +176,19 @@ BOOST_AUTO_TEST_CASE(block_serialization_test) {
 
     altintegration::PopData popData = generateRandPopData();
 
-    //block.v_popData = { popData, popData };
+    block.v_popData = { popData, popData };
 
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     BOOST_CHECK(stream.size() == 0);
     stream << block;
     BOOST_CHECK(stream.size() != 0);
 
-    /*
     CBlock decoded_block;
     stream >> decoded_block;
 
     BOOST_CHECK(decoded_block.GetHash() == block.GetHash());
     BOOST_CHECK(decoded_block.v_popData[0] == block.v_popData[0]);
     BOOST_CHECK(decoded_block.v_popData[1] == block.v_popData[1]);
-    */
 }
 
 BOOST_AUTO_TEST_SUITE_END()
