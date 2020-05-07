@@ -1,10 +1,8 @@
-// VeriBlock Blockchain Project
-// Copyright 2017-2018 VeriBlock, Inc
-// Copyright 2018-2019 Xenios SEZC
-// All rights reserved.
+// Copyright (c) 2019-2020 Xenios SEZC
 // https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
-// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #include <vbk/pop_service_impl.hpp>
 
 #include <chrono>
@@ -179,13 +177,6 @@ bool PopServiceImpl::acceptBlock(const CBlockIndex& indexNew, BlockValidationSta
     return true;
 }
 
-bool PopServiceImpl::checkPopPayloads(const CBlockIndex& indexPrev, const CBlock& fullBlock, BlockValidationState& state)
-{
-    // does not modify internal state, so no locking required
-    altintegration::AltTree copy = *altTree;
-    return addAllPayloadsToBlockImpl(copy, indexPrev, fullBlock, state);
-}
-
 bool PopServiceImpl::addAllBlockPayloads(const CBlockIndex& indexPrev, const CBlock& connecting, BlockValidationState& state)
 {
     std::lock_guard<std::mutex> lock(mutex);
@@ -213,11 +204,8 @@ int PopServiceImpl::compareForks(const CBlockIndex& leftForkTip, const CBlockInd
 
     std::lock_guard<std::mutex> lock(mutex);
     auto left = blockToAltBlock(leftForkTip);
-    auto right = blockToAltBlock(leftForkTip);
+    auto right = blockToAltBlock(rightForkTip);
     auto state = altintegration::ValidationState();
-    altTree->acceptBlock(left, state);
-    altTree->acceptBlock(right, state);
-
     return altTree->comparePopScore(left.hash, right.hash);
 }
 
@@ -242,10 +230,9 @@ void PopServiceImpl::invalidateBlockByHash(const uint256& block)
     altTree->removeSubtree(v);
 }
 
-bool PopServiceImpl::setState(const uint256& block)
+bool PopServiceImpl::setState(const uint256& block, altintegration::ValidationState& state)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    altintegration::ValidationState state;
     return altTree->setState(block.asVector(), state);
 }
 

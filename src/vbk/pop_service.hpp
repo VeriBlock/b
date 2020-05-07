@@ -2,6 +2,7 @@
 // https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #ifndef BITCOIN_SRC_VBK_POP_SERVICE_HPP
 #define BITCOIN_SRC_VBK_POP_SERVICE_HPP
 
@@ -48,11 +49,10 @@ struct PopService {
 
     virtual void rewardsCalculateOutputs(const int& blockHeight, const CBlockIndex& endorsedBlock, const CBlockIndex& contaningBlocksTip, const CBlockIndex* difficulty_start_interval, const CBlockIndex* difficulty_end_interval, std::map<CScript, int64_t>& outputs) = 0;
 
-    virtual bool checkPopPayloads(const CBlockIndex& prevIndex, const CBlock& fullBlock, BlockValidationState& state) = 0;
     virtual bool acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state) = 0;
     virtual bool addAllBlockPayloads(const CBlockIndex& prevIndex, const CBlock& fullBlock, BlockValidationState& state) = 0;
     virtual void invalidateBlockByHash(const uint256& block) = 0;
-    virtual bool setState(const uint256& block) = 0;
+    virtual bool setState(const uint256& block, altintegration::ValidationState& state) = 0;
 
     virtual std::vector<altintegration::PopData> getPopData(const CBlockIndex& currentBlockIndex) = 0;
     virtual void removePayloads(const std::vector<altintegration::PopData>& v_popData) = 0;

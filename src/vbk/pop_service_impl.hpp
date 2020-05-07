@@ -2,6 +2,7 @@
 // https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #ifndef BITCOIN_SRC_VBK_POP_SERVICE_POP_SERVICE_IMPL_HPP
 #define BITCOIN_SRC_VBK_POP_SERVICE_POP_SERVICE_IMPL_HPP
 
@@ -51,15 +52,12 @@ public:
 
     void rewardsCalculateOutputs(const int& blockHeight, const CBlockIndex& endorsedBlock, const CBlockIndex& contaningBlocksTip, const CBlockIndex* difficulty_start_interval, const CBlockIndex* difficulty_end_interval, std::map<CScript, int64_t>& outputs) override;
 
-    bool checkPopPayloads(const CBlockIndex& index, const CBlock& fullBlock, BlockValidationState& state) override;
     bool acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state) override;
     bool addAllBlockPayloads(const CBlockIndex& indexPrev, const CBlock& fullBlock, BlockValidationState& state) override;
     void invalidateBlockByHash(const uint256& block) override;
-    bool setState(const uint256& block) override;
+    bool setState(const uint256& block, altintegration::ValidationState& state) override;
 
-    std::vector<altintegration::PopData> getPopData(const CBlockIndex& currentBlockIndex) override;
-    void removePayloads(const std::vector<altintegration::PopData>& v_popData) override;
-
+    bool evalScript(const CScript& script, std::vector<std::vector<unsigned char>>& stack, ScriptError* serror, altintegration::AltPayloads* pub, altintegration::ValidationState& state, bool with_checks) override;
     int compareForks(const CBlockIndex& left, const CBlockIndex& right) override;
 };
 
