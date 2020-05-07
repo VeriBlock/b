@@ -143,7 +143,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     int nPackagesSelected = 0;
     int nDescendantsUpdated = 0;
 
-    addPackageTxs<ancestor_score>(nPackagesSelected, nDescendantsUpdated, *pindexPrev);
+    addPackageTxs<ancestor_score>(nPackagesSelected, nDescendantsUpdated);
 
     int64_t nTime1 = GetTimeMicros();
 
@@ -306,7 +306,7 @@ void BlockAssembler::SortForBlock(const CTxMemPool::setEntries& package, std::ve
 // mapModifiedTxs with the next transaction in the mempool to decide what
 // transaction package to work on next.
 template<typename MempoolComparatorTagName>
-void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpdated, CBlockIndex& prevIndex)
+void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpdated)
 {
     // mapModifiedTx will store sorted packages after they are modified
     // because some of their txs are already in the block
@@ -439,7 +439,7 @@ void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpda
     }
 }
 
-template void BlockAssembler::addPackageTxs<ancestor_score>(int &nPackagesSelected, int &nDescendantsUpdated, CBlockIndex& prevIndex);
+template void BlockAssembler::addPackageTxs<ancestor_score>(int &nPackagesSelected, int &nDescendantsUpdated);
 
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce)
 {

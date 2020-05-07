@@ -8,7 +8,7 @@
 #include "rpc_register.hpp"
 
 #include "merkle.hpp"
-#include "pop_service.hpp"
+#include "pop_service_impl.hpp"
 #include "vbk/service_locator.hpp"
 #include <chainparams.h>
 #include <consensus/merkle.h>
@@ -159,19 +159,34 @@ UniValue submitpop(const JSONRPCRequest& request)
     // TODO put atv and vtbs into the mempool
     const UniValue& vtb_array = request.params[1].get_array();
     LogPrint(BCLog::POP, "VeriBlock-PoP: submitpop RPC called with 1 ATV and %d VTBs\n", vtb_array.size());
+    std::vector<altintegration::VTB> vtbs;
     for (uint32_t idx = 0u, size = vtb_array.size(); idx < size; ++idx) {
         auto& vtbhex = vtb_array[idx];
-        auto vtb = ParseHexV(vtbhex, "vtb[" + std::to_string(idx) + "]");
+        auto vtb_bytes = ParseHexV(vtbhex, "vtb[" + std::to_string(idx) + "]");
+        vtbs.push_back(altintegration::VTB::fromVbkEncoding(vtb_bytes));
         
         LogPrint(BCLog::POP, "VeriBlock-PoP: VTB%d=\"%s\"\n", idx, vtbhex.get_str());
     }
 
     auto& atvhex = request.params[0];
-    auto atv = ParseHexV(atvhex, "atv");
+    auto atv_bytes = ParseHexV(atvhex, "atv");
 
     LogPrint(BCLog::POP, "VeriBlock-PoP: ATV=\"%s\"\n", atvhex.get_str());
 
-    return "has added";
+    auto& pop_service = VeriBlock::getService<VeriBlock::PopService>();
+    auto& pop_mempool = pop_service.getMemPool();
+
+    altintegration::ValidationState state;
+    if (pop_mempool.submitATV({ altintegration::ATV::fromVbkEncoding(atv_bytes) }, state)) {
+        LogPrint(BCLog::POP, "VeriBlock--invalid-PoP: %s ", state.GetPath());
+        return "ivalid ATV";
+    }
+    if (pop_mempool.submitVTB(vtbs, state)) {
+        LogPrint(BCLog::POP, "VeriBlock--invalid-PoP: %s ", state.GetPath());
+        return "invalid oone of the VTB";
+    }
+
+    return "successful added";
 }
 
 

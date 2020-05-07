@@ -23,6 +23,7 @@ namespace altintegration {
 struct AltPayloads;
 class ValidationState;
 struct AltTree;
+struct MemPool;
 } // namespace altintegration
 
 namespace Consensus {
@@ -37,6 +38,7 @@ using PoPRewards = std::map<CScript, CAmount>;
 struct PopService {
     virtual ~PopService() = default;
     virtual altintegration::AltTree& getAltTree() = 0;
+    virtual altintegration::MemPool& getMemPool() = 0;
     virtual PoPRewards getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) = 0;
     virtual void addPopPayoutsIntoCoinbaseTx(CMutableTransaction& coinbaseTx, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) = 0;
     virtual bool checkCoinbaseTxWithPopRewards(const CTransaction& tx, const CAmount& PoWBlockReward, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams, BlockValidationState& state) = 0;

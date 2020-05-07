@@ -169,13 +169,13 @@ bool PopServiceImpl::checkPopPayloads(const CBlockIndex& indexPrev, const CBlock
 {
     // does not modify internal state, so no locking required
     altintegration::AltTree copy = *altTree;
-    return addAllPayloadsToBlockImpl(copy, indexPrev, fullBlock, state, true, true);
+    return addAllPayloadsToBlockImpl(copy, indexPrev, fullBlock, state);
 }
 
 bool PopServiceImpl::addAllBlockPayloads(const CBlockIndex& indexPrev, const CBlock& connecting, BlockValidationState& state)
 {
     std::lock_guard<std::mutex> lock(mutex);
-    return addAllPayloadsToBlockImpl(*altTree, indexPrev, connecting, state, true, false);
+    return addAllPayloadsToBlockImpl(*altTree, indexPrev, connecting, state);
 }
 
 std::vector<BlockBytes> PopServiceImpl::getLastKnownVBKBlocks(size_t blocks)
@@ -198,18 +198,13 @@ int PopServiceImpl::compareForks(const CBlockIndex& leftForkTip, const CBlockInd
     }
 
     std::lock_guard<std::mutex> lock(mutex);
-
     auto left = blockToAltBlock(leftForkTip);
     auto right = blockToAltBlock(leftForkTip);
     auto state = altintegration::ValidationState();
-    if (!altTree->acceptBlock(left, state)) {
-        throw std::logic_error("compareForks: left fork tip can not be connected to altTree");
-    }
-    if (!altTree->acceptBlock(right, state)) {
-        throw std::logic_error("compareForks: right fork tip can not be connected to altTree");
-    }
+    altTree->acceptBlock(left, state);
+    altTree->acceptBlock(right, state);
 
-    return altTree->compareTwoBranches(left.hash, right.hash);
+    return altTree->comparePopScore(left.hash, right.hash);
 }
 
 // Pop rewards
@@ -229,7 +224,7 @@ void PopServiceImpl::invalidateBlockByHash(const uint256& block)
 {
     std::lock_guard<std::mutex> lock(mutex);
     auto v = block.asVector();
-    altTree->invalidateBlockByHash(v);
+    altTree->removeSubtree(v);
 }
 
 bool PopServiceImpl::setState(const uint256& block)
@@ -239,7 +234,7 @@ bool PopServiceImpl::setState(const uint256& block)
     return altTree->setState(block.asVector(), state);
 }
 
-bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex& indexPrev, const CBlock& block, BlockValidationState& state, bool atomic, bool cleanupAfter) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex& indexPrev, const CBlock& block, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     auto containing = VeriBlock::blockToAltBlock(indexPrev.nHeight + 1, block.GetBlockHeader());
 
@@ -251,12 +246,8 @@ bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex&
         return error("[%s] block %s is not accepted by altTree: %s", __func__, block.GetHash().ToString(), instate.toString());
     }
 
-    if (!payloads.empty() && !tree.addPayloads(containing, payloads, instate, atomic)) {
+    if (!payloads.empty() && !tree.addPayloads(containing, payloads, instate)) {
         return error("[%s] block %s failed stateful pop validation: %s", __func__, block.GetHash().ToString(), instate.toString());
-    }
-
-    if (cleanupAfter) {
-        tree.removePayloads(containing, payloads);
     }
 
     return true;

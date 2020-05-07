@@ -16,6 +16,7 @@
 #include <veriblock/altintegration.hpp>
 #include <veriblock/blockchain/alt_block_tree.hpp>
 #include <veriblock/config.hpp>
+#include <veriblock/mempool.hpp>
 
 namespace VeriBlock {
 
@@ -24,11 +25,16 @@ class PopServiceImpl : public PopService
 private:
     std::mutex mutex;
     std::shared_ptr<altintegration::AltTree> altTree;
+    std::shared_ptr<altintegration::MemPool> mempool;
 
 public:
     altintegration::AltTree& getAltTree() override
     {
         return *altTree;
+    }
+
+    altintegration::MemPool& getMemPool() override {
+        return *mempool;
     }
 
     PopServiceImpl(const altintegration::Config& config);
@@ -53,7 +59,7 @@ public:
     int compareForks(const CBlockIndex& left, const CBlockIndex& right) override;
 };
 
-bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex& indexPrev, const CBlock& block, BlockValidationState& state, bool atomic = true, bool cleanupAfter = false);
+bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex& indexPrev, const CBlock& block, BlockValidationState& state);
 
 } // namespace VeriBlock
 #endif //BITCOIN_SRC_VBK_POP_SERVICE_POP_SERVICE_IMPL_HPP
