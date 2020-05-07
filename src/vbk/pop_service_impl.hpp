@@ -33,7 +33,8 @@ public:
         return *altTree;
     }
 
-    altintegration::MemPool& getMemPool() override {
+    altintegration::MemPool& getMemPool() override
+    {
         return *mempool;
     }
 
@@ -55,6 +56,9 @@ public:
     bool addAllBlockPayloads(const CBlockIndex& indexPrev, const CBlock& fullBlock, BlockValidationState& state) override;
     void invalidateBlockByHash(const uint256& block) override;
     bool setState(const uint256& block) override;
+
+    std::vector<altintegration::PopData> getPopData(const CBlockIndex& currentBlockIndex) override;
+    void removePayloads(const std::vector<altintegration::PopData>& v_popData) override;
 
     int compareForks(const CBlockIndex& left, const CBlockIndex& right) override;
 };

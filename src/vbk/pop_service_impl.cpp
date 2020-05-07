@@ -54,6 +54,20 @@ void popstack(std::vector<valtype>& stack)
 } // namespace
 
 
+namespace {
+
+std::vector<uint8_t> HashFunction(const std::vector<uint8_t>& data)
+{
+    CHashWriter stream(SER_GETHASH, PROTOCOL_VERSION);
+    stream.write((const char*)data.data(), data.size());
+    auto hash = stream.GetHash();
+
+    return std::vector<uint8_t>(hash.begin(), hash.end());
+}
+
+} // namespace
+
+
 namespace VeriBlock {
 
 void PopServiceImpl::addPopPayoutsIntoCoinbaseTx(CMutableTransaction& coinbaseTx, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams)
@@ -218,6 +232,7 @@ PopServiceImpl::PopServiceImpl(const altintegration::Config& config)
 {
     config.validate();
     altTree = altintegration::Altintegration::create(config);
+    mempool = std::make_shared<altintegration::MemPool>(altTree->getParams(), altTree->vbk().getParams(), altTree->btc().getParams(), HashFunction);
 }
 
 void PopServiceImpl::invalidateBlockByHash(const uint256& block)
@@ -232,6 +247,18 @@ bool PopServiceImpl::setState(const uint256& block)
     std::lock_guard<std::mutex> lock(mutex);
     altintegration::ValidationState state;
     return altTree->setState(block.asVector(), state);
+}
+
+std::vector<altintegration::PopData> PopServiceImpl::getPopData(const CBlockIndex& currentBlockIndex)
+{
+    altintegration::AltBlock current = VeriBlock::blockToAltBlock(currentBlockIndex.nHeight, currentBlockIndex.GetBlockHeader());
+    altintegration::ValidationState state;
+    return mempool->getPop(current, *this->altTree, state);
+}
+
+void PopServiceImpl::removePayloads(const std::vector<altintegration::PopData>& v_popData)
+{
+    mempool->removePayloads(v_popData);
 }
 
 bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex& indexPrev, const CBlock& block, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
