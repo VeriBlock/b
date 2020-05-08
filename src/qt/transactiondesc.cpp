@@ -154,12 +154,9 @@ QString TransactionDesc::toHTML(interfaces::Node& node, interfaces::Wallet& wall
 		std::string stdVbkEndPoint = gArgs.GetArg("bfiendpoint", "");// read from conf.
 		
 		QString vbkEndPoint = QString::fromStdString(stdVbkEndPoint);
-		QString url = vbkEndPoint;	// + numBlocks for live.
-
-		//QMessageBox msgBoxErrorA;
-		//msgBoxErrorA.setText(url);
-		//msgBoxErrorA.exec();
-
+		QString url = vbkEndPoint;	
+        url = url.arg(numBlocks); // + numBlocks for live.
+		
 		QEventLoop loop;
 		QNetworkAccessManager nam;
 		QNetworkRequest req;
