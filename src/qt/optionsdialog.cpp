@@ -187,12 +187,6 @@ void OptionsDialog::setModel(OptionsModel *_model)
     connect(ui->lang, static_cast<void (QValueComboBox::*)()>(&QValueComboBox::valueChanged), [this]{ showRestartWarning(); });
     connect(ui->thirdPartyTxUrls, &QLineEdit::textChanged, [this]{ showRestartWarning(); });
 
-
-	/* VBK BFI */
-	//connect(ui->bfiDataSourceUrls, &QLineEdit::textChanged, this, &OptionsDialog::bfiChanged );
-	/* VBK BFI */
-
-
 }
 
 void OptionsDialog::setCurrentTab(OptionsDialog::Tab tab)
@@ -268,18 +262,6 @@ void OptionsDialog::on_resetButton_clicked()
     }
 }
 
-// VBK
-void OptionsDialog::bfiChanged(const QString &str){
-		//try { 
-		//	QMessageBox msgBoxC;
-		//	msgBoxC.setText("BFI setup url changed:" + str);
-		//	msgBoxC.exec();	
-		//} catch(...) { 
-		//
-		//}
-}
-// VBK
-	
 
 void OptionsDialog::on_openBitcoinConfButton_clicked()
 {
