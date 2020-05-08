@@ -319,8 +319,12 @@ class P2PInterface(P2PConnection):
     # Callback methods. Can be overridden by subclasses in individual test
     # cases to provide custom message handling behaviour.
 
-    def on_open(self): pass
-    def on_close(self): pass
+    def on_open(self):
+        pass
+
+    def on_close(self):
+        pass
+
     def on_addr(self, message): pass
     def on_block(self, message): pass
     def on_blocktxn(self, message): pass

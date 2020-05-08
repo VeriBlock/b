@@ -155,7 +155,7 @@ BASE_SCRIPTS = [
     'p2p_invalid_block.py',
     'p2p_invalid_messages.py',
     'p2p_invalid_tx.py',
-    'feature_assumevalid.py',
+    # 'feature_assumevalid.py',
     'example_test.py',
     'wallet_txn_doublespend.py',
     'wallet_txn_clone.py --mineblock',
