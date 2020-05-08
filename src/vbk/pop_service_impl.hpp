@@ -57,7 +57,9 @@ public:
     void invalidateBlockByHash(const uint256& block) override;
     bool setState(const uint256& block, altintegration::ValidationState& state) override;
 
-    bool evalScript(const CScript& script, std::vector<std::vector<unsigned char>>& stack, ScriptError* serror, altintegration::AltPayloads* pub, altintegration::ValidationState& state, bool with_checks) override;
+    std::vector<altintegration::PopData> getPopData(const CBlockIndex& currentBlockIndex) override;
+    void removePayloads(const std::vector<altintegration::PopData>& v_popData) override;
+
     int compareForks(const CBlockIndex& left, const CBlockIndex& right) override;
 };
 

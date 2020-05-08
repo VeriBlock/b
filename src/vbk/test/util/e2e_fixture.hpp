@@ -15,6 +15,7 @@
 #include <vbk/util.hpp>
 #include <veriblock/alt-util.hpp>
 #include <veriblock/mock_miner.hpp>
+#include <veriblock/mempool.hpp>
 
 using altintegration::AltPayloads;
 using altintegration::BtcBlock;
@@ -74,6 +75,10 @@ struct E2eFixture : public TestChain100Setup {
 
         bool isValid = false;
         //TODO generate PopData and put it into block
+        auto& pop_mempool = pop->getMemPool();
+        altintegration::ValidationState state;
+        pop_mempool.submitATV({ atv }, state);
+        pop_mempool.submitVTB(vtbs, state);
 
         return CreateAndProcessBlock({}, prevBlock, cbKey, &isValid);
     }

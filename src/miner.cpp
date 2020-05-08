@@ -306,8 +306,6 @@ void BlockAssembler::SortForBlock(const CTxMemPool::setEntries& package, std::ve
 // Each time through the loop, we compare the best transaction in
 // mapModifiedTxs with the next transaction in the mempool to decide what
 // transaction package to work on next.
-template <typename MempoolComparatorTagName>
-void BlockAssembler::addPackageTxs(int& nPackagesSelected, int& nDescendantsUpdated, CBlockIndex& prevIndex)
 template<typename MempoolComparatorTagName>
 void BlockAssembler::addPackageTxs(int &nPackagesSelected, int &nDescendantsUpdated)
 {

@@ -56,11 +56,7 @@ namespace {
 
 std::vector<uint8_t> HashFunction(const std::vector<uint8_t>& data)
 {
-    CHashWriter stream(SER_GETHASH, PROTOCOL_VERSION);
-    stream.write((const char*)data.data(), data.size());
-    auto hash = stream.GetHash();
-
-    return std::vector<uint8_t>(hash.begin(), hash.end());
+    return VeriBlock::headerFromBytes(data).GetHash().asVector();
 }
 
 } // namespace
@@ -253,8 +249,38 @@ bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex&
     auto containing = VeriBlock::blockToAltBlock(indexPrev.nHeight + 1, block.GetBlockHeader());
 
     altintegration::ValidationState instate;
-    std::vector<altintegration::AltPayloads> payloads;
-    // TODO transform v_popData to the AltPayloads
+    std::vector<altintegration::AltPayloads> payloads(block.v_popData.size());
+    // transform v_popData to the AltPayloads
+    for (size_t i = 0; i < payloads.size(); ++i) {
+        auto& pop_data = block.v_popData[i];
+
+        const altintegration::PublicationData& publicationData = pop_data.atv.transaction.publicationData;
+        CBlockHeader endorsedHeader;
+
+        try {
+            endorsedHeader = headerFromBytes(publicationData.header);
+        } catch (const std::exception& e) {
+            return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "pop-data-alt-block-invalid", "[" + pop_data.atv.getId().asString() + "] can't deserialize endorsed block header: " + e.what());
+        }
+
+        // set endorsed header
+        AssertLockHeld(cs_main);
+        CBlockIndex* endorsedIndex = LookupBlockIndex(endorsedHeader.GetHash());
+        if (!endorsedIndex) {
+            return state.Invalid(
+                BlockValidationResult::BLOCK_INVALID_HEADER,
+                "pop-data-endorsed-block-missing",
+                "[ " + pop_data.atv.getId().asString() + "]: endorsed block " + endorsedHeader.GetHash().ToString() + " is missing");
+        }
+
+        altintegration::AltPayloads p;
+        p.containingBlock = containing;
+        p.endorsed = blockToAltBlock(*endorsedIndex);
+        p.popData = pop_data;
+
+        payloads[i] = p;
+    }
+
 
     if (!tree.acceptBlock(containing, instate)) {
         return error("[%s] block %s is not accepted by altTree: %s", __func__, block.GetHash().ToString(), instate.toString());
