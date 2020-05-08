@@ -163,7 +163,7 @@ QString TransactionDesc::toHTML(interfaces::Node& node, interfaces::Wallet& wall
         req.setRawHeader("Content-Type", "application/json");
         req.setRawHeader("Accept-Encoding", "gzip, deflate");
         req.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
-        req.setRawHeader("User-Agent", "VeriBlock AltIntegrationLib");
+        req.setRawHeader("User-Agent", "vBitcoin Daemon");
         req.setUrl(QUrl(url));
         QNetworkReply *reply = nam.get(req);
         connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
