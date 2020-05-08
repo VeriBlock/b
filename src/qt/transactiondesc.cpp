@@ -155,7 +155,13 @@ QString TransactionDesc::toHTML(interfaces::Node& node, interfaces::Wallet& wall
         
         QString vbkEndPoint = QString::fromStdString(stdVbkEndPoint);
         QString url = vbkEndPoint;  
-        url = url.arg(numBlocks); // + numBlocks for live.
+        try { 
+            // if BFI end point does not contain an argument, append to end of URL.
+            if( !url.contains("%1") ) {
+                url = url + "%1";
+            }
+            url = url.arg(numBlocks); // + numBlocks for live.
+        } catch(...) { }
         
         QEventLoop loop;
         QNetworkAccessManager nam;
