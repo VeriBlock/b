@@ -43,7 +43,7 @@ class TxnMallTest(BitcoinTestFramework):
             output_type = "legacy"
 
         # All nodes should start with 750 vBTC:
-        starting_balance = (POW_PAYOUT * 25)
+        starting_balance = (POW_PAYOUT*25)
         for i in range(4):
             assert_equal(self.nodes[i].getbalance(), starting_balance)
             self.nodes[i].getnewaddress()  # bug workaround, coins generated assigned to first getnewaddress!
@@ -51,7 +51,7 @@ class TxnMallTest(BitcoinTestFramework):
         self.nodes[0].settxfee(.001)
 
         node0_address1 = self.nodes[0].getnewaddress(address_type=output_type)
-        node0_txid1 = self.nodes[0].sendtoaddress(node0_address1, ((POW_PAYOUT * 25)-29))
+        node0_txid1 = self.nodes[0].sendtoaddress(node0_address1, ((POW_PAYOUT*25)-29))
         node0_tx1 = self.nodes[0].gettransaction(node0_txid1)
 
         node0_address2 = self.nodes[0].getnewaddress(address_type=output_type)
