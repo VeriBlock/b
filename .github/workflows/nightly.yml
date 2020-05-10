@@ -100,7 +100,7 @@ jobs:
         run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
       - name: run functional tests
         if: always()
-        run: python3 test/functional/test_runner.py --ansi --ci --quiet --combinedlogslen=4000 --failfast
+        run: python3 test/functional/test_runner.py --combinedlogslen=4000
 
   windows:
     runs-on: windows-latest
@@ -187,7 +187,7 @@ jobs:
         if: always()
         shell: cmd
         run: |
-          python test\functional\test_runner.py --ansi --ci --quiet --combinedlogslen=4000 --failfast --exclude feature_fee_estimation
+          python test\functional\test_runner.py --combinedlogslen=4000 --exclude feature_fee_estimation
 
   macos:
     runs-on: macos-latest
@@ -249,7 +249,7 @@ jobs:
         run: make check
       - name: run functional tests
         if: always()
-        run: python3 test/functional/test_runner.py --ansi --ci --quiet --combinedlogslen=4000 --failfast
+        run: python3 test/functional/test_runner.py --combinedlogslen=4000
 
   x86_64-apple-darwin16:
     runs-on: ubuntu-latest
