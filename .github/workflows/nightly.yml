@@ -100,6 +100,7 @@ jobs:
         run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
       - name: run functional tests
         if: always()
+        timeout-minutes: 60
         run: python3 test/functional/test_runner.py --combinedlogslen=4000
 
   windows:
@@ -185,6 +186,7 @@ jobs:
         run: python test\util\rpcauth-test.py
       - name: test_runner
         if: always()
+        timeout-minutes: 60
         shell: cmd
         run: |
           python test\functional\test_runner.py --combinedlogslen=4000 --exclude feature_fee_estimation
@@ -246,9 +248,11 @@ jobs:
       - name: make
         run: make -j2
       - name: make check
+        timeout-minutes: 20
         run: make check
       - name: run functional tests
         if: always()
+        timeout-minutes: 60
         run: python3 test/functional/test_runner.py --combinedlogslen=4000
 
   x86_64-apple-darwin16:
