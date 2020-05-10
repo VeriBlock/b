@@ -98,7 +98,8 @@ jobs:
           name: test-suite.log
           path: src/test-suite.log
       - name: run functional tests
-        run: python3 test/functional/test_runner.py
+        if: always()
+        run: python3 test/functional/test_runner.py --ansi --ci --quiet --combinedlogslen=4000 --failfast
 
   x86_64-w64-mingw32:
     runs-on: ubuntu-latest
@@ -308,4 +309,7 @@ jobs:
       - name: make
         run: make -j2
       - name: make check
-        run: make check
+        run: make
+      - name: run functional tests
+        if: always()
+        run: python3 test/functional/test_runner.py --ansi --ci --quiet --combinedlogslen=4000 --failfast
