@@ -282,7 +282,7 @@ PopServiceImpl::PopServiceImpl(const altintegration::Config& config)
             index->nStatus |= BLOCK_FAILED_CHILD;
         }
         if (invalidated.status & altintegration::BLOCK_FAILED_POP) {
-            index->nStatus |= BLOCK_FAILED_POP;
+            index->nStatus |= BLOCK_FAILED_VALID;
         }
     });
 }
