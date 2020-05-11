@@ -41,6 +41,10 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
         return 0x3ae6ca;
     }
 
+    uint32_t getMaxPopDataPerBlock() const noexcept override {
+        return 50;
+    }
+
     altintegration::AltBlock bootstrap;
 };
 

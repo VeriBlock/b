@@ -35,10 +35,6 @@ struct Config {
 
     /// The maximum allowed weight for the PoP transaction
 //    uint32_t max_pop_tx_weight = 150000;
-
-    /// The maximum allowed number of PoP transaction in a block
-    uint32_t max_pop_tx_amount = 50;
-
     altintegration::Config popconfig;
 
     /////// Pop Rewards section start
