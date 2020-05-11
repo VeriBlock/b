@@ -32,30 +32,13 @@
 #include <veriblock/validation_state.hpp>
 
 namespace {
-/*
-bool set_error(ScriptError* ret, const ScriptError serror)
-{
-    if (ret)
-        *ret = serror;
-    return false;
-}
-typedef std::vector<unsigned char> valtype;
-
-#define stacktop(i) (stack.at(stack.size() + (i)))
-void popstack(std::vector<valtype>& stack)
-{
-    if (stack.empty())
-        throw std::runtime_error("popstack(): stack empty");
-    stack.pop_back();
-}
-*/
-} // namespace
-
 
 std::vector<uint8_t> HashFunction(const std::vector<uint8_t>& data)
 {
     return VeriBlock::headerFromBytes(data).GetHash().asVector();
 }
+
+} // namespace
 
 namespace VeriBlock {
 
@@ -216,7 +199,7 @@ PopServiceImpl::PopServiceImpl(const altintegration::Config& config)
     altTree->connectOnInvalidateBlock([&](const altintegration::BlockIndex<altintegration::AltBlock>& invalidated) {
         LOCK(cs_main);
         auto index = LookupBlockIndex(uint256(invalidated.getHash()));
-        if(!index) {
+        if (!index) {
             // we don't know this block, do nothing.
             return;
         }
