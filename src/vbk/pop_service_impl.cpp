@@ -236,7 +236,7 @@ std::vector<altintegration::PopData> PopServiceImpl::getPopData(const CBlockInde
 {
     altintegration::AltBlock current = VeriBlock::blockToAltBlock(currentBlockIndex.nHeight, currentBlockIndex.GetBlockHeader());
     altintegration::ValidationState state;
-    return mempool->getPop(current, *this->altTree, state);
+    return mempool->getPop(current, *this->altTree);
 }
 
 void PopServiceImpl::removePayloads(const std::vector<altintegration::PopData>& v_popData)

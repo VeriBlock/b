@@ -32,6 +32,7 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
 
     // endorse tip
     CBlock block = endorseAltBlockAndMine(tip->GetBlockHash(), 10);
+    BOOST_CHECK(block.v_popData.size() != 0);
     {
         BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == block.GetHash());
         auto btc = pop->getLastKnownBTCBlocks(1)[0];
@@ -42,6 +43,7 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
 
     // endorse another tip
     block = endorseAltBlockAndMine(tip->GetBlockHash(), 1);
+    BOOST_CHECK(block.v_popData.size() != 0);
     auto lastHash = ChainActive().Tip()->GetBlockHash();
     {
         BOOST_CHECK(lastHash == block.GetHash());
@@ -56,7 +58,7 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
 
     // endorse block that is not on main chain
     block = endorseAltBlockAndMine(fork1tip.GetHash(), 1);
-    BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == lastHash);
+    BOOST_CHECK(block.v_popData.size() == 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
