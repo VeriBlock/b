@@ -18,6 +18,7 @@
 #include <vbk/service_locator.hpp>
 #include <vbk/test/util/mock.hpp>
 #include <vbk/util.hpp>
+#include <bootstraps.h>
 
 using ::testing::Return;
 
@@ -25,6 +26,10 @@ BOOST_AUTO_TEST_SUITE(util_service_tests)
 
 BOOST_AUTO_TEST_CASE(is_keystone)
 {
+    VeriBlock::InitConfig();
+    SelectParams("regtest");
+    selectPopConfig("regtest", "regtest", true);
+
     CBlockIndex index;
     index.nHeight = 100; // multiple of 5
     BOOST_CHECK(VeriBlock::isKeystone(index));
@@ -34,6 +39,10 @@ BOOST_AUTO_TEST_CASE(is_keystone)
 
 BOOST_AUTO_TEST_CASE(get_previous_keystone)
 {
+    VeriBlock::InitConfig();
+    SelectParams("regtest");
+    selectPopConfig("regtest", "regtest", true);
+
     std::vector<CBlockIndex> blocks;
     blocks.resize(10);
     blocks[0].pprev = nullptr;
@@ -58,9 +67,6 @@ BOOST_AUTO_TEST_CASE(get_previous_keystone)
 BOOST_AUTO_TEST_CASE(make_context_info)
 {
     TestChain100Setup blockchain;
-
-    VeriBlock::InitPopService();
-    VeriBlock::InitConfig();
 
     CScript scriptPubKey = CScript() << ToByteVector(blockchain.coinbaseKey.GetPubKey()) << OP_CHECKSIG;
     CBlock block = blockchain.CreateAndProcessBlock({}, scriptPubKey);
