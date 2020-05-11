@@ -187,10 +187,17 @@ UniValue submitpop(const JSONRPCRequest& request)
     return "successful added";
 }
 
+UniValue debugpop(const JSONRPCRequest& request) {
+    auto& pop = VeriBlock::getService<VeriBlock::PopService>();
+    LogPrint(BCLog::POP, "%s", pop.toPrettyString());
+    return UniValue();
+}
+
 
 const CRPCCommand commands[] = {
     {"pop_mining", "submitpop", &submitpop, {"atv", "vtbs"}},
     {"pop_mining", "getpopdata", &getpopdata, {"blockheight"}},
+    {"pop_mining", "debugpop", &debugpop, {}},
 };
 
 void RegisterPOPMiningRPCCommands(CRPCTable& t)

@@ -58,6 +58,8 @@ struct PopService {
     virtual void removePayloads(const std::vector<altintegration::PopData>& v_popData) = 0;
 
     virtual int compareForks(const CBlockIndex& left, const CBlockIndex& right) = 0;
+
+    virtual std::string toPrettyString() const = 0;
 };
 } // namespace VeriBlock
 

@@ -66,10 +66,7 @@ jobs:
           --enable-lcov
           --enable-lcov-branch-coverage
       - name: make
-        run: make -j2
-      - name: make deploy
-        if: success()
-        run: make deploy
+        run: make -j2 deploy
       - name: create artifacts
         if: success()
         run: |
@@ -101,6 +98,10 @@ jobs:
       - name: Run sonarqube
         if: success()
         run: sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      - name: run functional tests
+        if: always()
+        timeout-minutes: 60
+        run: python3 test/functional/test_runner.py --combinedlogslen=4000
 
   windows:
     runs-on: windows-latest
@@ -130,12 +131,12 @@ jobs:
         with:
           path: C:/vcpkg/installed
           key: ${{ runner.os }}-vcpkg-${{ hashFiles('MSBuild_version') }}
-      - name: Clone alt-integration-cpp
+      - name: Clone veriblock-pop-cpp
         if: steps.vcpkgcache.outputs.cache-hit != 'true'
         run: |
           Write-Host "Cloning alt-integration-cpp-vcpkg."
           cd C:/vcpkg/ports
-          git submodule add --name altintegration https://github.com/Warchant/alt-integration-cpp-vcpkg altintegration
+          git submodule add --name veriblock-pop-cpp https://github.com/VeriBlock/alt-integration-cpp-vcpkg veriblock-pop-cpp
       - name: Update vcpkg and install packages
         if: steps.vcpkgcache.outputs.cache-hit != 'true'
         run: |
@@ -165,11 +166,11 @@ jobs:
            }
       - name: Generate project files
         run: python build_msvc\msvc-autogen.py
-      - name: Install alt-integration-cpp using vcpkg
+      - name: Install veriblock-pop-cpp using vcpkg
         if: steps.vcpkgcache.outputs.cache-hit != 'true'
         run: |
-          Write-Host "Installing alt-integration-cpp."
-          C:/vcpkg/vcpkg.exe install altintegration:x64-windows-static
+          Write-Host "Installing veriblock-pop-cpp."
+          C:/vcpkg/vcpkg.exe install veriblock-pop-cpp:x64-windows-static
       - name: vcpkg integration
         run: C:/vcpkg/vcpkg.exe integrate install
       - name: Build
@@ -183,11 +184,12 @@ jobs:
       - name: rpcauth-test
         shell: cmd
         run: python test\util\rpcauth-test.py
-#      - name: test_runner
-#        if: always()
-#        shell: cmd
-#        run: |
-#          python test\functional\test_runner.py --ansi --ci --quiet --combinedlogslen=4000 --failfast --exclude feature_fee_estimation
+      - name: test_runner
+        if: always()
+        timeout-minutes: 60
+        shell: cmd
+        run: |
+          python test\functional\test_runner.py --combinedlogslen=4000 --exclude feature_fee_estimation
 
   macos:
     runs-on: macos-latest
@@ -246,7 +248,12 @@ jobs:
       - name: make
         run: make -j2
       - name: make check
+        timeout-minutes: 20
         run: make check
+      - name: run functional tests
+        if: always()
+        timeout-minutes: 60
+        run: python3 test/functional/test_runner.py --combinedlogslen=4000
 
   x86_64-apple-darwin16:
     runs-on: ubuntu-latest
@@ -439,3 +446,4 @@ jobs:
           passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
           source: vBitcoin-nightly-${{ steps.extract_branch.outputs.last_tag }}-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.commits_ahead }}-${{ steps.extract_branch.outputs.git_hash }}-win64-qt.zip
           target: ${{ secrets.ARTIFACT_PATH }}
+          

@@ -29,6 +29,11 @@ private:
     std::shared_ptr<altintegration::MemPool> mempool;
 
 public:
+    std::string toPrettyString() const override {
+        return altTree->toPrettyString();
+    };
+
+
     altintegration::AltTree& getAltTree() override
     {
         return *altTree;
