@@ -52,15 +52,10 @@ void popstack(std::vector<valtype>& stack)
 } // namespace
 
 
-namespace {
-
 std::vector<uint8_t> HashFunction(const std::vector<uint8_t>& data)
 {
     return VeriBlock::headerFromBytes(data).GetHash().asVector();
 }
-
-} // namespace
-
 
 namespace VeriBlock {
 
@@ -254,7 +249,7 @@ std::vector<altintegration::PopData> PopServiceImpl::getPopData(const CBlockInde
     return mempool->getPop(current, *this->altTree);
 }
 
-void PopServiceImpl::removePayloads(const std::vector<altintegration::PopData>& v_popData)
+void PopServiceImpl::removePayloadsFromMempool(const std::vector<altintegration::PopData>& v_popData)
 {
     mempool->removePayloads(v_popData);
 }

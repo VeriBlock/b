@@ -2610,7 +2610,7 @@ bool CChainState::ConnectTip(BlockValidationState& state, const CChainParams& ch
     disconnectpool.removeForBlock(blockConnecting.vtx);
 
     // VeriBlock: remove from pop_mempool
-    VeriBlock::getService<VeriBlock::PopService>().removePayloads(blockConnecting.v_popData);
+    VeriBlock::getService<VeriBlock::PopService>().removePayloadsFromMempool(blockConnecting.v_popData);
 
     // Update m_chain & related variables.
     m_chain.SetTip(pindexNew);
