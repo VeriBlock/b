@@ -11,7 +11,6 @@ on:
     branches:
       - develop
       - master
-      - feature/mempool_integration
 
 jobs:
   linux-native:
@@ -98,10 +97,10 @@ jobs:
         with:
           name: test-suite.log
           path: src/test-suite.log
-      - name: run functional tests
-        if: always()
-        timeout-minutes: 60
-        run: python3 test/functional/test_runner.py --combinedlogslen=4000
+      #- name: run functional tests
+      #  if: always()
+      #  timeout-minutes: 60
+      #  run: python3 test/functional/test_runner.py --combinedlogslen=4000
 
   x86_64-w64-mingw32:
     runs-on: ubuntu-latest
@@ -312,7 +311,7 @@ jobs:
         run: make -j2
       - name: make check
         run: make
-      - name: run functional tests
-        if: always()
-        timeout-minutes: 60
-        run: python3 test/functional/test_runner.py --combinedlogslen=4000
+      #- name: run functional tests
+      #  if: always()
+      #  timeout-minutes: 60
+      #  run: python3 test/functional/test_runner.py --combinedlogslen=4000
