@@ -109,10 +109,63 @@ BOOST_FIXTURE_TEST_CASE(BlockWithTooManyPublicationTxes, E2eFixture)
 
     BOOST_CHECK_EQUAL(block3.v_popData.size(), config.popconfig.alt->getMaxPopDataPerBlock() + test_amount);
 
-    auto& pop_service = VeriBlock::getService<VeriBlock::PopService>();
     BlockValidationState block_state;
-    BOOST_CHECK(!pop_service.addAllBlockPayloads(*ChainActive().Tip(), block3, block_state));
+    BOOST_CHECK(!pop->addAllBlockPayloads(*ChainActive().Tip(), block3, block_state));
     BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-size");
+}
+
+BOOST_FIXTURE_TEST_CASE(BlockWithLargePopData, E2eFixture)
+{
+    auto& pop_mempool = pop->getMemPool();
+    altintegration::ValidationState state;
+
+    BOOST_CHECK(pop_mempool.submitVTB({ endorseVbkTip() }, state));
+
+    std::vector<uint256> endorsedBlockHashes = { ChainActive().Tip()->GetBlockHash() , ChainActive().Tip()->pprev->GetBlockHash() };
+    BOOST_CHECK_EQUAL(endorsedBlockHashes.size(), 2);
+
+    std::vector<ATV> atvs;
+    atvs.reserve(endorsedBlockHashes.size());
+    std::transform(endorsedBlockHashes.begin(), endorsedBlockHashes.end(), std::back_inserter(atvs), [&](const uint256& hash) -> ATV {
+        return endorseAltBlock(hash, defaultPayoutInfo);
+    });
+
+    BOOST_CHECK_EQUAL(endorsedBlockHashes.size(), atvs.size());
+    BOOST_CHECK(pop_mempool.submitATV(atvs, state));
+
+    std::vector<altintegration::PopData> v_pop_data = pop->getPopData(*ChainActive().Tip());
+    BOOST_CHECK_EQUAL(v_pop_data.size(), 2);
+    BOOST_CHECK_EQUAL(v_pop_data[0].vtbs.size(),1);
+
+    size_t num_vtbs = 8000;
+    v_pop_data[0].vtbs.reserve(num_vtbs);
+    std::generate_n(std::back_inserter(v_pop_data[0].vtbs), num_vtbs, [&]() -> VTB {
+        return v_pop_data[0].vtbs[0];
+    });
+
+    bool isValid = false;
+    CBlock block = CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey, &isValid);
+    block.v_popData = v_pop_data;
+
+    BlockValidationState block_state;
+    BOOST_CHECK(!pop->addAllBlockPayloads(*ChainActive().Tip(), block, block_state));
+    BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-weight");
+
+    // remove one pop_data that does not contain vtbs
+    block.v_popData.erase(block.v_popData.begin() + 1);
+    block_state = BlockValidationState();
+    BOOST_CHECK(pop->addAllBlockPayloads(*ChainActive().Tip(), block, block_state));
+
+    num_vtbs = 2000;
+    v_pop_data[0].vtbs.reserve(num_vtbs);
+    std::generate_n(std::back_inserter(v_pop_data[0].vtbs), num_vtbs, [&]() -> VTB {
+        return v_pop_data[0].vtbs[0];
+    });
+
+    block.v_popData = v_pop_data;
+    block_state = BlockValidationState();
+    BOOST_CHECK(!pop->addAllBlockPayloads(*ChainActive().Tip(), block, block_state));
+    BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-weight");
 }
 
 static altintegration::PopData generateRandPopData()
@@ -151,7 +204,7 @@ BOOST_AUTO_TEST_CASE(GetBlockWeight_test)
 
     altintegration::PopData popData = generateRandPopData();
 
-    int64_t popDataWeight = GetPopDataWeight(popData);
+    int64_t popDataWeight = VeriBlock::GetPopDataWeight(popData);
 
     BOOST_CHECK(popDataWeight > 0);
 

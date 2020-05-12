@@ -237,10 +237,32 @@ void PopServiceImpl::removePayloadsFromMempool(const std::vector<altintegration:
     mempool->removePayloads(v_popData);
 }
 
+bool validatePopDataLimits(const altintegration::AltChainParams& config, const std::vector<altintegration::PopData>& v_pop_data, BlockValidationState& state)
+{
+    if (v_pop_data.size() > config.getMaxPopDataPerBlock()) {
+        return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "pop-data-size", "[" + std::to_string(v_pop_data.size()) + "] size v_pop_data limits");
+    }
+
+    if (v_pop_data.size() == 1) {
+        if (v_pop_data[0].toVbkEncoding().size() > config.getSuperMaxPopDataWeight()) {
+            return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "pop-data-weight", "[" + std::to_string(v_pop_data.size()) + "] super weight pop_data limits");
+        }
+    }
+    else {
+        for (const auto& pop_data : v_pop_data) {
+            if (pop_data.toVbkEncoding().size() > config.getMaxPopDataWeight()) {
+                return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "pop-data-weight", "[" + std::to_string(v_pop_data.size()) + "] weight pop_data limits");
+            }
+        }
+    }
+
+    return true;
+}
+
 bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex& indexPrev, const CBlock& block, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
-    if (block.v_popData.size() > tree.getParams().getMaxPopDataPerBlock()) {
-        return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "pop-data-size", "[" + std::to_string(block.v_popData.size()) + "] size v_pop_data limits");
+    if (!validatePopDataLimits(tree.getParams(), block.v_popData, state)) {
+        return false;
     }
 
     auto containing = VeriBlock::blockToAltBlock(indexPrev.nHeight + 1, block.GetBlockHeader());

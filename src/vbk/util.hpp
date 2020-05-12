@@ -6,6 +6,7 @@
 #ifndef BITCOIN_SRC_VBK_UTIL_HPP
 #define BITCOIN_SRC_VBK_UTIL_HPP
 
+#include <consensus/consensus.h>
 #include <primitives/block.h>
 #include <primitives/transaction.h>
 #include <streams.h>
@@ -13,6 +14,8 @@
 
 #include <vbk/config.hpp>
 #include <vbk/service_locator.hpp>
+
+#include <veriblock/entities/popdata.hpp>
 
 #include <algorithm>
 #include <amount.h>
@@ -66,6 +69,12 @@ inline altintegration::AltBlock blockToAltBlock(int nHeight, const CBlockHeader&
 inline altintegration::AltBlock blockToAltBlock(const CBlockIndex& index)
 {
     return blockToAltBlock(index.nHeight, index.GetBlockHeader());
+}
+
+//PopData weight
+inline int64_t GetPopDataWeight(const altintegration::PopData& pop_data)
+{
+    return ::GetSerializeSize(pop_data, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) * (WITNESS_SCALE_FACTOR - 1) + ::GetSerializeSize(pop_data, PROTOCOL_VERSION);
 }
 
 } // namespace VeriBlock
