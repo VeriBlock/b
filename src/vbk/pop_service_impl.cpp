@@ -239,6 +239,10 @@ void PopServiceImpl::removePayloadsFromMempool(const std::vector<altintegration:
 
 bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex& indexPrev, const CBlock& block, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
+    if (block.v_popData.size() > tree.getParams().getMaxPopDataPerBlock()) {
+        return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "pop-data-size", "[" + std::to_string(block.v_popData.size()) + "] size v_pop_data limits");
+    }
+
     auto containing = VeriBlock::blockToAltBlock(indexPrev.nHeight + 1, block.GetBlockHeader());
 
     altintegration::ValidationState instate;

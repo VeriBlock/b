@@ -8,7 +8,6 @@
 #include <consensus/validation.h>
 #include <test/util/setup_common.h>
 #include <validation.h>
-#include <consensus/validation.h>
 
 #include <vbk/config.hpp>
 #include <vbk/init.hpp>
@@ -17,8 +16,10 @@
 #include <vbk/test/util/mock.hpp>
 #include <vbk/test/util/util.hpp>
 
-#include <string>
+#include <vbk/test/util/e2e_fixture.hpp>
+
 #include <gmock/gmock.h>
+#include <string>
 
 using ::testing::Return;
 
@@ -27,57 +28,8 @@ inline std::vector<uint8_t> operator""_v(const char* s, size_t size)
     return std::vector<uint8_t>{s, s + size};
 }
 
-//struct BlockValidationFixture : public TestChain100Setup {
-//    testing::NiceMock<VeriBlockTest::PopServiceImplMock> pop_impl_mock;
-//
-//    CScript cbKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
-//
-//    std::vector<uint8_t> btc_header = std::vector<uint8_t>(80, 1);
-//    std::vector<uint8_t> vbk_header = std::vector<uint8_t>(64, 2);
-//
-//    CScript ctxscript = (CScript() << vbk_header << OP_POPVBKHEADER << btc_header << OP_POPBTCHEADER << OP_CHECKPOP);
-//    CScript pubscript = (CScript() << "ATV"_v << OP_CHECKATV << "VTB"_v << OP_CHECKVTB << OP_CHECKPOP);
-//
-//    BlockValidationFixture()
-//    {
-//        auto& config = VeriBlock::InitConfig();
-//
-//        CBlockIndex* endorsedBlockIndex = ChainActive().Tip()->pprev;
-//        CBlock endorsedBlock;
-//        BOOST_CHECK(ReadBlockFromDisk(endorsedBlock, endorsedBlockIndex, Params().GetConsensus()));
-//
-//        stream = std::make_shared<CDataStream>(SER_NETWORK, PROTOCOL_VERSION);
-//        *stream << endorsedBlock.GetBlockHeader();
-//
-//        ON_CALL(pop_impl_mock, determineATVPlausibilityWithBTCRules).WillByDefault(Return(true));
-//
-//        ON_CALL(pop_service_mock, checkVTBinternally).WillByDefault(Return(true));
-//        ON_CALL(pop_service_mock, checkATVinternally).WillByDefault(Return(true));
-//        ON_CALL(pop_service_mock, blockPopValidation).WillByDefault(
-//          [&](const CBlock& block, const CBlockIndex& pindexPrev, const Consensus::Params& params, BlockValidationState& state) -> bool {
-//            return VeriBlock::blockPopValidationImpl(pop_impl_mock, block, pindexPrev, params, state);
-//          });
-//    };
-//
-//    std::shared_ptr<CDataStream> stream;
-//};
-//
 BOOST_AUTO_TEST_SUITE(block_validation_tests)
 
-//BOOST_FIXTURE_TEST_CASE(BlockWithTooManyPublicationTxes, BlockValidationFixture)
-//{
-//    std::vector<CMutableTransaction> pubs;
-//    for (size_t i = 0; i < 256 /* more than 50 */; ++i) {
-//        CScript script;
-//        script << std::vector<uint8_t>{10, (uint8_t)i} << OP_CHECKATV << OP_CHECKPOP;
-//        pubs.emplace_back(VeriBlock::MakePopTx(script));
-//    }
-//
-//    bool isBlockValid = true;
-//    auto block = CreateAndProcessBlock(pubs, cbKey, &isBlockValid);
-//    BOOST_CHECK(!isBlockValid);
-//}
-//
 //BOOST_FIXTURE_TEST_CASE(BlockWithMaxNumberOfPopTxes, BlockValidationFixture)
 //{
 //    auto& config = VeriBlock::getService<VeriBlock::Config>();
@@ -115,7 +67,56 @@ BOOST_AUTO_TEST_SUITE(block_validation_tests)
 //    BOOST_CHECK(*block.vtx[2] == CTransaction(pubtx));
 //}
 
-static altintegration::PopData generateRandPopData() {
+BOOST_FIXTURE_TEST_CASE(BlockWithTooManyPublicationTxes, E2eFixture)
+{
+    auto& config = VeriBlock::getService<VeriBlock::Config>();
+
+    std::vector<uint256> endorsedBlockHashes;
+    auto* walkBlock = ChainActive().Tip();
+
+    size_t test_amount = 10;
+    for (size_t i = 0; i < config.popconfig.alt->getMaxPopDataPerBlock() + test_amount; ++i) {
+        endorsedBlockHashes.push_back(walkBlock->GetBlockHash());
+        walkBlock = walkBlock->pprev;
+    }
+
+    BOOST_CHECK_EQUAL(endorsedBlockHashes.size(), config.popconfig.alt->getMaxPopDataPerBlock() + 10);
+
+    std::vector<ATV> atvs;
+    atvs.reserve(endorsedBlockHashes.size());
+    std::transform(endorsedBlockHashes.begin(), endorsedBlockHashes.end(), std::back_inserter(atvs), [&](const uint256& hash) -> ATV {
+        return endorseAltBlock(hash, defaultPayoutInfo);
+    });
+
+    BOOST_CHECK_EQUAL(endorsedBlockHashes.size(), atvs.size());
+
+    auto& pop_mempool = pop->getMemPool();
+    altintegration::ValidationState state;
+    BOOST_CHECK(pop_mempool.submitATV(atvs, state));
+
+    bool isValid = false;
+    CBlock block1 = CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey, &isValid);
+    BOOST_CHECK_EQUAL(block1.v_popData.size(), config.popconfig.alt->getMaxPopDataPerBlock());
+
+    CBlock block2 = CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey, &isValid);
+    BOOST_CHECK_EQUAL(block2.v_popData.size(), test_amount);
+
+    CBlock block3 = CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey, &isValid);
+    BOOST_CHECK_EQUAL(block3.v_popData.size(), 0);
+
+    block3.v_popData.insert(block3.v_popData.end(), block1.v_popData.begin(), block1.v_popData.end());
+    block3.v_popData.insert(block3.v_popData.end(), block2.v_popData.begin(), block2.v_popData.end());
+
+    BOOST_CHECK_EQUAL(block3.v_popData.size(), config.popconfig.alt->getMaxPopDataPerBlock() + test_amount);
+
+    auto& pop_service = VeriBlock::getService<VeriBlock::PopService>();
+    BlockValidationState block_state;
+    BOOST_CHECK(!pop_service.addAllBlockPayloads(*ChainActive().Tip(), block3, block_state));
+    BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-size");
+}
+
+static altintegration::PopData generateRandPopData()
+{
     // add PopData
     auto atvBytes = altintegration::ParseHex(VeriBlockTest::defaultAtvEncoded);
     auto streamATV = altintegration::ReadStream(atvBytes);
@@ -128,13 +129,13 @@ static altintegration::PopData generateRandPopData() {
 
     altintegration::PopData popData;
     popData.atv = atv;
-    popData.vtbs = { vtb, vtb, vtb };
+    popData.vtbs = {vtb, vtb, vtb};
 
     return popData;
 }
 
-BOOST_AUTO_TEST_CASE(GetBlockWeight_test) {
-
+BOOST_AUTO_TEST_CASE(GetBlockWeight_test)
+{
     // Create random block
     CBlock block;
     block.hashMerkleRoot.SetNull();
@@ -155,14 +156,14 @@ BOOST_AUTO_TEST_CASE(GetBlockWeight_test) {
     BOOST_CHECK(popDataWeight > 0);
 
     // put PopData into block
-    block.v_popData = { popData, popData };
+    block.v_popData = {popData, popData};
 
     int64_t new_block_weight = GetBlockWeight(block);
     BOOST_CHECK_EQUAL(new_block_weight, expected_block_weight);
 }
 
-BOOST_AUTO_TEST_CASE(block_serialization_test) {
-
+BOOST_AUTO_TEST_CASE(block_serialization_test)
+{
     // Create random block
     CBlock block;
     block.hashMerkleRoot.SetNull();
@@ -174,7 +175,7 @@ BOOST_AUTO_TEST_CASE(block_serialization_test) {
 
     altintegration::PopData popData = generateRandPopData();
 
-    block.v_popData = { popData, popData };
+    block.v_popData = {popData, popData};
 
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     BOOST_CHECK(stream.size() == 0);
