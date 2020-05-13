@@ -53,7 +53,7 @@ TIME_GENESIS_BLOCK = 1296688602
 WITNESS_COMMITMENT_HEADER = b"\xaa\x21\xa9\xed"
 
 
-def create_block(node, hashprev, coinbase, ntime=None, *, version=1):
+def create_block(node, hashprev, coinbase, ntime=None, *, version=1, height=None):
     """Create a block (with regtest difficulty)."""
     assert isinstance(node, TestNode)
     assert isinstance(hashprev, int)
@@ -68,7 +68,7 @@ def create_block(node, hashprev, coinbase, ntime=None, *, version=1):
     block.hashPrevBlock = hashprev
     block.nBits = 0x207fffff  # difficulty retargeting is disabled in REGTEST chainparams
     block.vtx.append(coinbase)
-    block.contextinfo = ContextInfoContainer.create(node, hashprev)
+    block.contextinfo = ContextInfoContainer.create(node, hashprev, height)
     block.hashMerkleRoot = block.get_top_level_merkle_root()
     block.calc_sha256()
     return block

@@ -1,5 +1,6 @@
 import struct
 from .messages import ser_uint256, hash256, uint256_from_str
+from .test_node import TestNode
 
 KEYSTONE_INTERVAL = 5
 
@@ -38,13 +39,22 @@ class ContextInfoContainer:
     __slots__ = ("height", "keystone1", "keystone2", "txRoot")
 
     @staticmethod
-    def create(node, prev):
+    def create(node, prev=None, height=None):
+        assert isinstance(node, TestNode)
+        if height:
+            return ContextInfoContainer.createFromHeight(node, height)
+
         if isinstance(prev, int):
             prev = ser_uint256(prev)[::-1].hex()
 
         assert (isinstance(prev, str))
-        best = node.getblock(blockhash=prev)
-        height = int(best['height']) + 1
+        best = node.getblock(prev)
+        return ContextInfoContainer.createFromHeight(node, best['height'])
+
+    @staticmethod
+    def createFromHeight(node, height):
+        assert isinstance(node, TestNode)
+        assert (isinstance(height, int))
         p1, p2 = getKeystones(node, height)
         return ContextInfoContainer(height, p1, p2)
 
