@@ -39,6 +39,7 @@ from .script import (
     OP_TRUE,
     hash160,
 )
+from .test_node import TestNode
 from .util import assert_equal
 from io import BytesIO
 
@@ -53,6 +54,8 @@ WITNESS_COMMITMENT_HEADER = b"\xaa\x21\xa9\xed"
 
 def create_block(node, hashprev, coinbase, ntime=None, *, version=1):
     """Create a block (with regtest difficulty)."""
+    assert isinstance(node, TestNode)
+    assert isinstance(hashprev, int)
 
     block = CBlock()
     block.nVersion = version

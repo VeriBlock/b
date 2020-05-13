@@ -627,8 +627,8 @@ class CBlock(CBlockHeader):
         return uint256_from_str(hashes[0])
 
     def get_top_level_merkle_root(self):
-        self.contextinfo.txRoot = self.calc_merkle_root()
-        return uint256_from_str(self.contextinfo.getAuthenticatedHash())
+        self.contextinfo.setTxRootInt(self.calc_merkle_root())
+        return self.contextinfo.getTopLevelMerkleRoot()
 
     def calc_merkle_root(self):
         hashes = []

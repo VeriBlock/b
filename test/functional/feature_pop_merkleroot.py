@@ -15,7 +15,7 @@ from collections import defaultdict
 
 # Avoid wildcard * imports
 from test_framework.blocktools import (create_block, create_coinbase)
-from test_framework.messages import CInv, hash256
+from test_framework.messages import CInv, hash256, ser_uint256, uint256_from_str
 from test_framework.mininode import (
     P2PInterface,
     mininode_lock,
@@ -39,29 +39,41 @@ class ExampleTest(BitcoinTestFramework):
 
     def set_test_params(self):
         self.setup_clean_chain = True
-        self.num_nodes = 1
+        self.num_nodes = 2
 
     def setup_network(self):
         self.add_nodes(self.num_nodes)
+        self.start_node(0)
+        self.start_node(1)
+        connect_nodes(self.nodes[0], 1)
 
     def run_test(self):
         """Main test logic"""
-        self.start_node(0)
+        self.nodes[0].add_p2p_connection(P2PInterface())
 
         # Generating a block on one of the nodes will get us out of IBD
         blockhashhex = self.nodes[0].generate(nblocks=1)[0]
         block = self.nodes[0].getblock(blockhashhex)
+        height = block['height']
+        blocktime = block['time']
         prevhashhex = block['previousblockhash']
         merkleroothex = block['merkleroot']
         coinbasetx = block['tx'][0]
 
-        ctx = ContextInfoContainer.create(self.nodes[0], prevhashhex)
-        ctx.txRoot = coinbasetx
-        h = ctx.getTopLevelMerkleRoot().hex()
-        print("expected: " + merkleroothex)
-        print("got     : " + h)
+        # ctx = ContextInfoContainer.create(self.nodes[0], prevhashhex)
+        # ctx.setTxRootHex(coinbasetx)
+        # h = ser_uint256(ctx.getTopLevelMerkleRoot()).hex()
+        # assert h == merkleroothex, "bad merkle root. expected: {}, got {}".format(merkleroothex, h)
 
-        assert(h == merkleroothex)
+        # create a block
+        block = create_block(self.nodes[0], int(blockhashhex, 16), create_coinbase(height + 1), blocktime + 1)
+        block.solve()
+        block_message = msg_block(block)
+        # Send message is used to send a P2P message to the node over our P2PInterface
+        self.nodes[0].p2p.send_message(block_message)
+
+        newbest = self.nodes[0].getbestblockhash()
+        assert newbest == block.hash, "bad tip. \n\tExpected : {}\n\tGot      : {}".format(block, newbest)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 import struct
-from .messages import ser_uint256, hash256
+from .messages import ser_uint256, hash256, uint256_from_str
 
 KEYSTONE_INTERVAL = 5
 
@@ -52,7 +52,7 @@ class ContextInfoContainer:
         self.height: int = height
         self.keystone1: str = keystone1
         self.keystone2: str = keystone2
-        self.txRoot: str = ""
+        self.txRoot: int = 0
 
     def getUnauthenticated(self):
         data = b''
@@ -67,9 +67,18 @@ class ContextInfoContainer:
 
     def getTopLevelMerkleRoot(self):
         data = b''
-        data += bytes.fromhex(self.txRoot)[::-1]
+        data += ser_uint256(self.txRoot)
         data += self.getUnauthenticatedHash()
-        return hash256(data)[::-1]
+        return uint256_from_str(hash256(data))
+
+    def setTxRootInt(self, txRoot: int):
+        assert isinstance(txRoot, int)
+        self.txRoot = txRoot
+
+    def setTxRootHex(self, txRoot: str):
+        assert isinstance(txRoot, str)
+        assert len(txRoot) == 64
+        self.txRoot = int(txRoot, 16)
 
     def __repr__(self):
         return "ContextInfo(height={}, ks1={}, ks2={}, mroot={})".format(self.height, self.keystone1,
