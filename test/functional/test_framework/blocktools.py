@@ -26,6 +26,7 @@ from .messages import (
     sha256,
     uint256_from_str,
 )
+from .pop import ContextInfoContainer
 from .script import (
     CScript,
     CScriptNum,
@@ -50,8 +51,9 @@ TIME_GENESIS_BLOCK = 1296688602
 WITNESS_COMMITMENT_HEADER = b"\xaa\x21\xa9\xed"
 
 
-def create_block(hashprev, coinbase, ntime=None, *, version=1):
+def create_block(node, hashprev, coinbase, ntime=None, *, version=1):
     """Create a block (with regtest difficulty)."""
+
     block = CBlock()
     block.nVersion = version
     if ntime is None:
@@ -62,7 +64,8 @@ def create_block(hashprev, coinbase, ntime=None, *, version=1):
     block.hashPrevBlock = hashprev
     block.nBits = 0x207fffff  # difficulty retargeting is disabled in REGTEST chainparams
     block.vtx.append(coinbase)
-    block.hashMerkleRoot = block.calc_merkle_root()
+    block.contextinfo = ContextInfoContainer.create(node, hashprev)
+    block.hashMerkleRoot = block.get_top_level_merkle_root()
     block.calc_sha256()
     return block
 
