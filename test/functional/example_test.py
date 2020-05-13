@@ -175,7 +175,7 @@ class ExampleTest(BitcoinTestFramework):
             # Calling the generate() rpc is easier, but this allows us to exactly
             # control the blocks and transactions.
             block = create_block(self.nodes[0], self.tip, create_coinbase(height + 1), self.block_time,
-                                 height=(height + 1))
+                                 prevheight=height)
             block.solve()
             block_message = msg_block(block)
             # Send message is used to send a P2P message to the node over our P2PInterface

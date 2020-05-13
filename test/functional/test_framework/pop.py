@@ -39,17 +39,17 @@ class ContextInfoContainer:
     __slots__ = ("height", "keystone1", "keystone2", "txRoot")
 
     @staticmethod
-    def create(node, prev=None, height=None):
+    def create(node, prev=None, prevheight=None):
         assert isinstance(node, TestNode)
-        if height:
-            return ContextInfoContainer.createFromHeight(node, height)
+        if prevheight:
+            return ContextInfoContainer.createFromHeight(node, prevheight + 1)
 
         if isinstance(prev, int):
             prev = ser_uint256(prev)[::-1].hex()
 
         assert (isinstance(prev, str))
         best = node.getblock(prev)
-        return ContextInfoContainer.createFromHeight(node, best['height'])
+        return ContextInfoContainer.createFromHeight(node, best['height'] + 1)
 
     @staticmethod
     def createFromHeight(node, height):
