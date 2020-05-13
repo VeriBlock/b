@@ -39,13 +39,11 @@ class ExampleTest(BitcoinTestFramework):
 
     def set_test_params(self):
         self.setup_clean_chain = True
-        self.num_nodes = 2
+        self.num_nodes = 1
 
     def setup_network(self):
         self.add_nodes(self.num_nodes)
         self.start_node(0)
-        self.start_node(1)
-        connect_nodes(self.nodes[0], 1)
 
     def run_test(self):
         """Main test logic"""
@@ -56,14 +54,6 @@ class ExampleTest(BitcoinTestFramework):
         block = self.nodes[0].getblock(blockhashhex)
         height = block['height']
         blocktime = block['time']
-        prevhashhex = block['previousblockhash']
-        merkleroothex = block['merkleroot']
-        coinbasetx = block['tx'][0]
-
-        # ctx = ContextInfoContainer.create(self.nodes[0], prevhashhex)
-        # ctx.setTxRootHex(coinbasetx)
-        # h = ser_uint256(ctx.getTopLevelMerkleRoot()).hex()
-        # assert h == merkleroothex, "bad merkle root. expected: {}, got {}".format(merkleroothex, h)
 
         # create a block
         block = create_block(self.nodes[0], int(blockhashhex, 16), create_coinbase(height + 1), blocktime + 1)
@@ -71,7 +61,7 @@ class ExampleTest(BitcoinTestFramework):
         block_message = msg_block(block)
         # Send message is used to send a P2P message to the node over our P2PInterface
         self.nodes[0].p2p.send_message(block_message)
-
+        self.nodes[0].waitforblockheight(2)
         newbest = self.nodes[0].getbestblockhash()
         assert newbest == block.hash, "bad tip. \n\tExpected : {}\n\tGot      : {}".format(block, newbest)
 
