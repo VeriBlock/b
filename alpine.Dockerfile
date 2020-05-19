@@ -65,7 +65,7 @@ RUN export VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print
      cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION}; \
      mkdir build; \
      cd build; \
-     cmake .. -DCMAKE_BUILD_TYPE=Debug -DASAN=ON -DTESTING=OFF; \
+     cmake .. -DCMAKE_BUILD_TYPE=Debug -DTESTING=OFF; \
      make -j$(nproc) install \
     )
 
@@ -79,7 +79,6 @@ RUN ./configure LDFLAGS=-L`ls -d /opt/db*`/lib/ CPPFLAGS=-I`ls -d /opt/db*`/incl
     --without-gui \
     --with-libs=no \
     --with-daemon \
-    --with-sanitizers=address \
     --prefix=${VBITCOIN_PREFIX}
 
 RUN make -j$(nproc) install
