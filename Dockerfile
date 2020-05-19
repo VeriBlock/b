@@ -25,7 +25,8 @@ RUN CC=gcc-7 CXX=g++-7 ./configure \
   --with-libs=no \
   --with-sanitizers=address
 RUN make -j4 install
-
+# remove source files to decrease image size
+RUN rm -rf /app
 ENV DATA_DIR=/home/vbitcoin/.vbitcoin
 RUN groupadd -r --gid 1001 vbitcoin
 RUN useradd --no-log-init -r --uid 1001 --gid 1001 --create-home --shell /bin/bash vbitcoin
@@ -34,6 +35,3 @@ RUN chown -R 1001:1001 ${DATA_DIR}
 USER vbitcoin
 
 WORKDIR $DATA_DIR
-
-# some cleanup to decrease image size
-RUN rm -rf /app
