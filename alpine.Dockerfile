@@ -79,14 +79,16 @@ RUN ./configure LDFLAGS=-L`ls -d /opt/db*`/lib/ CPPFLAGS=-I`ls -d /opt/db*`/incl
     --without-gui \
     --with-libs=no \
     --with-daemon \
+    --use-sanitizers=address \
     --prefix=${VBITCOIN_PREFIX}
 
 RUN make -j$(nproc) install
 
-RUN strip ${VBITCOIN_PREFIX}/bin/vbitcoin-cli
-RUN strip ${VBITCOIN_PREFIX}/bin/vbitcoind
-RUN strip ${VBITCOIN_PREFIX}/bin/vbitcoin-tx
-RUN strip ${VBITCOIN_PREFIX}/bin/vbitcoin-wallet
+# DO NOT STRIP debug symbols
+#RUN strip ${VBITCOIN_PREFIX}/bin/vbitcoin-cli
+#RUN strip ${VBITCOIN_PREFIX}/bin/vbitcoind
+#RUN strip ${VBITCOIN_PREFIX}/bin/vbitcoin-tx
+#RUN strip ${VBITCOIN_PREFIX}/bin/vbitcoin-wallet
 
 # Build stage for compiled artifacts
 FROM alpine
