@@ -79,7 +79,7 @@ RUN ./configure LDFLAGS=-L`ls -d /opt/db*`/lib/ CPPFLAGS=-I`ls -d /opt/db*`/incl
     --without-gui \
     --with-libs=no \
     --with-daemon \
-    --use-sanitizers=address \
+    --with-sanitizers=address \
     --prefix=${VBITCOIN_PREFIX}
 
 RUN make -j$(nproc) install
