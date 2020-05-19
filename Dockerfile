@@ -27,11 +27,9 @@ RUN CC=gcc-7 CXX=g++-7 ./configure \
 RUN make -j4 install
 
 ENV DATA_DIR=/home/vbitcoin/.vbitcoin
-
+RUN groupadd -r --gid 1001 vbitcoin
+RUN useradd --no-log-init -r --uid 1001 --gid 1001 --create-home --shell /bin/bash vbitcoin
 RUN mkdir -p ${DATA_DIR}
-RUN set -x \
-    && addgroup -g 1001 -S vbitcoin \
-    && adduser -u 1001 -D -S -G vbitcoin vbitcoin
 RUN chown -R 1001:1001 ${DATA_DIR}
 USER vbitcoin
 
