@@ -1,7 +1,5 @@
 FROM veriblock/prerelease-btc
 
-RUN apt-get update && apt-get install --no-install-recommends -y libasan4
-
 ADD . /app
 WORKDIR /app
 

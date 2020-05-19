@@ -40,8 +40,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     vim \
     unzip \
     cmake \
-    golang \
-    libasan4
+    golang
 
 WORKDIR /tmp
 
