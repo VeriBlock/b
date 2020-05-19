@@ -26,7 +26,16 @@ RUN CC=gcc-7 CXX=g++-7 ./configure \
   --with-sanitizers=address
 RUN make -j4 install
 
-WORKDIR /root
+ENV DATA_DIR=/home/vbitcoin/.vbitcoin
+
+RUN mkdir -p ${DATA_DIR}
+RUN set -x \
+    && addgroup -g 1001 -S vbitcoin \
+    && adduser -u 1001 -D -S -G vbitcoin vbitcoin
+RUN chown -R 1001:1001 ${DATA_DIR}
+USER vbitcoin
+
+WORKDIR $DATA_DIR
 
 # some cleanup to decrease image size
 RUN rm -rf /app
