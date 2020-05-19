@@ -25,6 +25,9 @@ jobs:
           echo "::set-env name=TAGS::$(if [ "${{ github.event_name }}" == "push" ] && [ "$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')" == "master" ]; then echo "latest,$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')"; elif [ "${{ github.event_name }}" == "pull_request" ]; then echo ""; else echo "$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')"; fi)"
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
+        env:
+          ASAN: ON
+          BUILD_TYPE: DEBUG
         with:
           dockerfile: alpine.Dockerfile
           name: veriblock/vbitcoin
