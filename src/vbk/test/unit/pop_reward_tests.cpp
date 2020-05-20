@@ -20,7 +20,7 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
     auto tip = ChainActive().Tip();
     BOOST_CHECK(tip != nullptr);
     std::vector<uint8_t> payoutInfo{scriptPubKey.begin(), scriptPubKey.end()};
-    CBlock block = endorseAltBlockAndMine(tip->GetAncestor(0)->GetBlockHash(), ChainActive().Tip()->GetBlockHash(), payoutInfo, 0);
+    CBlock block = endorseAltBlockAndMine(tip->GetAncestor(100)->GetBlockHash(), ChainActive().Tip()->GetBlockHash(), payoutInfo, 0);
     {
         LOCK(cs_main);
         BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == block.GetHash());
@@ -28,20 +28,14 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
 
     // Generate a chain whith rewardInterval of blocks
     int rewardInterval = (int)VeriBlock::getService<VeriBlock::Config>().popconfig.alt->getEndorsementSettlementInterval();
-    // we already have 101 blocks
     // do not add block with rewards
     // do not add block before block with rewards
-    for (int i = 0; i < (rewardInterval - 103); i++) {
+    for (int i = 0; i < (rewardInterval - 3); i++) {
         CBlock b = CreateAndProcessBlock({}, scriptPubKey);
         m_coinbase_txns.push_back(b.vtx[0]);
     }
 
     CBlock beforePayoutBlock = CreateAndProcessBlock({}, scriptPubKey);
-    {
-        LOCK(cs_main);
-        BOOST_CHECK(ChainActive().Tip() != nullptr);
-        BOOST_CHECK(ChainActive().Tip()->nHeight + 1 == rewardInterval);
-    }
 
     int n = 0;
     for (const auto& out : beforePayoutBlock.vtx[0]->vout) {
@@ -50,12 +44,6 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
     BOOST_CHECK(n == 1);
 
     CBlock payoutBlock = CreateAndProcessBlock({}, scriptPubKey);
-    {
-        LOCK(cs_main);
-        BOOST_CHECK(ChainActive().Tip() != nullptr);
-        BOOST_CHECK(ChainActive().Tip()->nHeight == rewardInterval);
-    }
-
     n = 0;
     for (const auto& out : payoutBlock.vtx[0]->vout) {
         if (out.nValue > 0) n++;
