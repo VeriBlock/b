@@ -4,9 +4,9 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <boost/test/unit_test.hpp>
+#include <vbk/pop_service_impl.hpp>
 #include <vbk/test/util/e2e_fixture.hpp>
 #include <vbk/test/util/tx.hpp>
-#include <vbk/pop_service_impl.hpp>
 
 struct PopRewardsTestFixture : public E2eFixture {
 };
@@ -27,7 +27,7 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
     }
 
     // Generate a chain whith rewardInterval of blocks
-    int rewardInterval = (int)VeriBlock::getService<VeriBlock::Config>().popconfig.alt->getRewardParams().rewardSettlementInterval();
+    int rewardInterval = (int)VeriBlock::getService<VeriBlock::Config>().popconfig.alt->getEndorsementSettlementInterval();
     // we already have 101 blocks
     // do not add block with rewards
     // do not add block before block with rewards
