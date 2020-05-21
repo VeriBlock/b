@@ -20,9 +20,13 @@
 #include <wallet/wallet.h>    // for CWallet
 
 #include <set>
+<<<<<<< HEAD
 #include <fstream>
 
 #include "pop_service_impl.hpp"
+=======
+
+>>>>>>> cb977a509ebb27cdb3aa0cce0c34de92ecfc8545
 #include "vbk/config.hpp"
 #include "veriblock/entities/test_case_entity.hpp"
 
@@ -89,7 +93,11 @@ CBlock GetBlockChecked(const CBlockIndex* pblockindex)
     return block;
 }
 
+<<<<<<< HEAD
 void SaveState(std::string file_name = "vbtc_state")
+=======
+void SaveState()
+>>>>>>> cb977a509ebb27cdb3aa0cce0c34de92ecfc8545
 {
     LOCK2(cs_main, mempool.cs);
 
@@ -103,6 +111,7 @@ void SaveState(std::string file_name = "vbtc_state")
     };
     std::set<CBlockIndex*, decltype(cmp)> block_index(cmp);
 
+<<<<<<< HEAD
     for (const auto& el : vbtc_tree) {
         block_index.insert(el.second);
     }
@@ -130,6 +139,10 @@ void SaveState(std::string file_name = "vbtc_state")
     file.write((const char*)stream.data().data(), stream.data().size());
     
     file.close();
+=======
+    for (const auto& b_index : vbtc_tree) {
+    }
+>>>>>>> cb977a509ebb27cdb3aa0cce0c34de92ecfc8545
 }
 
 } // namespace

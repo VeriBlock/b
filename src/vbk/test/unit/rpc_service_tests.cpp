@@ -45,6 +45,7 @@ BOOST_AUTO_TEST_CASE(getpopdata_test)
     //
     //    BOOST_CHECK(find_value(result.get_obj(), "raw_contextinfocontainer").get_str() == HexStr(authedContext.begin(), authedContext.end()));
     //    BOOST_CHECK(find_value(result.get_obj(), "block_header").get_str() == HexStr(ssBlock));
+
 }
 
 BOOST_AUTO_TEST_CASE(submitpop_test)
@@ -89,6 +90,5 @@ BOOST_AUTO_TEST_CASE(savepopstate_test)
     UniValue result;
     BOOST_CHECK_NO_THROW(result = tableRPC.execute(request));
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()
