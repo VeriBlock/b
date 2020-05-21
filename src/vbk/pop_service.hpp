@@ -8,6 +8,7 @@
 
 #include <map>
 #include <vector>
+#include <mutex>
 
 #include <consensus/validation.h>
 #include <script/interpreter.h>
