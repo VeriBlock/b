@@ -19,6 +19,11 @@
 #include <wallet/rpcwallet.h> // for GetWalletForJSONRPCRequest
 #include <wallet/wallet.h>    // for CWallet
 
+#include <set>
+
+#include "vbk/config.hpp"
+#include "veriblock/entities/test_case_entity.hpp"
+
 namespace VeriBlock {
 
 namespace {
@@ -80,6 +85,24 @@ CBlock GetBlockChecked(const CBlockIndex* pblockindex)
     }
 
     return block;
+}
+
+void SaveState()
+{
+    LOCK2(cs_main, mempool.cs);
+
+    altintegration::TestCase vbtc_state;
+    vbtc_state.config = VeriBlock::getService<VeriBlock::Config>().popconfig;
+
+    auto& vbtc_tree = BlockIndex();
+
+    auto cmp = [](CBlockIndex* a, CBlockIndex* b) -> bool {
+        return a->nHeight < b->nHeight;
+    };
+    std::set<CBlockIndex*, decltype(cmp)> block_index(cmp);
+
+    for (const auto& b_index : vbtc_tree) {
+    }
 }
 
 } // namespace
@@ -214,11 +237,24 @@ UniValue debugpop(const JSONRPCRequest& request)
     return UniValue();
 }
 
+UniValue savepopstate(const JSONRPCRequest& request)
+{
+    if (request.fHelp) {
+        throw std::runtime_error(
+            "savepopstate\n"
+            "\nSave pop state into the file.\n");
+    }
+
+    SaveState();
+
+    return UniValue();
+}
 
 const CRPCCommand commands[] = {
     {"pop_mining", "submitpop", &submitpop, {"atv", "vtbs"}},
     {"pop_mining", "getpopdata", &getpopdata, {"blockheight"}},
     {"pop_mining", "debugpop", &debugpop, {}},
+    {"pop_mining", "savepopstate", &savepopstate, {}},
 };
 
 void RegisterPOPMiningRPCCommands(CRPCTable& t)
