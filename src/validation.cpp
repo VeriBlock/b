@@ -1411,6 +1411,7 @@ void CChainState::InvalidBlockFound(CBlockIndex* pindex, const BlockValidationSt
 {
     if (state.GetResult() != BlockValidationResult::BLOCK_MUTATED) {
         pindex->nStatus |= BLOCK_FAILED_VALID;
+        VeriBlock::getService<VeriBlock::PopService>().invalidateBlockByHash(pindex->GetBlockHash());
         m_blockman.m_failed_blocks.insert(pindex);
         setDirtyBlockIndex.insert(pindex);
         setBlockIndexCandidates.erase(pindex);

@@ -37,6 +37,7 @@ using PoPRewards = std::map<CScript, CAmount>;
 
 struct PopService {
     virtual ~PopService() = default;
+    virtual std::unique_lock<std::mutex> lock() = 0;
     virtual altintegration::AltTree& getAltTree() = 0;
     virtual bool validatePopTxOutput(const CTxOut& out, TxValidationState& state) = 0;
     virtual bool validatePopTxInput(const CTxIn& in, TxValidationState& state) = 0;

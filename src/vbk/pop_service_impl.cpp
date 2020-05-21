@@ -68,6 +68,7 @@ void PopServiceImpl::addPopPayoutsIntoCoinbaseTx(CMutableTransaction& coinbaseTx
 
 bool PopServiceImpl::checkCoinbaseTxWithPopRewards(const CTransaction& tx, const CAmount& PoWBlockReward, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams, BlockValidationState& state)
 {
+    auto _lock = lock();
     PoPRewards rewards = getPopRewards(pindexPrev, consensusParams);
     CAmount nTotalPopReward = 0;
 
@@ -127,6 +128,7 @@ bool PopServiceImpl::checkCoinbaseTxWithPopRewards(const CTransaction& tx, const
 
 PoPRewards PopServiceImpl::getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams)
 {
+    auto _lock = lock();
     auto& config = getService<Config>();
     if ((pindexPrev.nHeight + 1) < (int)config.popconfig.alt->getEndorsementSettlementInterval()) {
         return {};

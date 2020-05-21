@@ -27,7 +27,13 @@ private:
     std::shared_ptr<altintegration::AltTree> altTree;
 
 public:
-    std::string toPrettyString() const override {
+    std::unique_lock<std::mutex> lock() override
+    {
+        return std::unique_lock<std::mutex>(mutex);
+    }
+
+    std::string toPrettyString() const override
+    {
         return altTree->toPrettyString();
     };
 
