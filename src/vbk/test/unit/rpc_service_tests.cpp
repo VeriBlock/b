@@ -74,11 +74,13 @@ BOOST_AUTO_TEST_CASE(submitpop_test)
     //    BOOST_CHECK(mempool.exists(popTxHash));
 }
 
-BOOST_AUTO_TEST_CASE(submitpop_test)
+BOOST_AUTO_TEST_CASE(savepopstate_test)
 {
     JSONRPCRequest request;
     request.strMethod = "savepopstate";
     request.fHelp = false;
+    request.params = UniValue(UniValue::VARR);
+    request.params.push_back("vbtc_state_test");
 
     if (RPCIsInWarmup(nullptr)) {
         SetRPCWarmupFinished();
@@ -86,11 +88,6 @@ BOOST_AUTO_TEST_CASE(submitpop_test)
 
     UniValue result;
     BOOST_CHECK_NO_THROW(result = tableRPC.execute(request));
-
-    uint256 popTxHash;
-    popTxHash.SetHex(result.get_str());
-
-    BOOST_CHECK(mempool.exists(popTxHash));
 }
 
 

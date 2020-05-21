@@ -20,7 +20,9 @@
 #include <wallet/wallet.h>    // for CWallet
 
 #include <set>
+#include <fstream>
 
+#include "pop_service_impl.hpp"
 #include "vbk/config.hpp"
 #include "veriblock/entities/test_case_entity.hpp"
 
@@ -87,7 +89,7 @@ CBlock GetBlockChecked(const CBlockIndex* pblockindex)
     return block;
 }
 
-void SaveState()
+void SaveState(std::string file_name = "vbtc_state")
 {
     LOCK2(cs_main, mempool.cs);
 
@@ -101,8 +103,33 @@ void SaveState()
     };
     std::set<CBlockIndex*, decltype(cmp)> block_index(cmp);
 
-    for (const auto& b_index : vbtc_tree) {
+    for (const auto& el : vbtc_tree) {
+        block_index.insert(el.second);
     }
+
+    BlockValidationState state;
+
+    for (const auto& index : block_index) {
+        auto alt_block = blockToAltBlock(*index);
+        if (index->pprev) {
+            CBlock block;
+            bool res = ReadBlockFromDisk(block, index, Params().GetConsensus());
+            assert(res);
+            std::vector<altintegration::AltPayloads> payloads;
+            res = parseBlockPopPayloadsImpl(block, *index->pprev, Params().GetConsensus(), state, &payloads);
+            assert(res);
+            vbtc_state.alt_tree.push_back(std::make_pair(alt_block, payloads));
+        }
+    }
+
+    std::ofstream file(file_name);
+
+    altintegration::WriteStream stream;
+    vbtc_state.toRaw(stream);
+
+    file.write((const char*)stream.data().data(), stream.data().size());
+    
+    file.close();
 }
 
 } // namespace
@@ -239,13 +266,23 @@ UniValue debugpop(const JSONRPCRequest& request)
 
 UniValue savepopstate(const JSONRPCRequest& request)
 {
-    if (request.fHelp) {
+    if (request.fHelp || request.params.size() > 1) {
         throw std::runtime_error(
-            "savepopstate\n"
-            "\nSave pop state into the file.\n");
+            "savepopstate [file]\n"
+            "\nSave pop state into the file.\n"
+            "\nArguments:\n"
+            "1. file       (string, optional) the name of the file, by default 'vbtc_state'.\n");
     }
 
-    SaveState();
+    std::string file_name = "vbtc_state";
+
+    if (!request.params.empty()) {
+        RPCTypeCheck(request.params, { UniValue::VSTR });
+        file_name = request.params[0].getValStr();
+    }
+
+    LogPrint(BCLog::POP, "Save vBTC state to the file %s \n", file_name);
+    SaveState(file_name);
 
     return UniValue();
 }
