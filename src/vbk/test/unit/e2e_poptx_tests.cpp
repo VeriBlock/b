@@ -9,10 +9,10 @@
 #include <chain.h>
 #include <test/util/setup_common.h>
 #include <validation.h>
+#include <vbk/test/util/e2e_fixture.hpp>
 #include <vbk/util.hpp>
 #include <veriblock/alt-util.hpp>
 #include <veriblock/mock_miner.hpp>
-#include <vbk/test/util/e2e_fixture.hpp>
 
 using altintegration::AltPayloads;
 using altintegration::BtcBlock;
@@ -56,6 +56,9 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
     // endorse block that is not on main chain
     block = endorseAltBlockAndMine(fork1tip.GetHash(), 1);
     BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == lastHash);
+
+    BOOST_CHECK(*pop->getAltTree().vbk().getBestChain().tip() == *popminer.vbk().getBestChain().tip());
+    BOOST_CHECK(*pop->getAltTree().btc().getBestChain().tip() == *popminer.btc().getBestChain().tip());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

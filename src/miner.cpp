@@ -333,7 +333,7 @@ void BlockAssembler::addPackageTxs(int& nPackagesSelected, int& nDescendantsUpda
     auto refreshDummy = [&](const std::vector<altintegration::AltPayloads>& p) {
         auto* index = altTree.getBlockIndex(dummyContainingBlock.hash);
         assert(index);
-        index->status = BLOCK_VALID_TREE;
+        index->status = altintegration::BLOCK_VALID_TREE;
         altTree.removePayloads(dummyContainingBlock.hash, p);
     };
 
@@ -473,7 +473,7 @@ void BlockAssembler::addPackageTxs(int& nPackagesSelected, int& nDescendantsUpda
                     continue;
                 }
                 p.containingBlock = dummyContainingBlock;
-                if (!altTree.addPayloads(dummyContainingBlock, {p}, _state) || !altTree.setState(dummyContainingBlock.hash, _state)) {
+                if (!altTree.validatePayloads(p.containingBlock.hash, p, _state)) {
                     LogPrint(BCLog::POP, "VeriBlock-PoP: %s: tx %s is statefully invalid: %s\n", __func__, iter->GetTx().GetHash().ToString(), _state.toString());
                     failedTx.insert(iter);
                     failedPopTx.insert(iter);
