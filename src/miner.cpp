@@ -339,7 +339,7 @@ void BlockAssembler::addPackageTxs(int& nPackagesSelected, int& nDescendantsUpda
 
     CTxMemPool::setEntries failedPopTx;
 
-    auto finalized = altintegration::Finalizer([&altTree, failedPopTx, dummyContainingBlock]() {
+    auto finalized = altintegration::Finalizer([&]() {
         LOCK(mempool.cs);
         // delete invalid PoP transactions
         for (auto& tx : failedPopTx) {

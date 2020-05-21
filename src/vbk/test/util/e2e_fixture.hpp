@@ -15,14 +15,23 @@
 #include <vbk/util.hpp>
 #include <veriblock/alt-util.hpp>
 #include <veriblock/mock_miner.hpp>
+#include <vbk/log.hpp>
 
 using altintegration::AltPayloads;
+using altintegration::ATV;
 using altintegration::BtcBlock;
 using altintegration::MockMiner;
 using altintegration::PublicationData;
 using altintegration::VbkBlock;
 using altintegration::VTB;
-using altintegration::ATV;
+
+struct TestLogger : public altintegration::Logger {
+    ~TestLogger() override = default;
+
+    void log(altintegration::LogLevel lvl, const std::string& msg) override {
+        fmt::printf("[pop] [%s]\t%s\n", altintegration::LevelToString(lvl), msg);
+    }
+};
 
 struct E2eFixture : public TestChain100Setup {
     CScript cbKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
@@ -33,6 +42,8 @@ struct E2eFixture : public TestChain100Setup {
 
     E2eFixture()
     {
+        altintegration::SetLogger<TestLogger>();
+        altintegration::GetLogger().level = altintegration::LogLevel::debug;
         pop = &VeriBlock::getService<VeriBlock::PopService>();
     }
 
@@ -48,6 +59,14 @@ struct E2eFixture : public TestChain100Setup {
         auto publicationdata = createPublicationData(endorsed, payoutInfo);
         auto vbktx = popminer.createVbkTxEndorsingAltBlock(publicationdata);
         auto atv = popminer.generateATV(vbktx, getLastKnownVBKblock(), state);
+        // fill VTB context: from last known VBK block to containing
+        auto* current = popminer.vbk().getBlockIndex(atv.containingBlock.getHash());
+        auto lastKnownVbk = getLastKnownVBKblock();
+        while (current != nullptr && current->getHash() != lastKnownVbk) {
+            atv.context.push_back(*current->header);
+            current = current->pprev;
+        }
+        std::reverse(atv.context.begin(), atv.context.end());
         BOOST_CHECK(state.IsValid());
         return atv;
     }
