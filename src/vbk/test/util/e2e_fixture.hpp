@@ -59,14 +59,6 @@ struct E2eFixture : public TestChain100Setup {
         auto publicationdata = createPublicationData(endorsed, payoutInfo);
         auto vbktx = popminer.createVbkTxEndorsingAltBlock(publicationdata);
         auto atv = popminer.generateATV(vbktx, getLastKnownVBKblock(), state);
-        // fill VTB context: from last known VBK block to containing
-        auto* current = popminer.vbk().getBlockIndex(atv.containingBlock.getHash());
-        auto lastKnownVbk = getLastKnownVBKblock();
-        while (current != nullptr && current->getHash() != lastKnownVbk) {
-            atv.context.push_back(*current->header);
-            current = current->pprev;
-        }
-        std::reverse(atv.context.begin(), atv.context.end());
         BOOST_CHECK(state.IsValid());
         return atv;
     }

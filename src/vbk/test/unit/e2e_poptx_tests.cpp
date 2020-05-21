@@ -31,7 +31,6 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
 
     // endorse tip
     CBlock block = endorseAltBlockAndMine(tip->GetBlockHash(), 10);
-    std::cout << pop->getAltTree().toPrettyString() << "\n\n";
     BOOST_REQUIRE(block.vtx.size() == 2);
 
     {
@@ -59,9 +58,6 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
     // endorse block that is not on main chain
     block = endorseAltBlockAndMine(fork1tip.GetHash(), 1);
     BOOST_CHECK(ChainActive().Tip()->GetBlockHash() == lastHash);
-
-    BOOST_CHECK(*pop->getAltTree().vbk().getBestChain().tip() == *popminer.vbk().getBestChain().tip());
-    BOOST_CHECK(*pop->getAltTree().btc().getBestChain().tip() == *popminer.btc().getBestChain().tip());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
