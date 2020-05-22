@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
-# Copyright (c) 2017-2019 The Bitcoin Core developers
+# Copyright (c) 2014-2019 The Bitcoin Core developers
+# Copyright (c) 2019-2020 Xenios SEZC
+# https://www.veriblock.org
 # Distributed under the MIT software license, see the accompanying
-# file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""An example functional test
+# file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 
-The module-level docstring should include a high-level description of
-what the test is doing. It's the first thing people see when they open
-the file and should give the reader information about *what* the test
-is testing and *how* it's being tested
 """
-# Imports should be in PEP8 ordering (std library first, then third party
-# libraries then local imports).
+Feature POP Payout test
+
+Consists of multiple test cases.
+
+Case1:
+node0 endorses block 5, node1 confirms it and mines blocks until reward for this block is paid.
+node0 mines 100 blocks and checks balance.
+Expected balance is POW_PAYOUT * 10 + pop payout. (node0 has only 10 mature coinbases)
+
+"""
+
 from collections import defaultdict
 
 # Avoid wildcard * imports
