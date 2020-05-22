@@ -46,6 +46,8 @@ struct Config {
     int32_t POP_REWARD_SETTLEMENT_INTERVAL = 400;
     int32_t POP_REWARD_PAYMENT_DELAY = 500;
     int32_t POP_DIFFICULTY_AVERAGING_INTERVAL = 50;
+
+    int32_t POP_REWARD_COEFFICIENT = 20;
 };
 
 } // namespace VeriBlock
