@@ -312,7 +312,6 @@ void BlockAssembler::addPackageTxs(int& nPackagesSelected, int& nDescendantsUpda
 {
     auto& config = VeriBlock::getService<VeriBlock::Config>();
     auto& pop = VeriBlock::getService<VeriBlock::PopService>();
-//    auto _lock = pop.lock();
 
     // do a full copy of alt tree, and do stateful validation against this tree.
     // then, discard this copy
