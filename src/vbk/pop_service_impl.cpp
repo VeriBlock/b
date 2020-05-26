@@ -263,6 +263,12 @@ int PopServiceImpl::compareForks(const CBlockIndex& leftForkTip, const CBlockInd
     auto left = blockToAltBlock(leftForkTip);
     auto right = blockToAltBlock(rightForkTip);
     auto state = altintegration::ValidationState();
+
+    if (!altTree->setState(left.hash, state))
+    {
+        return -1;
+    }
+
     return altTree->comparePopScore(left.hash, right.hash);
 }
 
@@ -508,6 +514,13 @@ bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex&
     if (!payloads.empty() && !tree.addPayloads(containing, payloads, instate)) {
         return error("[%s] block %s failed stateful pop validation: %s", __func__, block.GetHash().ToString(), instate.toString());
     }
+
+    // TODO, temprorary solution, remove it later
+    //if (!tree.setState(containing.hash, instate)) {
+    //    tree.removePayloads(containing.hash, payloads);
+    //    return error("[%s] block %s failed stateful pop validation: %s", __func__, block.GetHash().ToString(), instate.toString());
+    //}
+
 
     return true;
 }
