@@ -180,7 +180,7 @@ QString TransactionDesc::toHTML(interfaces::Node& node, interfaces::Wallet& wall
         
         if (reply->error()) {            
             err = true;
-            vbkMessage = "Unable to connect to BFI endpoint"
+            vbkMessage = "BFI not setup yet, specify url in vbitcoin.conf"
         } else {
             QByteArray buffer = reply->readAll();
             dataLine = buffer.constData();
