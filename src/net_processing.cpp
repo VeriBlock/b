@@ -608,7 +608,7 @@ static void FindNextBlocksToDownload(NodeId nodeid, unsigned int count, std::vec
 
     if (state->pindexBestKnownBlock == nullptr
         // VeriBlock: we should allow downloading shorter chains, as they might contain more publications
-        /*|| state->pindexBestKnownBlock->nChainWork < ::ChainActive().Tip()->nChainWork || state->pindexBestKnownBlock->nChainWork < nMinimumChainWork*/
+        /*|| state->pindexBestKnownBlock->nChainWork < ::ChainActive().Tip()->nChainWork*/ || state->pindexBestKnownBlock->nChainWork < nMinimumChainWork
         ) {
         // This peer has nothing interesting.
         return;
