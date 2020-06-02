@@ -3648,7 +3648,7 @@ bool ContextualCheckBlock(const CBlock& block, BlockValidationState& state, cons
     }
 
     auto& pop = VeriBlock::getService<VeriBlock::PopService>();
-    if (pindexPrev != nullptr && !pop.addAllBlockPayloads(*pindexPrev, block, state)) {
+    if (!pop.addAllBlockPayloads(pindexPrev, block, state)) {
         return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-block-pop-payloads", strprintf("Can not add POP payloads to block %s: %s", block.GetHash().ToString(), FormatStateMessage(state)));
     }
 
