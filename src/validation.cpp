@@ -2403,7 +2403,8 @@ void static UpdateTip(const CBlockIndex* pindexNew, const CChainParams& chainPar
     }
 
     altintegration::ValidationState state;
-    bool ret = VeriBlock::getService<VeriBlock::PopService>().setState(pindexNew->GetBlockHash(), state);
+    auto& pop = VeriBlock::getService<VeriBlock::PopService>();
+    bool ret = pop.setState(pindexNew->GetBlockHash(), state);
     assert(ret && "block has been checked previously and should be valid");
 
     std::string warningMessages;
@@ -2432,12 +2433,20 @@ void static UpdateTip(const CBlockIndex* pindexNew, const CChainParams& chainPar
         if (nUpgraded > 0)
             AppendWarning(warningMessages, strprintf(_("%d of last 100 blocks have unexpected version").translated, nUpgraded));
     }
-    LogPrintf("%s: new best=%s height=%d version=0x%08x log2_work=%.8g tx=%lu date='%s' progress=%f cache=%.1fMiB(%utxo)%s\n", __func__,
-        pindexNew->GetBlockHash().ToString(), pindexNew->nHeight, pindexNew->nVersion,
+
+    auto* vbktip = pop.getAltTree().vbk().getBestChain().tip();
+    auto* btctip = pop.getAltTree().btc().getBestChain().tip();
+    LogPrintf("%s: new best=ALT:%d:%s %s %s version=0x%08x log2_work=%.8g tx=%lu date='%s' progress=%f cache=%.1fMiB(%utxo)%s\n", __func__,
+        pindexNew->nHeight,
+        pindexNew->GetBlockHash().ToString(),
+        (vbktip ? vbktip->toShortPrettyString() : "VBK:nullptr"),
+        (btctip ? btctip->toShortPrettyString() : "BTC:nullptr"),
+        pindexNew->nVersion,
         log(pindexNew->nChainWork.getdouble()) / log(2.0), (unsigned long)pindexNew->nChainTx,
         FormatISO8601DateTime(pindexNew->GetBlockTime()),
         GuessVerificationProgress(chainParams.TxData(), pindexNew), ::ChainstateActive().CoinsTip().DynamicMemoryUsage() * (1.0 / (1 << 20)), ::ChainstateActive().CoinsTip().GetCacheSize(),
-        !warningMessages.empty() ? strprintf(" warning='%s'", warningMessages) : "");
+        !warningMessages.empty() ? strprintf(" warning='%s'", warningMessages) : ""
+        );
 }
 
 /** Disconnect m_chain's tip.
@@ -3011,7 +3020,7 @@ bool CChainState::InvalidateBlock(BlockValidationState& state, const CChainParam
     // We do not allow ActivateBestChain() to run while InvalidateBlock() is
     // running, as that could cause the tip to change while we disconnect
     // blocks.
-    LOCK(m_cs_chainstate);
+
     // We'll be acquiring and releasing cs_main below, to allow the validation
     // callbacks to run. However, we should keep the block index in a
     // consistent state as we disconnect blocks -- in particular we need to
@@ -3023,6 +3032,7 @@ bool CChainState::InvalidateBlock(BlockValidationState& state, const CChainParam
 
     {
         LOCK(cs_main);
+        VeriBlock::getService<VeriBlock::PopService>().invalidateBlockByHash(pindex->GetBlockHash());
         for (const auto& entry : m_blockman.m_block_index) {
             CBlockIndex* candidate = entry.second;
             // We don't need to put anything in our active chain into the
