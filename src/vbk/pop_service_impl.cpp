@@ -515,13 +515,6 @@ bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex&
         return error("[%s] block %s failed stateful pop validation: %s", __func__, block.GetHash().ToString(), instate.toString());
     }
 
-    // TODO, temprorary solution, remove it later
-    //if (!tree.setState(containing.hash, instate)) {
-    //    tree.removePayloads(containing.hash, payloads);
-    //    return error("[%s] block %s failed stateful pop validation: %s", __func__, block.GetHash().ToString(), instate.toString());
-    //}
-
-
     return true;
 }
 
