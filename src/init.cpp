@@ -1444,9 +1444,7 @@ bool AppInitMain(NodeContext& node)
 
     // ********************************************************* Step 7: load block chain
 
-    // VeriBlock: force -reindex=true on by default
     fReindex = gArgs.GetBoolArg("-reindex", false);
-    fReindex = true; // TODO: remove when alt-cpp state is persisted on-disk (BTC-499)
     bool fReindexChainState = gArgs.GetBoolArg("-reindex-chainstate", false);
 
     // cache size calculations

@@ -2999,8 +2999,6 @@ bool CChainState::InvalidateBlock(BlockValidationState& state, const CChainParam
     // blocks.
     LOCK(m_cs_chainstate);
 
-    VeriBlock::getService<VeriBlock::PopService>().invalidateBlockByHash(pindex->GetBlockHash());
-
     // We'll be acquiring and releasing cs_main below, to allow the validation
     // callbacks to run. However, we should keep the block index in a
     // consistent state as we disconnect blocks -- in particular we need to
@@ -3012,6 +3010,7 @@ bool CChainState::InvalidateBlock(BlockValidationState& state, const CChainParam
 
     {
         LOCK(cs_main);
+        VeriBlock::getService<VeriBlock::PopService>().invalidateBlockByHash(pindex->GetBlockHash());
         for (const auto& entry : m_blockman.m_block_index) {
             CBlockIndex* candidate = entry.second;
             // We don't need to put anything in our active chain into the
@@ -3128,7 +3127,6 @@ bool CChainState::InvalidateBlock(BlockValidationState& state, const CChainParam
 
 bool InvalidateBlock(BlockValidationState& state, const CChainParams& chainparams, CBlockIndex* pindex)
 {
-    VeriBlock::getService<VeriBlock::PopService>().invalidateBlockByHash(pindex->GetBlockHash());
     return ::ChainstateActive().InvalidateBlock(state, chainparams, pindex);
 }
 
