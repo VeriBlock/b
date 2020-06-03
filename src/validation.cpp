@@ -70,11 +70,6 @@
 
 bool CBlockIndexWorkComparator::operator()(const CBlockIndex* pa, const CBlockIndex* pb) const
 {
-    /* auto& pop_service = VeriBlock::getService<VeriBlock::PopService>();
-    int pop_result = pop_service.compareForks(*pa, *pb);
-    if (pop_result > 0) return false;
-    if (pop_result < 0) return true;*/
-
     // First sort by most total work, ...
     if (pa->nChainWork > pb->nChainWork) return false;
     if (pa->nChainWork < pb->nChainWork) return true;
