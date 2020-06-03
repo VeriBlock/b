@@ -3032,7 +3032,6 @@ bool CChainState::InvalidateBlock(BlockValidationState& state, const CChainParam
 
     {
         LOCK(cs_main);
-        VeriBlock::getService<VeriBlock::PopService>().invalidateBlockByHash(pindex->GetBlockHash());
         for (const auto& entry : m_blockman.m_block_index) {
             CBlockIndex* candidate = entry.second;
             // We don't need to put anything in our active chain into the
