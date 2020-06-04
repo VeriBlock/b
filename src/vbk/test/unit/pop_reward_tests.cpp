@@ -35,11 +35,6 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
     }
 
     CBlock beforePayoutBlock = CreateAndProcessBlock({}, scriptPubKey);
-    {
-        LOCK(cs_main);
-        BOOST_CHECK(ChainActive().Tip() != nullptr);
-        BOOST_CHECK(ChainActive().Tip()->nHeight + 1 == rewardInterval);
-    }
 
     int n = 0;
     for (const auto& out : beforePayoutBlock.vtx[0]->vout) {
@@ -48,12 +43,6 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
     BOOST_CHECK(n == 1);
 
     CBlock payoutBlock = CreateAndProcessBlock({}, scriptPubKey);
-    {
-        LOCK(cs_main);
-        BOOST_CHECK(ChainActive().Tip() != nullptr);
-        BOOST_CHECK(ChainActive().Tip()->nHeight == rewardInterval);
-    }
-
     n = 0;
     for (const auto& out : payoutBlock.vtx[0]->vout) {
         if (out.nValue > 0) n++;
