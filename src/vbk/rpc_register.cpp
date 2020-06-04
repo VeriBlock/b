@@ -6,7 +6,7 @@
 #include "rpc_register.hpp"
 
 #include "merkle.hpp"
-#include "pop_service_impl.hpp"
+#include "pop_service.hpp"
 #include "vbk/service_locator.hpp"
 #include <chainparams.h>
 #include <consensus/merkle.h>
@@ -18,6 +18,13 @@
 #include <wallet/rpcwallet.h>
 #include <wallet/rpcwallet.h> // for GetWalletForJSONRPCRequest
 #include <wallet/wallet.h>    // for CWallet
+
+#include <fstream>
+#include <set>
+
+#include "pop_service_impl.hpp"
+#include "vbk/config.hpp"
+#include "veriblock/entities/test_case_entity.hpp"
 
 namespace VeriBlock {
 
@@ -48,6 +55,50 @@ CBlock GetBlockChecked(const CBlockIndex* pblockindex)
     }
 
     return block;
+}
+
+void SaveState(std::string file_name)
+{
+    LOCK2(cs_main, mempool.cs);
+
+    altintegration::TestCase vbtc_state;
+    vbtc_state.config = VeriBlock::getService<VeriBlock::Config>().popconfig;
+
+    auto& vbtc_tree = BlockIndex();
+
+    auto cmp = [](CBlockIndex* a, CBlockIndex* b) -> bool {
+        return a->nHeight < b->nHeight;
+    };
+    std::vector<CBlockIndex*> block_index;
+    block_index.reserve(vbtc_tree.size());
+    for (const auto& el : vbtc_tree) {
+        block_index.push_back(el.second);
+    }
+    std::sort(block_index.begin(), block_index.end(), cmp);
+
+    BlockValidationState state;
+
+    for (const auto& index : block_index) {
+        auto alt_block = blockToAltBlock(*index);
+        std::vector<altintegration::AltPayloads> payloads;
+        if (index->pprev) {
+            CBlock block;
+            if (ReadBlockFromDisk(block, index, Params().GetConsensus())) {
+                bool res = popDataToPayloads(block, *index->pprev, state, payloads);
+                assert(res);
+            }
+        }
+        vbtc_state.alt_tree.push_back(std::make_pair(alt_block, payloads));
+    }
+
+    std::ofstream file(file_name, std::ios::binary);
+
+    altintegration::WriteStream stream;
+    vbtc_state.toRaw(stream);
+
+    file.write((const char*)stream.data().data(), stream.data().size());
+
+    file.close();
 }
 
 } // namespace
@@ -182,12 +233,40 @@ UniValue submitpop(const JSONRPCRequest& request)
     return "successful added";
 }
 
-UniValue debugpop(const JSONRPCRequest& request) {
+UniValue debugpop(const JSONRPCRequest& request)
+{
+    if (request.fHelp) {
+        throw std::runtime_error(
+            "debugpop\n"
+            "\nPrints alt-cpp-lib state into log.\n");
+    }
     auto& pop = VeriBlock::getService<VeriBlock::PopService>();
     LogPrint(BCLog::POP, "%s", pop.toPrettyString());
     return UniValue();
 }
 
+UniValue savepopstate(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() > 1) {
+        throw std::runtime_error(
+            "savepopstate [file]\n"
+            "\nSave pop state into the file.\n"
+            "\nArguments:\n"
+            "1. file       (string, optional) the name of the file, by default 'vbtc_state'.\n");
+    }
+
+    std::string file_name = "vbtc_state";
+
+    if (!request.params.empty()) {
+        RPCTypeCheck(request.params, {UniValue::VSTR});
+        file_name = request.params[0].getValStr();
+    }
+
+    LogPrint(BCLog::POP, "Save vBTC state to the file %s \n", file_name);
+    SaveState(file_name);
+
+    return UniValue();
+}
 
 const CRPCCommand commands[] = {
     {"pop_mining", "submitpop", &submitpop, {"atv", "vtbs"}},

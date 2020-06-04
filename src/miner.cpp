@@ -28,7 +28,6 @@
 #include <vbk/pop_service.hpp>
 #include <vbk/pop_service_impl.hpp>
 #include <vbk/service_locator.hpp>
-#include <vbk/util.hpp>
 
 #include <algorithm>
 #include <utility>
@@ -143,13 +142,6 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     int nDescendantsUpdated = 0;
 
     addPackageTxs<ancestor_score>(nPackagesSelected, nDescendantsUpdated);
-
-    // VeriBlock: add PopData into the block
-    pblock->v_popData = VeriBlock::getService<VeriBlock::PopService>().getPopData(*pindexPrev);
-    if (!pblock->v_popData.empty()) {
-        pblock->nVersion |= VeriBlock::POP_BLOCK_VERSION_BIT;
-    }
-
 
     int64_t nTime1 = GetTimeMicros();
 

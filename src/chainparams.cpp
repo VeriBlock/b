@@ -17,7 +17,6 @@
 #include <assert.h>
 
 #include <vbk/genesis.hpp>
-#include <vbk/init.hpp>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -25,7 +24,9 @@
 #include "bootstraps.h"
 #include <veriblock/blockchain/alt_chain_params.hpp>
 
-#define VBK_VERSION 0x4
+#define VBK_ALPHA 0x50
+#define VBK_BETA  0xa0
+#define VBK_VERSION (VBK_ALPHA + 0x1)
 
 /**
  * Main network

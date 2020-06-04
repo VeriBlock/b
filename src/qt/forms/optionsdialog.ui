@@ -716,15 +716,20 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_BFI">
        
-	    <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_BFI">
-         <item>
+	<item>
           <widget class="QLabel" name="bfiInfoLabel">
            <property name="toolTip">
-            <string>........ This is the data tool tip </string>
+            <string>Bitcoin Finality Indicator (BFI) indicates when a transaction on an altchain network has as much security as a transaction on Bitcoin itself.</string>
            </property>
+           <property name="textFormat">
+            <enum>Qt::RichText</enum>
+           </property>
+           <property name="openExternalLinks">
+            <bool>true</bool>
+           </property>
+         
            <property name="text">
-            <string>&amp;this is the explanation</string>
+           <string>Bitcoin Finality Indicator (BFI) indicates when a transaction on an altchain network has as much security as a transaction on Bitcoin itself.&lt;br&gt;See here for more details: &lt;a href='https://wiki.veriblock.org/index.php/How_VeriBlock_PoP_BFI_Protects_Altchains'&gt;https://wiki.veriblock.org/index.php/How_VeriBlock_PoP_BFI_Protects_Altchains&lt;/a&gt;.&lt;br&gt;The BFI service can be run locally, or for convenience, directly pulled from a hosted website (like looking up transactions in an altchain web explorer).&lt;br&gt;&lt;br&gt;Check the -bfiendpoint in the vbitcoin.conf file to set the BFI endpoint.&lt;br&gt;</string>
            </property>
            
           </widget>
@@ -732,10 +737,14 @@
          <item>
           <widget class="QLineEdit" name="bfiDataSourceUrls">
            <property name="toolTip">
-            <string>... tool tip </string>
+            <string>BFI data source end point.</string>
            </property>
            <property name="placeholderText">
-            <string notr="true">https://example.com/tx/%s</string>
+            <string notr="true">https://bfi.example.com/block/best/%1</string>
+           </property>
+           
+           <property name="enabled">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -754,8 +763,6 @@
         </spacer>
        </item>
       </layout>
-	  </item>
-	  </layout>
      </widget>
      
     </widget>
