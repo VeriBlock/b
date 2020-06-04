@@ -160,7 +160,7 @@ bool PopServiceImpl::acceptBlock(const CBlockIndex& indexNew, BlockValidationSta
 bool PopServiceImpl::addAllBlockPayloads(const CBlockIndex* indexPrev, const CBlock& connecting, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
-    return addAllPayloadsToBlockImpl(*altTree, *indexPrev, connecting, state);
+    return addAllPayloadsToBlockImpl(*altTree, indexPrev, connecting, state);
 }
 
 std::vector<BlockBytes> PopServiceImpl::getLastKnownVBKBlocks(size_t blocks)
@@ -187,8 +187,7 @@ int PopServiceImpl::compareForks(const CBlockIndex& leftForkTip, const CBlockInd
     auto right = blockToAltBlock(rightForkTip);
     auto state = altintegration::ValidationState();
 
-    if (!altTree->setState(left.hash, state))
-    {
+    if (!altTree->setState(left.hash, state)) {
         return -1;
     }
 
@@ -237,8 +236,7 @@ bool validatePopDataLimits(const altintegration::AltChainParams& config, const s
         if (v_pop_data[0].toVbkEncoding().size() > config.getSuperMaxPopDataWeight()) {
             return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "pop-data-weight", "[" + std::to_string(v_pop_data.size()) + "] super weight pop_data limits");
         }
-    }
-    else {
+    } else {
         for (const auto& pop_data : v_pop_data) {
             if (pop_data.toVbkEncoding().size() > config.getMaxPopDataWeight()) {
                 return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "pop-data-weight", "[" + std::to_string(v_pop_data.size()) + "] weight pop_data limits");
@@ -249,7 +247,8 @@ bool validatePopDataLimits(const altintegration::AltChainParams& config, const s
     return true;
 }
 
-bool popDataToPayloads(const CBlock& block, const CBlockIndex& indexPrev, BlockValidationState& state, std::vector<altintegration::AltPayloads>& payloads) {
+bool popDataToPayloads(const CBlock& block, const CBlockIndex& indexPrev, BlockValidationState& state, std::vector<altintegration::AltPayloads>& payloads)
+{
     auto containing = VeriBlock::blockToAltBlock(indexPrev.nHeight + 1, block.GetBlockHeader());
 
     payloads.resize(block.v_popData.size());
@@ -271,9 +270,9 @@ bool popDataToPayloads(const CBlock& block, const CBlockIndex& indexPrev, BlockV
         CBlockIndex* endorsedIndex = LookupBlockIndex(endorsedHeader.GetHash());
         if (!endorsedIndex) {
             return state.Invalid(
-                    BlockValidationResult::BLOCK_INVALID_HEADER,
-                    "pop-data-endorsed-block-missing",
-                    "[ " + pop_data.atv.getId().asString() + "]: endorsed block " + endorsedHeader.GetHash().ToString() + " is missing");
+                BlockValidationResult::BLOCK_INVALID_HEADER,
+                "pop-data-endorsed-block-missing",
+                "[ " + pop_data.atv.getId().asString() + "]: endorsed block " + endorsedHeader.GetHash().ToString() + " is missing");
         }
 
         altintegration::AltPayloads p;
@@ -287,28 +286,40 @@ bool popDataToPayloads(const CBlock& block, const CBlockIndex& indexPrev, BlockV
     return true;
 }
 
-bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex& indexPrev, const CBlock& block, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex* indexPrev, const CBlock& block, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
-    if (!validatePopDataLimits(tree.getParams(), block.v_popData, state)) {
-        return false;
+
+    int height = 0;
+    if (indexPrev != nullptr) {
+        height = indexPrev->nHeight + 1;
     }
 
-    auto containing = VeriBlock::blockToAltBlock(indexPrev.nHeight + 1, block.GetBlockHeader());
+    auto containing = VeriBlock::blockToAltBlock(height, block.GetBlockHeader());
 
-    std::vector<altintegration::AltPayloads> payloads;
-    if(!popDataToPayloads(block, indexPrev, state, payloads)) {
-        return false;
-    }
 
     altintegration::ValidationState instate;
 
     if (!tree.acceptBlock(containing, instate)) {
-        return error("[%s] block %s is not accepted by altTree: %s", __func__, block.GetHash().ToString(), instate.toString());
+        return error("[%s] block %s is not accepted by altTree: %s", __func__, block.GetHash().ToString(),
+            instate.toString());
     }
 
-    if (!payloads.empty() && !tree.addPayloads(containing, payloads, instate)) {
-        return error("[%s] block %s failed stateful pop validation: %s", __func__, block.GetHash().ToString(), instate.toString());
+    if (indexPrev != nullptr) {
+        if (!validatePopDataLimits(tree.getParams(), block.v_popData, state)) {
+            return false;
+        }
+
+
+        std::vector<altintegration::AltPayloads> payloads;
+        if (!popDataToPayloads(block, *indexPrev, state, payloads)) {
+            return false;
+        }
+
+        if (!payloads.empty() && !tree.addPayloads(containing, payloads, instate)) {
+            return error("[%s] block %s failed stateful pop validation: %s", __func__, block.GetHash().ToString(),
+                instate.toString());
+        }
     }
 
     return true;
