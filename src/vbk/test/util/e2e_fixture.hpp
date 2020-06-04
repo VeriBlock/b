@@ -109,7 +109,7 @@ struct E2eFixture : public TestChain100Setup {
         std::vector<ATV> atvs;
         atvs.reserve(hashes.size());
         std::transform(hashes.begin(), hashes.end(), std::back_inserter(atvs), [&](const uint256& hash) -> ATV {
-            return endorseAltBlock(hash, {}, defaultPayoutInfo);
+            return endorseAltBlock(hash, {}, payoutInfo);
         });
 
         auto& pop_mempool = pop->getMemPool();
