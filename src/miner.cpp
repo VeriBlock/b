@@ -28,6 +28,7 @@
 #include <vbk/pop_service.hpp>
 #include <vbk/pop_service_impl.hpp>
 #include <vbk/service_locator.hpp>
+#include <vbk/util.hpp>
 
 #include <algorithm>
 #include <utility>
