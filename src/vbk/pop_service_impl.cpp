@@ -201,13 +201,6 @@ PopServiceImpl::PopServiceImpl(const altintegration::Config& config)
     mempool = std::make_shared<altintegration::MemPool>(altTree->getParams(), altTree->vbk().getParams(), altTree->btc().getParams(), HashFunction);
 }
 
-void PopServiceImpl::invalidateBlockByHash(const uint256& block) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
-{
-    AssertLockHeld(cs_main);
-    auto v = block.asVector();
-    altTree->removeSubtree(v);
-}
-
 bool PopServiceImpl::setState(const uint256& block, altintegration::ValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);

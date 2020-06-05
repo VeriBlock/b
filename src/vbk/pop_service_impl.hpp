@@ -57,7 +57,6 @@ public:
 
     bool acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state) override;
     bool addAllBlockPayloads(const CBlockIndex* indexPrev, const CBlock& fullBlock, BlockValidationState& state) override;
-    void invalidateBlockByHash(const uint256& block) override;
     bool setState(const uint256& block, altintegration::ValidationState& state) override;
 
     std::vector<altintegration::PopData> getPopData(const CBlockIndex& currentBlockIndex) override;

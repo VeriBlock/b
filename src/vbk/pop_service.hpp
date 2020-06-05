@@ -50,7 +50,6 @@ struct PopService {
 
     virtual bool acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state) = 0;
     virtual bool addAllBlockPayloads(const CBlockIndex* prevIndex, const CBlock& fullBlock, BlockValidationState& state) = 0;
-    virtual void invalidateBlockByHash(const uint256& block) = 0;
     virtual bool setState(const uint256& block, altintegration::ValidationState& state) = 0;
 
     virtual std::vector<altintegration::PopData> getPopData(const CBlockIndex& currentBlockIndex) = 0;
