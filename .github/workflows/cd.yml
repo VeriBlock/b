@@ -5,12 +5,12 @@ on:
     branches:
     - master
     - develop
-    - releases/*
+    - release/*
 
   pull_request:
     branches:
     - master
-    - releases/*
+    - release/*
 
 
 jobs:
