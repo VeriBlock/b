@@ -6,12 +6,14 @@ on:
       - develop
       - master
       - releases/*
+      - trunk/mempool
 
   pull_request:
     branches:
       - develop
       - master
       - releases/*
+      - trunk/mempool
 
 jobs:
   linux-native:
