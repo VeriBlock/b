@@ -220,6 +220,8 @@ UniValue submitpop(const JSONRPCRequest& request)
     auto& pop_service = VeriBlock::getService<VeriBlock::PopService>();
     auto& pop_mempool = pop_service.getMemPool();
 
+    LogPrintf("{submitpop} vtbs amount: %d \n", vtbs.size());
+
     altintegration::ValidationState state;
     if (!pop_mempool.submitATV({ altintegration::ATV::fromVbkEncoding(atv_bytes) }, state)) {
         LogPrint(BCLog::POP, "VeriBlock-PoP: %s ", state.GetPath());

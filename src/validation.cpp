@@ -1895,8 +1895,7 @@ bool CChainState::ConnectBlock(const CBlock& block, BlockValidationState& state,
     //VeriBlock : added ContextualCheckBlock() here becuse merkleRoot calculation  moved from the CheckBlock() to the ContextualCheckBlock()
 
     if (!CheckBlock(block, state, chainparams.GetConsensus(), !fJustCheck)
-        /*&& !ContextualCheckBlock(block, state, chainparams.GetConsensus(), pindex->pprev, true)
-         */
+        && !ContextualCheckBlock(block, state, chainparams.GetConsensus(), pindex->pprev, true)
     ) {
         if (state.GetResult() == BlockValidationResult::BLOCK_MUTATED) {
             // We don't write down blocks to disk if they may have been
