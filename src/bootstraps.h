@@ -48,12 +48,12 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
     }
 
     /** The maximum allowed weight for a PopData */
-    uint32_t getMaxPopDataWeight() const noexcept
+    uint32_t getMaxPopDataWeight() const noexcept override
     {
         return 1000000;
     }
 
-    uint32_t getSuperMaxPopDataWeight() const noexcept
+    uint32_t getSuperMaxPopDataWeight() const noexcept override
     {
         return 5 * getMaxPopDataWeight();
     }

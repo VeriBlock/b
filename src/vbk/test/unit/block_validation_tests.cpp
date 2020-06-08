@@ -18,10 +18,7 @@
 
 #include <vbk/test/util/e2e_fixture.hpp>
 
-#include <gmock/gmock.h>
 #include <string>
-
-using ::testing::Return;
 
 inline std::vector<uint8_t> operator""_v(const char* s, size_t size)
 {
@@ -85,32 +82,29 @@ BOOST_FIXTURE_TEST_CASE(BlockWithTooManyPublicationTxes, E2eFixture)
     std::vector<ATV> atvs;
     atvs.reserve(endorsedBlockHashes.size());
     std::transform(endorsedBlockHashes.begin(), endorsedBlockHashes.end(), std::back_inserter(atvs), [&](const uint256& hash) -> ATV {
-        return endorseAltBlock(hash, defaultPayoutInfo);
+        return endorseAltBlock(hash, {}, defaultPayoutInfo);
     });
 
+    bool isValid = false;
     BOOST_CHECK_EQUAL(endorsedBlockHashes.size(), atvs.size());
 
     auto& pop_mempool = pop->getMemPool();
     altintegration::ValidationState state;
     BOOST_CHECK(pop_mempool.submitATV(atvs, state));
 
-    bool isValid = false;
     CBlock block1 = CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey, &isValid);
     BOOST_CHECK_EQUAL(block1.v_popData.size(), config.popconfig.alt->getMaxPopDataPerBlock());
 
     CBlock block2 = CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey, &isValid);
-    BOOST_CHECK_EQUAL(block2.v_popData.size(), test_amount);
+    BOOST_CHECK_EQUAL(block2.v_popData.size(), 0);
 
-    CBlock block3 = CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey, &isValid);
-    BOOST_CHECK_EQUAL(block3.v_popData.size(), 0);
+    block2.v_popData.insert(block2.v_popData.end(), block1.v_popData.begin(), block1.v_popData.end());
+    block2.v_popData.insert(block2.v_popData.end(), block1.v_popData.begin(), block1.v_popData.end());
 
-    block3.v_popData.insert(block3.v_popData.end(), block1.v_popData.begin(), block1.v_popData.end());
-    block3.v_popData.insert(block3.v_popData.end(), block2.v_popData.begin(), block2.v_popData.end());
-
-    BOOST_CHECK_EQUAL(block3.v_popData.size(), config.popconfig.alt->getMaxPopDataPerBlock() + test_amount);
+    BOOST_CHECK_EQUAL(block2.v_popData.size(), 2 * config.popconfig.alt->getMaxPopDataPerBlock());
 
     BlockValidationState block_state;
-    BOOST_CHECK(!pop->addAllBlockPayloads(*ChainActive().Tip(), block3, block_state));
+    BOOST_CHECK(!pop->addAllBlockPayloads(ChainActive().Tip(), block2, block_state));
     BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-size");
 }
 
@@ -127,7 +121,7 @@ BOOST_FIXTURE_TEST_CASE(BlockWithLargePopData, E2eFixture)
     std::vector<ATV> atvs;
     atvs.reserve(endorsedBlockHashes.size());
     std::transform(endorsedBlockHashes.begin(), endorsedBlockHashes.end(), std::back_inserter(atvs), [&](const uint256& hash) -> ATV {
-        return endorseAltBlock(hash, defaultPayoutInfo);
+        return endorseAltBlock(hash, {}, defaultPayoutInfo);
     });
 
     BOOST_CHECK_EQUAL(endorsedBlockHashes.size(), atvs.size());
@@ -148,13 +142,13 @@ BOOST_FIXTURE_TEST_CASE(BlockWithLargePopData, E2eFixture)
     block.v_popData = v_pop_data;
 
     BlockValidationState block_state;
-    BOOST_CHECK(!pop->addAllBlockPayloads(*ChainActive().Tip(), block, block_state));
+    BOOST_CHECK(!pop->addAllBlockPayloads(ChainActive().Tip(), block, block_state));
     BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-weight");
 
     // remove one pop_data that does not contain vtbs
     block.v_popData.erase(block.v_popData.begin() + 1);
     block_state = BlockValidationState();
-    BOOST_CHECK(pop->addAllBlockPayloads(*ChainActive().Tip(), block, block_state));
+    BOOST_CHECK(pop->addAllBlockPayloads(ChainActive().Tip(), block, block_state));
 
     num_vtbs = 2000;
     v_pop_data[0].vtbs.reserve(num_vtbs);
@@ -164,7 +158,7 @@ BOOST_FIXTURE_TEST_CASE(BlockWithLargePopData, E2eFixture)
 
     block.v_popData = v_pop_data;
     block_state = BlockValidationState();
-    BOOST_CHECK(!pop->addAllBlockPayloads(*ChainActive().Tip(), block, block_state));
+    BOOST_CHECK(!pop->addAllBlockPayloads(ChainActive().Tip(), block, block_state));
     BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-weight");
 }
 
@@ -196,7 +190,7 @@ BOOST_AUTO_TEST_CASE(GetBlockWeight_test)
     block.nBits = 10000;
     block.nNonce = 10000;
     block.nTime = 10000;
-    block.nVersion = 1;
+    block.nVersion = 1 | VeriBlock::POP_BLOCK_VERSION_BIT;
 
     int64_t expected_block_weight = GetBlockWeight(block);
 
@@ -224,7 +218,7 @@ BOOST_AUTO_TEST_CASE(block_serialization_test)
     block.nBits = 10000;
     block.nNonce = 10000;
     block.nTime = 10000;
-    block.nVersion = 1;
+    block.nVersion = 1 | VeriBlock::POP_BLOCK_VERSION_BIT;
 
     altintegration::PopData popData = generateRandPopData();
 
@@ -250,8 +244,6 @@ BOOST_FIXTURE_TEST_CASE(BlockPoPVersion_test, E2eFixture)
     }
 
     auto block = CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey);
-
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

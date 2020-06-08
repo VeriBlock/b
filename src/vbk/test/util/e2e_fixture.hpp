@@ -16,6 +16,7 @@
 #include <veriblock/alt-util.hpp>
 #include <veriblock/mempool.hpp>
 #include <veriblock/mock_miner.hpp>
+#include <vbk/log.hpp>
 
 using altintegration::AltPayloads;
 using altintegration::ATV;
@@ -24,6 +25,14 @@ using altintegration::MockMiner;
 using altintegration::PublicationData;
 using altintegration::VbkBlock;
 using altintegration::VTB;
+
+struct TestLogger : public altintegration::Logger {
+    ~TestLogger() override = default;
+
+    void log(altintegration::LogLevel lvl, const std::string& msg) override {
+        fmt::printf("[pop] [%s]\t%s\n", altintegration::LevelToString(lvl), msg);
+    }
+};
 
 struct E2eFixture : public TestChain100Setup {
     CScript cbKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
@@ -34,10 +43,31 @@ struct E2eFixture : public TestChain100Setup {
 
     E2eFixture()
     {
+        altintegration::SetLogger<TestLogger>();
+        altintegration::GetLogger().level = altintegration::LogLevel::off;
         pop = &VeriBlock::getService<VeriBlock::PopService>();
     }
 
-    ATV endorseAltBlock(uint256 hash, const std::vector<uint8_t>& payoutInfo)
+    void InvalidateTestBlock(CBlockIndex* pblock)
+    {
+        BlockValidationState state;
+        InvalidateBlock(state, Params(), pblock);
+        ActivateBestChain(state, Params());
+        mempool.clear();
+    }
+
+    void ReconsiderTestBlock(CBlockIndex* pblock)
+    {
+        BlockValidationState state;
+
+        {
+            LOCK(cs_main);
+            ResetBlockFailureFlags(pblock);
+        }
+        ActivateBestChain(state, Params(), std::shared_ptr<const CBlock>());
+    }
+
+    ATV endorseAltBlock(uint256 hash, const std::vector<VTB>& vtbs, const std::vector<uint8_t>& payoutInfo)
     {
         CBlockIndex* endorsed = nullptr;
         {
@@ -55,7 +85,7 @@ struct E2eFixture : public TestChain100Setup {
 
     ATV endorseAltBlock(uint256 hash, const std::vector<VTB>& vtbs)
     {
-        return endorseAltBlock(hash, defaultPayoutInfo);
+        return endorseAltBlock(hash, vtbs, defaultPayoutInfo);
     }
 
     CBlock endorseAltBlockAndMine(const std::vector<uint256>& hashes, size_t generateVtbs = 0)
@@ -79,7 +109,7 @@ struct E2eFixture : public TestChain100Setup {
         std::vector<ATV> atvs;
         atvs.reserve(hashes.size());
         std::transform(hashes.begin(), hashes.end(), std::back_inserter(atvs), [&](const uint256& hash) -> ATV {
-            return endorseAltBlock(hash, payoutInfo);
+            return endorseAltBlock(hash, {}, payoutInfo);
         });
 
         auto& pop_mempool = pop->getMemPool();

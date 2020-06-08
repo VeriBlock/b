@@ -8,6 +8,7 @@
 
 #include <map>
 #include <vector>
+#include <mutex>
 
 #include <consensus/validation.h>
 #include <script/interpreter.h>
@@ -47,11 +48,8 @@ struct PopService {
     virtual std::vector<BlockBytes> getLastKnownVBKBlocks(size_t blocks) = 0;
     virtual std::vector<BlockBytes> getLastKnownBTCBlocks(size_t blocks) = 0;
 
-    virtual void rewardsCalculateOutputs(const int& blockHeight, const CBlockIndex& endorsedBlock, const CBlockIndex& contaningBlocksTip, const CBlockIndex* difficulty_start_interval, const CBlockIndex* difficulty_end_interval, std::map<CScript, int64_t>& outputs) = 0;
-
     virtual bool acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state) = 0;
-    virtual bool addAllBlockPayloads(const CBlockIndex& prevIndex, const CBlock& fullBlock, BlockValidationState& state) = 0;
-    virtual void invalidateBlockByHash(const uint256& block) = 0;
+    virtual bool addAllBlockPayloads(const CBlockIndex* prevIndex, const CBlock& fullBlock, BlockValidationState& state) = 0;
     virtual bool setState(const uint256& block, altintegration::ValidationState& state) = 0;
 
     virtual std::vector<altintegration::PopData> getPopData(const CBlockIndex& currentBlockIndex) = 0;

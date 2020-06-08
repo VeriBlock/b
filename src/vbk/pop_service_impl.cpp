@@ -40,11 +40,15 @@ std::vector<uint8_t> HashFunction(const std::vector<uint8_t>& data)
 
 } // namespace
 
+
 namespace VeriBlock {
 
-void PopServiceImpl::addPopPayoutsIntoCoinbaseTx(CMutableTransaction& coinbaseTx, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams)
+void PopServiceImpl::addPopPayoutsIntoCoinbaseTx(CMutableTransaction& coinbaseTx, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
+    AssertLockHeld(cs_main);
     PoPRewards rewards = getPopRewards(pindexPrev, consensusParams);
+    LogPrintf("{addPopPayoutsIntoCoinbaseTx()}: rewards size %d \n", rewards.size());
+    LogPrintf("{addPopPayoutsIntoCoinbaseTx()}: vout before size %d \n", coinbaseTx.vout.size());
     assert(coinbaseTx.vout.size() == 1 && "at this place we should have only PoW payout here");
     for (const auto& itr : rewards) {
         CTxOut out;
@@ -52,12 +56,16 @@ void PopServiceImpl::addPopPayoutsIntoCoinbaseTx(CMutableTransaction& coinbaseTx
         out.nValue = itr.second;
         coinbaseTx.vout.push_back(out);
     }
+    LogPrintf("{addPopPayoutsIntoCoinbaseTx()}: vout before size %d \n", coinbaseTx.vout.size());
 }
 
-bool PopServiceImpl::checkCoinbaseTxWithPopRewards(const CTransaction& tx, const CAmount& PoWBlockReward, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams, BlockValidationState& state)
+bool PopServiceImpl::checkCoinbaseTxWithPopRewards(const CTransaction& tx, const CAmount& PoWBlockReward, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
+    AssertLockHeld(cs_main);
     PoPRewards rewards = getPopRewards(pindexPrev, consensusParams);
     CAmount nTotalPopReward = 0;
+
+    LogPrintf("{checkCoinbaseTxWithPopRewards}: coinbase vout size %d \n", tx.vout.size());
 
     if (tx.vout.size() < rewards.size()) {
         return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-pop-vouts-size",
@@ -113,11 +121,18 @@ bool PopServiceImpl::checkCoinbaseTxWithPopRewards(const CTransaction& tx, const
     return true;
 }
 
-PoPRewards PopServiceImpl::getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams)
+PoPRewards PopServiceImpl::getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
+    AssertLockHeld(cs_main);
+    altintegration::ValidationState state;
+    bool ret = this->altTree->setState(pindexPrev.GetBlockHash().asVector(), state);
+    (void)ret;
+    assert(ret);
+
     auto& config = getService<Config>();
-    if ((pindexPrev.nHeight + 1) < (int)config.popconfig.alt->getRewardParams().rewardSettlementInterval()) return {};
-    auto state = altintegration::ValidationState();
+    if ((pindexPrev.nHeight + 1) < (int)config.popconfig.alt->getEndorsementSettlementInterval()) {
+        return {};
+    }
     auto blockHash = pindexPrev.GetBlockHash();
     auto rewards = altTree->getPopPayout(blockHash.asVector(), state);
     if (state.IsError()) {
@@ -127,6 +142,7 @@ PoPRewards PopServiceImpl::getPopRewards(const CBlockIndex& pindexPrev, const Co
     int halvings = (pindexPrev.nHeight + 1) / consensusParams.nSubsidyHalvingInterval;
     PoPRewards btcRewards{};
     //erase rewards, that pay 0 satoshis and halve rewards
+    LogPrintf("Pop rewards amount: %d \n", rewards.size());
     for (const auto& r : rewards) {
         auto rewardValue = r.second;
         rewardValue >>= halvings;
@@ -141,7 +157,7 @@ PoPRewards PopServiceImpl::getPopRewards(const CBlockIndex& pindexPrev, const Co
 
 bool PopServiceImpl::acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state)
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    AssertLockHeld(cs_main);
     auto containing = VeriBlock::blockToAltBlock(indexNew);
     altintegration::ValidationState instate;
     if (!altTree->acceptBlock(containing, instate)) {
@@ -151,43 +167,41 @@ bool PopServiceImpl::acceptBlock(const CBlockIndex& indexNew, BlockValidationSta
     return true;
 }
 
-bool PopServiceImpl::addAllBlockPayloads(const CBlockIndex& indexPrev, const CBlock& connecting, BlockValidationState& state)
+bool PopServiceImpl::addAllBlockPayloads(const CBlockIndex* indexPrev, const CBlock& connecting, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    AssertLockHeld(cs_main);
     return addAllPayloadsToBlockImpl(*altTree, indexPrev, connecting, state);
 }
 
 std::vector<BlockBytes> PopServiceImpl::getLastKnownVBKBlocks(size_t blocks)
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    LOCK(cs_main);
     return altintegration::getLastKnownBlocks(altTree->vbk(), blocks);
 }
 
 std::vector<BlockBytes> PopServiceImpl::getLastKnownBTCBlocks(size_t blocks)
 {
-    std::lock_guard<std::mutex> lock(mutex);
+    LOCK(cs_main);
     return altintegration::getLastKnownBlocks(altTree->btc(), blocks);
 }
 
 // Forkresolution
-int PopServiceImpl::compareForks(const CBlockIndex& leftForkTip, const CBlockIndex& rightForkTip)
+int PopServiceImpl::compareForks(const CBlockIndex& leftForkTip, const CBlockIndex& rightForkTip) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
+    AssertLockHeld(cs_main);
     if (&leftForkTip == &rightForkTip) {
         return 0;
     }
 
-    std::lock_guard<std::mutex> lock(mutex);
     auto left = blockToAltBlock(leftForkTip);
     auto right = blockToAltBlock(rightForkTip);
     auto state = altintegration::ValidationState();
-    return altTree->comparePopScore(left.hash, right.hash);
-}
 
-// Pop rewards
-void PopServiceImpl::rewardsCalculateOutputs(const int& blockHeight, const CBlockIndex& endorsedBlock, const CBlockIndex& contaningBlocksTip, const CBlockIndex* difficulty_start_interval, const CBlockIndex* difficulty_end_interval, std::map<CScript, int64_t>& outputs)
-{
-    std::lock_guard<std::mutex> lock(mutex);
-    // TODO: implement
+    if (!altTree->setState(left.hash, state)) {
+        return -1;
+    }
+
+    return altTree->comparePopScore(left.hash, right.hash);
 }
 
 PopServiceImpl::PopServiceImpl(const altintegration::Config& config)
@@ -195,33 +209,11 @@ PopServiceImpl::PopServiceImpl(const altintegration::Config& config)
     config.validate();
     altTree = altintegration::Altintegration::create(config);
     mempool = std::make_shared<altintegration::MemPool>(altTree->getParams(), altTree->vbk().getParams(), altTree->btc().getParams(), HashFunction);
-
-    altTree->connectOnInvalidateBlock([&](const altintegration::BlockIndex<altintegration::AltBlock>& invalidated) {
-        LOCK(cs_main);
-        auto index = LookupBlockIndex(uint256(invalidated.getHash()));
-        if (!index) {
-            // we don't know this block, do nothing.
-            return;
-        }
-        if (invalidated.status & altintegration::BLOCK_FAILED_CHILD) {
-            index->nStatus |= BLOCK_FAILED_CHILD;
-        }
-        if (invalidated.status & altintegration::BLOCK_FAILED_POP) {
-            index->nStatus |= BLOCK_FAILED_VALID;
-        }
-    });
 }
 
-void PopServiceImpl::invalidateBlockByHash(const uint256& block)
+bool PopServiceImpl::setState(const uint256& block, altintegration::ValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
-    std::lock_guard<std::mutex> lock(mutex);
-    auto v = block.asVector();
-    altTree->removeSubtree(v);
-}
-
-bool PopServiceImpl::setState(const uint256& block, altintegration::ValidationState& state)
-{
-    std::lock_guard<std::mutex> lock(mutex);
+    AssertLockHeld(cs_main);
     return altTree->setState(block.asVector(), state);
 }
 
@@ -247,8 +239,7 @@ bool validatePopDataLimits(const altintegration::AltChainParams& config, const s
         if (v_pop_data[0].toVbkEncoding().size() > config.getSuperMaxPopDataWeight()) {
             return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "pop-data-weight", "[" + std::to_string(v_pop_data.size()) + "] super weight pop_data limits");
         }
-    }
-    else {
+    } else {
         for (const auto& pop_data : v_pop_data) {
             if (pop_data.toVbkEncoding().size() > config.getMaxPopDataWeight()) {
                 return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "pop-data-weight", "[" + std::to_string(v_pop_data.size()) + "] weight pop_data limits");
@@ -259,16 +250,11 @@ bool validatePopDataLimits(const altintegration::AltChainParams& config, const s
     return true;
 }
 
-bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex& indexPrev, const CBlock& block, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+bool popDataToPayloads(const CBlock& block, const CBlockIndex& indexPrev, BlockValidationState& state, std::vector<altintegration::AltPayloads>& payloads)
 {
-    if (!validatePopDataLimits(tree.getParams(), block.v_popData, state)) {
-        return false;
-    }
-
     auto containing = VeriBlock::blockToAltBlock(indexPrev.nHeight + 1, block.GetBlockHeader());
 
-    altintegration::ValidationState instate;
-    std::vector<altintegration::AltPayloads> payloads(block.v_popData.size());
+    payloads.resize(block.v_popData.size());
     // transform v_popData to the AltPayloads
     for (size_t i = 0; i < payloads.size(); ++i) {
         auto& pop_data = block.v_popData[i];
@@ -300,13 +286,44 @@ bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex&
         payloads[i] = p;
     }
 
+    return true;
+}
 
-    if (!tree.acceptBlock(containing, instate)) {
-        return error("[%s] block %s is not accepted by altTree: %s", __func__, block.GetHash().ToString(), instate.toString());
+bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex* indexPrev, const CBlock& block, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+{
+    AssertLockHeld(cs_main);
+
+    int height = 0;
+    if (indexPrev != nullptr) {
+        height = indexPrev->nHeight + 1;
     }
 
-    if (!payloads.empty() && !tree.addPayloads(containing, payloads, instate)) {
-        return error("[%s] block %s failed stateful pop validation: %s", __func__, block.GetHash().ToString(), instate.toString());
+    auto containing = VeriBlock::blockToAltBlock(height, block.GetBlockHeader());
+
+    altintegration::ValidationState instate;
+
+    if (!tree.acceptBlock(containing, instate)) {
+        return error("[%s] block %s is not accepted by altTree: %s", __func__, block.GetHash().ToString(),
+            instate.toString());
+    }
+
+    LogPrintf("Pop v_pop_data amount: %d , block height: %d \n", block.v_popData.size(), containing.height);
+
+    if (indexPrev != nullptr) {
+        if (!validatePopDataLimits(tree.getParams(), block.v_popData, state)) {
+            return false;
+        }
+
+
+        std::vector<altintegration::AltPayloads> payloads;
+        if (!popDataToPayloads(block, *indexPrev, state, payloads)) {
+            return false;
+        }
+
+        if (!payloads.empty() && !tree.addPayloads(containing, payloads, instate)) {
+            return error("[%s] block %s failed stateful pop validation: %s", __func__, block.GetHash().ToString(),
+                instate.toString());
+        }
     }
 
     return true;

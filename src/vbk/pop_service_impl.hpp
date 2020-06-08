@@ -24,12 +24,12 @@ namespace VeriBlock {
 class PopServiceImpl : public PopService
 {
 private:
-    std::mutex mutex;
-    std::shared_ptr<altintegration::AltTree> altTree;
     std::shared_ptr<altintegration::MemPool> mempool;
+    std::shared_ptr<altintegration::AltTree> altTree;
 
 public:
-    std::string toPrettyString() const override {
+    std::string toPrettyString() const override
+    {
         return altTree->toPrettyString();
     };
 
@@ -55,11 +55,8 @@ public:
     std::vector<BlockBytes> getLastKnownVBKBlocks(size_t blocks) override;
     std::vector<BlockBytes> getLastKnownBTCBlocks(size_t blocks) override;
 
-    void rewardsCalculateOutputs(const int& blockHeight, const CBlockIndex& endorsedBlock, const CBlockIndex& contaningBlocksTip, const CBlockIndex* difficulty_start_interval, const CBlockIndex* difficulty_end_interval, std::map<CScript, int64_t>& outputs) override;
-
     bool acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state) override;
-    bool addAllBlockPayloads(const CBlockIndex& indexPrev, const CBlock& fullBlock, BlockValidationState& state) override;
-    void invalidateBlockByHash(const uint256& block) override;
+    bool addAllBlockPayloads(const CBlockIndex* indexPrev, const CBlock& fullBlock, BlockValidationState& state) override;
     bool setState(const uint256& block, altintegration::ValidationState& state) override;
 
     std::vector<altintegration::PopData> getPopData(const CBlockIndex& currentBlockIndex) override;
@@ -68,7 +65,8 @@ public:
     int compareForks(const CBlockIndex& left, const CBlockIndex& right) override;
 };
 
-bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex& indexPrev, const CBlock& block, BlockValidationState& state);
+bool popDataToPayloads(const CBlock& block, const CBlockIndex& indexPrev, BlockValidationState& state, std::vector<altintegration::AltPayloads>& payloads);
+bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex* indexPrev, const CBlock& block, BlockValidationState& state);
 
 } // namespace VeriBlock
 #endif //BITCOIN_SRC_VBK_POP_SERVICE_POP_SERVICE_IMPL_HPP

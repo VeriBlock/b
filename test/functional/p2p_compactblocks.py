@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # Copyright (c) 2016-2019 The Bitcoin Core developers
+# Copyright (c) 2019-2020 Xenios SEZC
+# https://www.veriblock.org
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test compact blocks (BIP 152).
@@ -107,7 +109,7 @@ class CompactBlocksTest(BitcoinTestFramework):
         height = node.getblockcount()
         tip = node.getbestblockhash()
         mtp = node.getblockheader(tip)['mediantime']
-        block = create_block(int(tip, 16), create_coinbase(height + 1), mtp + 1)
+        block = create_block(node, int(tip, 16), create_coinbase(height + 1), mtp + 1)
         block.nVersion = 4
         if segwit:
             add_witness_commitment(block)

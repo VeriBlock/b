@@ -19,7 +19,7 @@ namespace VeriBlock {
 
 using KeystoneArray = std::array<uint256, 2>;
 
-// 1000 0000 0000 0000 0000 0000 0000 0000
+// 0000 0000 0000 1000 0000 0000 0000 0000
 const static int32_t POP_BLOCK_VERSION_BIT = 0x80000000UL;
 
 
@@ -40,9 +40,7 @@ struct Config {
 
     /////// Pop Rewards section start
     uint32_t POP_REWARD_PERCENTAGE = 40;
-    int32_t POP_REWARD_SETTLEMENT_INTERVAL = 400;
-    int32_t POP_REWARD_PAYMENT_DELAY = 500;
-    int32_t POP_DIFFICULTY_AVERAGING_INTERVAL = 50;
+    int32_t POP_REWARD_COEFFICIENT = 20;
 };
 
 } // namespace VeriBlock
