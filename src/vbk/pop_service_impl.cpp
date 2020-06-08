@@ -124,11 +124,15 @@ bool PopServiceImpl::checkCoinbaseTxWithPopRewards(const CTransaction& tx, const
 PoPRewards PopServiceImpl::getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
+    altintegration::ValidationState state;
+    bool ret = this->altTree->setState(pindexPrev.GetBlockHash().asVector(), state);
+    (void)ret;
+    assert(ret);
+
     auto& config = getService<Config>();
     if ((pindexPrev.nHeight + 1) < (int)config.popconfig.alt->getEndorsementSettlementInterval()) {
         return {};
     }
-    auto state = altintegration::ValidationState();
     auto blockHash = pindexPrev.GetBlockHash();
     auto rewards = altTree->getPopPayout(blockHash.asVector(), state);
     if (state.IsError()) {

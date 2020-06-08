@@ -85,29 +85,26 @@ BOOST_FIXTURE_TEST_CASE(BlockWithTooManyPublicationTxes, E2eFixture)
         return endorseAltBlock(hash, {}, defaultPayoutInfo);
     });
 
+    bool isValid = false;
     BOOST_CHECK_EQUAL(endorsedBlockHashes.size(), atvs.size());
 
     auto& pop_mempool = pop->getMemPool();
     altintegration::ValidationState state;
     BOOST_CHECK(pop_mempool.submitATV(atvs, state));
 
-    bool isValid = false;
     CBlock block1 = CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey, &isValid);
     BOOST_CHECK_EQUAL(block1.v_popData.size(), config.popconfig.alt->getMaxPopDataPerBlock());
 
     CBlock block2 = CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey, &isValid);
-    BOOST_CHECK_EQUAL(block2.v_popData.size(), test_amount);
+    BOOST_CHECK_EQUAL(block2.v_popData.size(), 0);
 
-    CBlock block3 = CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey, &isValid);
-    BOOST_CHECK_EQUAL(block3.v_popData.size(), 0);
+    block2.v_popData.insert(block2.v_popData.end(), block1.v_popData.begin(), block1.v_popData.end());
+    block2.v_popData.insert(block2.v_popData.end(), block1.v_popData.begin(), block1.v_popData.end());
 
-    block3.v_popData.insert(block3.v_popData.end(), block1.v_popData.begin(), block1.v_popData.end());
-    block3.v_popData.insert(block3.v_popData.end(), block2.v_popData.begin(), block2.v_popData.end());
-
-    BOOST_CHECK_EQUAL(block3.v_popData.size(), config.popconfig.alt->getMaxPopDataPerBlock() + test_amount);
+    BOOST_CHECK_EQUAL(block2.v_popData.size(), 2 * config.popconfig.alt->getMaxPopDataPerBlock());
 
     BlockValidationState block_state;
-    BOOST_CHECK(!pop->addAllBlockPayloads(ChainActive().Tip(), block3, block_state));
+    BOOST_CHECK(!pop->addAllBlockPayloads(ChainActive().Tip(), block2, block_state));
     BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-size");
 }
 
@@ -221,7 +218,7 @@ BOOST_AUTO_TEST_CASE(block_serialization_test)
     block.nBits = 10000;
     block.nNonce = 10000;
     block.nTime = 10000;
-    block.nVersion = 1;
+    block.nVersion = 1 | VeriBlock::POP_BLOCK_VERSION_BIT;
 
     altintegration::PopData popData = generateRandPopData();
 
