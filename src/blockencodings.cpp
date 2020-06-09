@@ -31,6 +31,8 @@ CBlockHeaderAndShortTxIDs::CBlockHeaderAndShortTxIDs(const CBlock& block, bool f
         const CTransaction& tx = *block.vtx[i];
         shorttxids[i - 1] = GetShortID(fUseWTXID ? tx.GetWitnessHash() : tx.GetHash());
     }
+    // VeriBlock
+    this->v_popData = block.v_popData;
 }
 
 void CBlockHeaderAndShortTxIDs::FillShortTxIDSelector() const {
@@ -180,8 +182,9 @@ bool PartiallyDownloadedBlock::IsTxAvailable(size_t index) const {
 }
 
 ReadStatus PartiallyDownloadedBlock::FillBlock(CBlock& block, const std::vector<CTransactionRef>& vtx_missing, const std::vector<altintegration::PopData>& v_popData) {
+    ReadStatus status = FillBlock(block, vtx_missing);
     block.v_popData = v_popData;
-    return FillBlock(block, vtx_missing);
+    return status;
 }
 
 ReadStatus PartiallyDownloadedBlock::FillBlock(CBlock& block, const std::vector<CTransactionRef>& vtx_missing) {

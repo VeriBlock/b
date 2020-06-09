@@ -86,17 +86,17 @@ class PopPayouts(BitcoinTestFramework):
         coinbasetxhash = block['tx'][0]
         coinbasetx = self.nodes[0].getrawtransaction(coinbasetxhash, 1)
         outputs = coinbasetx['vout']
-        #assert len(outputs) > 3, "block with payout does not contain pop payout: {}".format(outputs)
-        assert outputs[0]['n'] == 1
-        assert outputs[0]['value'] > 0, "expected non-zero output at n=1, got: {}".format(outputs[1])
+        assert len(outputs) > 3, "block with payout does not contain pop payout: {}".format(outputs)
+        assert outputs[1]['n'] == 1
+        assert outputs[1]['value'] > 0, "expected non-zero output at n=1, got: {}".format(outputs[1])
 
 
         # mine 100 blocks and check balance
         self.nodes[0].generate(nblocks=100)
         balance = self.nodes[0].getbalance()
 
-        # node[0] has 10 mature coinbases and single pop payout
-        assert balance == POW_PAYOUT * 10 + outputs[1]['value']
+        # node[0] has 11 mature coinbases and single pop payout
+        assert balance == POW_PAYOUT * 11 + outputs[1]['value']
         self.log.warning("success! _case1_endorse_keystone_get_paid()")
 
     def run_test(self):

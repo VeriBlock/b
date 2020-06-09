@@ -2370,7 +2370,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
     if (strCommand == NetMsgType::GETBLOCKTXN) {
         BlockTransactionsRequest req;
         vRecv >> req;
-
+        LogPrintf("NetMsgType::GETBLOCKTXN \n");
         std::shared_ptr<const CBlock> recent_block;
         {
             LOCK(cs_most_recent_block);
@@ -2631,6 +2631,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
     if (strCommand == NetMsgType::CMPCTBLOCK)
     {
 
+        LogPrintf("NetMsgType::CMPCTBLOCK\n");
         // Ignore cmpctblock received while importing
         if (fImporting || fReindex) {
             LogPrint(BCLog::NET, "Unexpected cmpctblock message received from peer %d\n", pfrom->GetId());
@@ -2763,6 +2764,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                     // Dirty hack to jump to BLOCKTXN code (TODO: move message handling into their own functions)
                     BlockTransactions txn;
                     txn.blockhash = cmpctblock.header.GetHash();
+                    txn.v_popData = cmpctblock.v_popData;
                     blockTxnMsg << txn;
                     fProcessBLOCKTXN = true;
                 } else {
@@ -2861,7 +2863,6 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
 
         BlockTransactions resp;
         vRecv >> resp;
-
         std::shared_ptr<CBlock> pblock = std::make_shared<CBlock>();
         bool fBlockRead = false;
         {
@@ -2875,7 +2876,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             }
 
             PartiallyDownloadedBlock& partialBlock = *it->second.second->partialBlock;
-            ReadStatus status = partialBlock.FillBlock(*pblock, resp.txn);
+            ReadStatus status = partialBlock.FillBlock(*pblock, resp.txn, resp.v_popData);
             if (status == READ_STATUS_INVALID) {
                 MarkBlockAsReceived(resp.blockhash); // Reset in-flight state in case of whitelist
                 Misbehaving(pfrom->GetId(), 100, strprintf("Peer %d sent us invalid compact block/non-matching block transactions\n", pfrom->GetId()));

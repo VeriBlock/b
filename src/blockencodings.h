@@ -147,6 +147,8 @@ protected:
 
 public:
     CBlockHeader header;
+    // VeriBlock data
+    std::vector<altintegration::PopData> v_popData;
 
     // Dummy for deserialization
     CBlockHeaderAndShortTxIDs() {}
@@ -185,6 +187,10 @@ public:
                 READWRITE(lsb);
                 READWRITE(msb);
             }
+        }
+
+        if (this->header.nVersion & VeriBlock::POP_BLOCK_VERSION_BIT) {
+            READWRITE(v_popData);
         }
 
         READWRITE(prefilledtxn);
