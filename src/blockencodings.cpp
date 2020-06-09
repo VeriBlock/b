@@ -179,6 +179,11 @@ bool PartiallyDownloadedBlock::IsTxAvailable(size_t index) const {
     return txn_available[index] != nullptr;
 }
 
+ReadStatus PartiallyDownloadedBlock::FillBlock(CBlock& block, const std::vector<CTransactionRef>& vtx_missing, const std::vector<altintegration::PopData>& v_popData) {
+    block.v_popData = v_popData;
+    return FillBlock(block, vtx_missing);
+}
+
 ReadStatus PartiallyDownloadedBlock::FillBlock(CBlock& block, const std::vector<CTransactionRef>& vtx_missing) {
     assert(!header.IsNull());
     uint256 hash = header.GetHash();

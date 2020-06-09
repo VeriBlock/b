@@ -77,6 +77,7 @@ class CBlock : public CBlockHeader
 public:
     // network and disk
     std::vector<CTransactionRef> vtx;
+    // VeriBlock  data network and disk
     std::vector<altintegration::PopData> v_popData;
 
     // memory only
@@ -99,8 +100,7 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITEAS(CBlockHeader, *this);
         READWRITE(vtx);
-        if (this->nVersion & VeriBlock::POP_BLOCK_VERSION_BIT)
-        {
+        if (this->nVersion & VeriBlock::POP_BLOCK_VERSION_BIT) {
             READWRITE(v_popData);
         }
     }
@@ -109,6 +109,7 @@ public:
     {
         CBlockHeader::SetNull();
         vtx.clear();
+        v_popData.clear();
         fChecked = false;
     }
 

@@ -1643,6 +1643,10 @@ inline void static SendBlockTransactions(const CBlock& block, const BlockTransac
     LOCK(cs_main);
     const CNetMsgMaker msgMaker(pfrom->GetSendVersion());
     int nSendFlags = State(pfrom->GetId())->fWantsCmpctWitness ? 0 : SERIALIZE_TRANSACTION_NO_WITNESS;
+
+    //VeriBlock add popData
+    resp.v_popData = block.v_popData;
+
     connman->PushMessage(pfrom, msgMaker.Make(nSendFlags, NetMsgType::BLOCKTXN, resp));
 }
 
@@ -2626,6 +2630,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
 
     if (strCommand == NetMsgType::CMPCTBLOCK)
     {
+
         // Ignore cmpctblock received while importing
         if (fImporting || fReindex) {
             LogPrint(BCLog::NET, "Unexpected cmpctblock message received from peer %d\n", pfrom->GetId());
@@ -2806,6 +2811,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             // the peer if the header turns out to be for an invalid block.
             // Note that if a peer tries to build on an invalid chain, that
             // will be detected and the peer will be banned.
+            LogPrintf("NetMsgType::CMPCTBLOCK \n");
             return ProcessHeadersMessage(pfrom, connman, {cmpctblock.header}, chainparams, /*via_compact_block=*/true);
         }
 
@@ -2936,9 +2942,10 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         }
 
         std::vector<CBlockHeader> headers;
-
+        LogPrintf("NetMsgType::HEADERS \n");
         // Bypass the normal CBlock deserialization, as we don't want to risk deserializing 2000 full blocks.
         unsigned int nCount = ReadCompactSize(vRecv);
+        LogPrintf("NetMsgType::HEADERS, nCount: %d \n", nCount);
         if (nCount > MAX_HEADERS_RESULTS) {
             LOCK(cs_main);
             Misbehaving(pfrom->GetId(), 20, strprintf("headers message size = %u", nCount));
