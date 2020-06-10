@@ -104,8 +104,11 @@ BOOST_FIXTURE_TEST_CASE(BlockWithTooManyPublicationTxes, E2eFixture)
     BOOST_CHECK_EQUAL(block2.v_popData.size(), 2 * config.popconfig.alt->getMaxPopDataPerBlock());
 
     BlockValidationState block_state;
-    BOOST_CHECK(!pop->addAllBlockPayloads(ChainActive().Tip(), block2, block_state));
-    BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-size");
+    {
+        LOCK(cs_main);
+        BOOST_CHECK(!pop->addAllBlockPayloads(ChainActive().Tip(), block2, block_state));
+        BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-size");
+    }
 }
 
 BOOST_FIXTURE_TEST_CASE(BlockWithLargePopData, E2eFixture)
@@ -142,13 +145,19 @@ BOOST_FIXTURE_TEST_CASE(BlockWithLargePopData, E2eFixture)
     block.v_popData = v_pop_data;
 
     BlockValidationState block_state;
-    BOOST_CHECK(!pop->addAllBlockPayloads(ChainActive().Tip(), block, block_state));
-    BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-weight");
+    {
+        LOCK(cs_main);
+        BOOST_CHECK(!pop->addAllBlockPayloads(ChainActive().Tip(), block, block_state));
+        BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-weight");
+    }
 
     // remove one pop_data that does not contain vtbs
     block.v_popData.erase(block.v_popData.begin() + 1);
     block_state = BlockValidationState();
-    BOOST_CHECK(pop->addAllBlockPayloads(ChainActive().Tip(), block, block_state));
+    {
+        LOCK(cs_main);
+        BOOST_CHECK(pop->addAllBlockPayloads(ChainActive().Tip(), block, block_state));
+    }
 
     num_vtbs = 2000;
     v_pop_data[0].vtbs.reserve(num_vtbs);
@@ -158,8 +167,11 @@ BOOST_FIXTURE_TEST_CASE(BlockWithLargePopData, E2eFixture)
 
     block.v_popData = v_pop_data;
     block_state = BlockValidationState();
-    BOOST_CHECK(!pop->addAllBlockPayloads(ChainActive().Tip(), block, block_state));
-    BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-weight");
+    {
+        LOCK(cs_main);
+        BOOST_CHECK(!pop->addAllBlockPayloads(ChainActive().Tip(), block, block_state));
+        BOOST_CHECK_EQUAL(block_state.GetRejectReason(), "pop-data-weight");
+    }
 }
 
 static altintegration::PopData generateRandPopData()
