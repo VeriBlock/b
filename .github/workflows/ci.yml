@@ -75,7 +75,6 @@ jobs:
           --without-gui
           --enable-werror
           --disable-bench
-          --disable-gmock
       - name: make
         run: make -j2 deploy
       - name: create artifacts
@@ -160,7 +159,6 @@ jobs:
         run: CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure --prefix=/
           --enable-werror
           --disable-bench
-          --disable-gmock
       - name: make
         run: make -j2
       - name: make deploy
@@ -238,7 +236,6 @@ jobs:
           --disable-shared
           --enable-werror
           --disable-bench
-          --disable-gmock
           --without-qtdbus
       - name: make
         run: make -j2 deploy
@@ -315,7 +312,6 @@ jobs:
         run: ./configure
           --enable-werror
           --disable-bench
-          --disable-gmock
       - name: make
         run: make -j2
       - name: make check
@@ -384,7 +380,6 @@ jobs:
           --without-gui
           --enable-werror
           --disable-bench
-          --disable-gmock
           --with-sanitizers=address
       - name: make
         run: make -j2 deploy
