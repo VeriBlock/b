@@ -2370,7 +2370,6 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
     if (strCommand == NetMsgType::GETBLOCKTXN) {
         BlockTransactionsRequest req;
         vRecv >> req;
-        LogPrintf("NetMsgType::GETBLOCKTXN \n");
         std::shared_ptr<const CBlock> recent_block;
         {
             LOCK(cs_most_recent_block);
@@ -2630,8 +2629,6 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
 
     if (strCommand == NetMsgType::CMPCTBLOCK)
     {
-
-        LogPrintf("NetMsgType::CMPCTBLOCK\n");
         // Ignore cmpctblock received while importing
         if (fImporting || fReindex) {
             LogPrint(BCLog::NET, "Unexpected cmpctblock message received from peer %d\n", pfrom->GetId());
@@ -2813,7 +2810,6 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             // the peer if the header turns out to be for an invalid block.
             // Note that if a peer tries to build on an invalid chain, that
             // will be detected and the peer will be banned.
-            LogPrintf("NetMsgType::CMPCTBLOCK \n");
             return ProcessHeadersMessage(pfrom, connman, {cmpctblock.header}, chainparams, /*via_compact_block=*/true);
         }
 

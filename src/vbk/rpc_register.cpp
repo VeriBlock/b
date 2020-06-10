@@ -207,7 +207,6 @@ UniValue submitpop(const JSONRPCRequest& request)
 
     const UniValue& vtb_array = request.params[1].get_array();
     LogPrint(BCLog::POP, "VeriBlock-PoP: submitpop RPC called with 1 ATV and %d VTBs\n", vtb_array.size());
-    LogPrintf("VeriBlock-PoP: submitpop RPC called with 1 ATV and %d VTBs\n", vtb_array.size());
     std::vector<altintegration::VTB> vtbs;
     for (uint32_t idx = 0u, size = vtb_array.size(); idx < size; ++idx) {
         auto& vtbhex = vtb_array[idx];
