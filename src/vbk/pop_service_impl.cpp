@@ -47,8 +47,6 @@ void PopServiceImpl::addPopPayoutsIntoCoinbaseTx(CMutableTransaction& coinbaseTx
 {
     AssertLockHeld(cs_main);
     PoPRewards rewards = getPopRewards(pindexPrev, consensusParams);
-    LogPrintf("{addPopPayoutsIntoCoinbaseTx()}: rewards size %d \n", rewards.size());
-    LogPrintf("{addPopPayoutsIntoCoinbaseTx()}: vout before size %d \n", coinbaseTx.vout.size());
     assert(coinbaseTx.vout.size() == 1 && "at this place we should have only PoW payout here");
     for (const auto& itr : rewards) {
         CTxOut out;
@@ -56,7 +54,6 @@ void PopServiceImpl::addPopPayoutsIntoCoinbaseTx(CMutableTransaction& coinbaseTx
         out.nValue = itr.second;
         coinbaseTx.vout.push_back(out);
     }
-    LogPrintf("{addPopPayoutsIntoCoinbaseTx()}: vout before size %d \n", coinbaseTx.vout.size());
 }
 
 bool PopServiceImpl::checkCoinbaseTxWithPopRewards(const CTransaction& tx, const CAmount& PoWBlockReward, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
@@ -64,8 +61,6 @@ bool PopServiceImpl::checkCoinbaseTxWithPopRewards(const CTransaction& tx, const
     AssertLockHeld(cs_main);
     PoPRewards rewards = getPopRewards(pindexPrev, consensusParams);
     CAmount nTotalPopReward = 0;
-
-    LogPrintf("{checkCoinbaseTxWithPopRewards}: coinbase vout size %d \n", tx.vout.size());
 
     if (tx.vout.size() < rewards.size()) {
         return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, "bad-pop-vouts-size",
@@ -142,7 +137,6 @@ PoPRewards PopServiceImpl::getPopRewards(const CBlockIndex& pindexPrev, const Co
     int halvings = (pindexPrev.nHeight + 1) / consensusParams.nSubsidyHalvingInterval;
     PoPRewards btcRewards{};
     //erase rewards, that pay 0 satoshis and halve rewards
-    LogPrintf("Pop rewards amount: %d \n", rewards.size());
     for (const auto& r : rewards) {
         auto rewardValue = r.second;
         rewardValue >>= halvings;
@@ -306,8 +300,6 @@ bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex*
         return error("[%s] block %s is not accepted by altTree: %s", __func__, block.GetHash().ToString(),
             instate.toString());
     }
-
-    LogPrintf("Pop v_pop_data amount: %d , block height: %d \n", block.v_popData.size(), containing.height);
 
     if (indexPrev != nullptr) {
         if (!validatePopDataLimits(tree.getParams(), block.v_popData, state)) {

@@ -237,6 +237,26 @@ BOOST_AUTO_TEST_CASE(block_serialization_test)
     BOOST_CHECK(decoded_block.v_popData[1] == block.v_popData[1]);
 }
 
+BOOST_AUTO_TEST_CASE(block_network_passing_test) {
+
+        // Create random block
+        CBlock block;
+        block.hashMerkleRoot.SetNull();
+        block.hashPrevBlock.SetNull();
+        block.nBits = 10000;
+        block.nNonce = 10000;
+        block.nTime = 10000;
+        block.nVersion = 1 | VeriBlock::POP_BLOCK_VERSION_BIT;
+
+        altintegration::PopData popData = generateRandPopData();
+
+        block.v_popData = {popData, popData};
+
+        CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
+
+
+}
+
 BOOST_FIXTURE_TEST_CASE(BlockPoPVersion_test, E2eFixture)
 {
     for (size_t i = 0; i < 400; ++i) {
