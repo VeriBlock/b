@@ -41,24 +41,6 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
         return 0x3ae6ca;
     }
 
-    /** The maximum allowed PopData amounts per block */
-    uint32_t getMaxPopDataPerBlock() const noexcept override
-    {
-        return 50;
-    }
-
-    /** The maximum allowed weight for a PopData */
-    uint32_t getMaxPopDataWeight() const noexcept override
-    {
-        return 1000000;
-    }
-
-    uint32_t getSuperMaxPopDataWeight() const noexcept override
-    {
-        return 5 * getMaxPopDataWeight();
-    }
-
-
     altintegration::AltBlock bootstrap;
 };
 
@@ -72,6 +54,4 @@ void selectPopConfig(
     const std::string& btcblocks = {},
     int vbkstart = 0,
     const std::string& vbkblocks = {});
-
-
 #endif

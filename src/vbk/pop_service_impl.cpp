@@ -142,7 +142,7 @@ PoPRewards PopServiceImpl::getPopRewards(const CBlockIndex& pindexPrev, const Co
         rewardValue >>= halvings;
         if ((rewardValue != 0) && (halvings < 64)) {
             CScript key = CScript(r.first.begin(), r.first.end());
-            btcRewards[key] = rewardValue;
+            btcRewards[key] = config.POP_REWARD_COEFFICIENT * rewardValue;
         }
     }
 
@@ -192,6 +192,9 @@ int PopServiceImpl::compareForks(const CBlockIndex& leftForkTip, const CBlockInd
     auto state = altintegration::ValidationState();
 
     if (!altTree->setState(left.hash, state)) {
+        if (!altTree->setState(right.hash, state)) {
+            throw std::logic_error("both chains are invalid");
+        }
         return -1;
     }
 
@@ -213,6 +216,7 @@ bool PopServiceImpl::setState(const uint256& block, altintegration::ValidationSt
 
 std::vector<altintegration::PopData> PopServiceImpl::getPopData(const CBlockIndex& currentBlockIndex)
 {
+    AssertLockHeld(cs_main);
     altintegration::AltBlock current = VeriBlock::blockToAltBlock(currentBlockIndex.nHeight, currentBlockIndex.GetBlockHeader());
     altintegration::ValidationState state;
     return mempool->getPop(current, *this->altTree);
@@ -220,28 +224,8 @@ std::vector<altintegration::PopData> PopServiceImpl::getPopData(const CBlockInde
 
 void PopServiceImpl::removePayloadsFromMempool(const std::vector<altintegration::PopData>& v_popData)
 {
+    AssertLockHeld(cs_main);
     mempool->removePayloads(v_popData);
-}
-
-bool validatePopDataLimits(const altintegration::AltChainParams& config, const std::vector<altintegration::PopData>& v_pop_data, BlockValidationState& state)
-{
-    if (v_pop_data.size() > config.getMaxPopDataPerBlock()) {
-        return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "pop-data-size", "[" + std::to_string(v_pop_data.size()) + "] size v_pop_data limits");
-    }
-
-    if (v_pop_data.size() == 1) {
-        if (v_pop_data[0].toVbkEncoding().size() > config.getSuperMaxPopDataWeight()) {
-            return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "pop-data-weight", "[" + std::to_string(v_pop_data.size()) + "] super weight pop_data limits");
-        }
-    } else {
-        for (const auto& pop_data : v_pop_data) {
-            if (pop_data.toVbkEncoding().size() > config.getMaxPopDataWeight()) {
-                return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "pop-data-weight", "[" + std::to_string(v_pop_data.size()) + "] weight pop_data limits");
-            }
-        }
-    }
-
-    return true;
 }
 
 bool popDataToPayloads(const CBlock& block, const CBlockIndex& indexPrev, BlockValidationState& state, std::vector<altintegration::AltPayloads>& payloads)
@@ -302,11 +286,6 @@ bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex*
     }
 
     if (indexPrev != nullptr) {
-        if (!validatePopDataLimits(tree.getParams(), block.v_popData, state)) {
-            return false;
-        }
-
-
         std::vector<altintegration::AltPayloads> payloads;
         if (!popDataToPayloads(block, *indexPrev, state, payloads)) {
             return false;
