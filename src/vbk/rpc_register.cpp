@@ -308,6 +308,7 @@ template <typename Tree>
 UniValue getblock(const JSONRPCRequest& req, Tree& tree, const std::string& chain)
 {
     check_getblock(req, chain);
+    LOCK(cs_main);
 
     using block_t = typename Tree::block_t;
     using hash_t = typename block_t::hash_t;
@@ -439,6 +440,30 @@ UniValue getbtcblockhash(const JSONRPCRequest& request)
 
 } // namespace
 
+// getpoprawmempool
+namespace {
+
+UniValue getrawpopmempool(const JSONRPCRequest& request)
+{
+    auto cmdname = "getrawpopmempool";
+    RPCHelpMan{
+        cmdname,
+        "\nReturns the list of VBK blocks, ATVs and VTBs stored in POP mempool.\n",
+        {},
+        RPCResult{"TODO"},
+        RPCExamples{
+            HelpExampleCli(cmdname, "") +
+            HelpExampleRpc(cmdname, "")},
+    }
+        .Check(request);
+
+    auto& pop = VeriBlock::getService<VeriBlock::PopService>();
+    auto& mp = pop.getMemPool();
+    return altintegration::ToJSON<UniValue>(mp);
+}
+
+} // namespace
+
 const CRPCCommand commands[] = {
     {"pop_mining", "submitpop", &submitpop, {"atv", "vtbs"}},
     {"pop_mining", "getpopdata", &getpopdata, {"blockheight"}},
@@ -449,7 +474,8 @@ const CRPCCommand commands[] = {
     {"pop_mining", "getvbkbestblockhash", &getvbkbestblockhash, {}},
     {"pop_mining", "getbtcbestblockhash", &getbtcbestblockhash, {}},
     {"pop_mining", "getvbkblockhash", &getvbkblockhash, {"height"}},
-    {"pop_mining", "getbtcblockhash", &getbtcblockhash, {"height"}}};
+    {"pop_mining", "getbtcblockhash", &getbtcblockhash, {"height"}},
+    {"pop_mining", "getrawpopmempool", &getrawpopmempool, {}}};
 
 void RegisterPOPMiningRPCCommands(CRPCTable& t)
 {

@@ -13,6 +13,13 @@
 /// UniValue v = ToJSON<UniValue>(vbk entity);
 
 namespace altintegration {
+
+template <>
+inline UniValue ToJSON(const std::string& t)
+{
+    return UniValue(t);
+}
+
 namespace json {
 
 template <>
@@ -25,12 +32,6 @@ template <>
 inline UniValue makeEmptyArray()
 {
     return UniValue(UniValue::VARR);
-}
-
-template <>
-inline UniValue ToJSON(const std::string& t)
-{
-    return UniValue(t);
 }
 
 template <>
