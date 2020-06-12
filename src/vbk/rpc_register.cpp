@@ -516,7 +516,7 @@ UniValue getrawpayload(const JSONRPCRequest& request, const std::string& name)
         "\nReturn the raw " + name + " data.\n"
 
         "\nBy default this function only works for mempool " + name + ". When called with a blockhash\n"
-        "argument, " + cmdname + " will return the transaction if the specified block is available and\n"
+        "argument, " + cmdname + " will return the " +name+ " if the specified block is available and\n"
         "the " + name + " is found in that block. When called without a blockhash argument, " + cmdname + "\n"
         "will return the " + name + " if it is in the POP mempool, or in local payload repository.\n"
 
@@ -547,7 +547,7 @@ UniValue getrawpayload(const JSONRPCRequest& request, const std::string& name)
     id_t hash;
     try {
         hash = id_t::fromHex(request.params[0].get_str());
-    } catch(const std::exception& e) {
+    } catch (const std::exception& e) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, strprintf("Bad hash: %s", e.what()));
     }
 
@@ -578,7 +578,7 @@ UniValue getrawpayload(const JSONRPCRequest& request, const std::string& name)
             if (!(blockindex->nStatus & BLOCK_HAVE_DATA)) {
                 throw JSONRPCError(RPC_MISC_ERROR, "Block not available");
             }
-            errmsg = "No such transaction found in the provided block";
+            errmsg = "No such " + name + " found in the provided block";
         } else {
             errmsg = "No such mempool or blockchain " + name;
         }
