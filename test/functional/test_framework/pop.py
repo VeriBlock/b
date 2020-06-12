@@ -163,7 +163,7 @@ def sync_pop_mempools(rpc_connections, *, wait=1, timeout=60, flush_scheduler=Tr
         mpooldata = [r.getrawpopmempool() for r in rpc_connections]
         atvs = [set(data['atvs']) for data in mpooldata]
         vtbs = [set(data['vtbs']) for data in mpooldata]
-        vbkblocks = [set(data['vbk_blocks']) for data in mpooldata]
+        vbkblocks = [set(data['vbkblocks']) for data in mpooldata]
 
         if test(atvs) and test(vtbs) and test(vbkblocks):
             if flush_scheduler:
@@ -171,4 +171,8 @@ def sync_pop_mempools(rpc_connections, *, wait=1, timeout=60, flush_scheduler=Tr
                     r.syncwithvalidationinterfacequeue()
             return
         time.sleep(wait)
-    raise AssertionError("POP mempool sync timed out:{}".format("".join("\n  {!r}".format(m) for m in pool)))
+    raise AssertionError("POP mempool sync timed out: \natvs: {}\nvtbs: {}\nvbkblocks:{}".format(
+        "".join("\n  {!r}".format(m) for m in atvs),
+        "".join("\n  {!r}".format(m) for m in vtbs),
+        "".join("\n  {!r}".format(m) for m in vbkblocks)
+    ))
