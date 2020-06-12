@@ -9,17 +9,37 @@
 #include <chainparams.h>
 #include <net_processing.h>
 #include <netmessagemaker.h>
+#include <vbk/pop_service.hpp>
+
+#include "veriblock/mempool.hpp"
 
 namespace VeriBlock {
 
 namespace p2p {
+
+const static std::string get_prefix = "g";
+const static std::string offer_prefix = "of";
+
+template <typename PopDataType>
+void offerPopData(CConnman* connman, const CNetMsgMaker& msgMaker)
+{
+    AssertLockHeld(cs_main);
+    auto& pop_mempool = VeriBlock::getService<VeriBlock::PopService>().getMemPool();
+    auto data = pop_mempool.getMap<PopDataType>();
+    LogPrint(BCLog::NET, "request pop data: %s, known data count: %d", PopDataType::name(), data.size());
+
+    connman->ForEachNode([&connman, &msgMaker, &data](CNode* pnode) {
+        for (const auto& el : data) {
+            connman->PushMessage(pnode, msgMaker.Make(offer_prefix + PopDataType::name(), el.first.asVector()));
+        }
+    });
+}
 
 template <typename PopDataType>
 void sendPopData(CConnman* connman, const CNetMsgMaker& msgMaker, const std::vector<PopDataType>& data)
 {
     AssertLockHeld(cs_main);
     LogPrint(BCLog::NET, "send PopData: count %d\n", data.size());
-    LogPrintf("send PopData: count %d\n", data.size());
     connman->ForEachNode([&connman, &msgMaker, &data](CNode* pnode) {
         for (const auto& el : data) {
             connman->PushMessage(pnode, msgMaker.Make(PopDataType::name(), el));
