@@ -213,8 +213,6 @@ bool PopServiceImpl::setState(const uint256& block, altintegration::ValidationSt
 std::vector<altintegration::PopData> PopServiceImpl::getPopData(const CBlockIndex& currentBlockIndex)
 {
     AssertLockHeld(cs_main);
-    altintegration::AltBlock current = VeriBlock::blockToAltBlock(currentBlockIndex.nHeight, currentBlockIndex.GetBlockHeader());
-    altintegration::ValidationState state;
     return mempool->getPop(*this->altTree);
 }
 
