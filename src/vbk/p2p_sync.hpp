@@ -21,18 +21,16 @@ const static std::string get_prefix = "g";
 const static std::string offer_prefix = "of";
 
 template <typename PopDataType>
-void offerPopData(CConnman* connman, const CNetMsgMaker& msgMaker)
+void offerPopData(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker)
 {
     AssertLockHeld(cs_main);
     auto& pop_mempool = VeriBlock::getService<VeriBlock::PopService>().getMemPool();
     auto data = pop_mempool.getMap<PopDataType>();
     LogPrint(BCLog::NET, "request pop data: %s, known data count: %d", PopDataType::name(), data.size());
 
-    connman->ForEachNode([&connman, &msgMaker, &data](CNode* pnode) {
-        for (const auto& el : data) {
-            connman->PushMessage(pnode, msgMaker.Make(offer_prefix + PopDataType::name(), el.first.asVector()));
-        }
-    });
+    for (const auto& el : data) {
+        connman->PushMessage(node, msgMaker.Make(offer_prefix + PopDataType::name(), el.first.asVector()));
+    }
 }
 
 template <typename PopDataType>

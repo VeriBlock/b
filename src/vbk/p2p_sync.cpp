@@ -20,6 +20,8 @@ bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altin
         const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
         connman->PushMessage(node, msgMaker.Make(PopDataType::name(), *data));
     }
+
+    return true;
 }
 
 template <typename PopDataType>
