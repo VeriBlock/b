@@ -2396,14 +2396,14 @@ void static UpdateTip(const CBlockIndex* pindexNew, const CChainParams& chainPar
         g_best_block = pindexNew->GetBlockHash();
         g_best_block_cv.notify_all();
     }
-
-    altintegration::ValidationState state;
     auto& pop = VeriBlock::getService<VeriBlock::PopService>();
-    bool ret = pop.setState(pindexNew->GetBlockHash(), state);
-    assert(ret && "block has been checked previously and should be valid");
 
     std::string warningMessages;
     if (!::ChainstateActive().IsInitialBlockDownload()) {
+        altintegration::ValidationState state;
+        bool ret = pop.setState(pindexNew->GetBlockHash(), state);
+        assert(ret && "block has been checked previously and should be valid");
+
         int nUpgraded = 0;
         const CBlockIndex* pindex = pindexNew;
         for (int bit = 0; bit < VERSIONBITS_NUM_BITS; bit++) {
@@ -2647,6 +2647,7 @@ bool CChainState::ConnectTip(BlockValidationState& state, const CChainParams& ch
  */
 CBlockIndex* CChainState::FindBestChain()
 {
+    AssertLockHeld(cs_main);
     auto& pop_service = VeriBlock::getService<VeriBlock::PopService>();
     CBlockIndex* bestCandidate = m_chain.Tip();
 
@@ -2905,6 +2906,8 @@ bool CChainState::ActivateBestChain(BlockValidationState& state, const CChainPar
 
                 if (pindexBestChain == nullptr) {
                     pindexBestChain = FindBestChain();
+                    // update pindexBestHeader
+                    pindexBestHeader = pindexBestChain;
                 }
 
                 // Whether we have anything to do at all.
@@ -3226,7 +3229,9 @@ CBlockIndex* BlockManager::AddToBlockIndex(const CBlockHeader& block)
     pindexNew->nTimeMax = (pindexNew->pprev ? std::max(pindexNew->pprev->nTimeMax, pindexNew->nTime) : pindexNew->nTime);
     pindexNew->nChainWork = (pindexNew->pprev ? pindexNew->pprev->nChainWork : 0) + GetBlockProof(*pindexNew);
     pindexNew->RaiseValidity(BLOCK_VALID_TREE);
-    if (pindexBestHeader == nullptr || pindexBestHeader->nChainWork < pindexNew->nChainWork)
+    if (pindexBestHeader == nullptr
+        // VeriBlock: update pindexBestHeader in POP FR, or if it is nullptr
+        /*|| pindexBestHeader->nChainWork < pindexNew->nChainWork */)
         pindexBestHeader = pindexNew;
 
     setDirtyBlockIndex.insert(pindexNew);
