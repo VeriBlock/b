@@ -2675,6 +2675,8 @@ CBlockIndex* CChainState::FindBestChain()
         }
     }
 
+    // update best header after POP FR
+    pindexBestHeader = bestCandidate;
     return bestCandidate;
 }
 
