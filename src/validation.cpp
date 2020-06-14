@@ -2906,8 +2906,6 @@ bool CChainState::ActivateBestChain(BlockValidationState& state, const CChainPar
 
                 if (pindexBestChain == nullptr) {
                     pindexBestChain = FindBestChain();
-                    // update pindexBestHeader
-                    pindexBestHeader = pindexBestChain;
                 }
 
                 // Whether we have anything to do at all.
@@ -3229,9 +3227,7 @@ CBlockIndex* BlockManager::AddToBlockIndex(const CBlockHeader& block)
     pindexNew->nTimeMax = (pindexNew->pprev ? std::max(pindexNew->pprev->nTimeMax, pindexNew->nTime) : pindexNew->nTime);
     pindexNew->nChainWork = (pindexNew->pprev ? pindexNew->pprev->nChainWork : 0) + GetBlockProof(*pindexNew);
     pindexNew->RaiseValidity(BLOCK_VALID_TREE);
-    if (pindexBestHeader == nullptr
-        // VeriBlock: update pindexBestHeader in POP FR, or if it is nullptr
-        /*|| pindexBestHeader->nChainWork < pindexNew->nChainWork */)
+    if (pindexBestHeader == nullptr || pindexBestHeader->nChainWork < pindexNew->nChainWork)
         pindexBestHeader = pindexNew;
 
     setDirtyBlockIndex.insert(pindexNew);
