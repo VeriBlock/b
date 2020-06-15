@@ -337,6 +337,19 @@ jobs:
           echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
           echo "::set-output name=commits_ahead::$(git rev-list $(git describe --tags $(git rev-list --tags --max-count=1)).. --count)"
           echo "::set-output name=last_tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
+      - name: Prepare ccache timestamp
+        id: cache_timestamp
+        run: |
+          current_date=`date --utc +%Y%m%d_%H%M%SZ`
+          echo "::set-output name=timestamp::${current_date}"
+      - name: ccache cache files
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
+        uses: actions/cache@v1.1.0
+        with:
+          path: ~/.ccache
+          key: linux-asan-ccache-${{ steps.cache_timestamp.outputs.timestamp }}
+          restore-keys: |
+            linux-asan-ccache-
       - name: get version for veriblock-pop-cpp
         run: echo "::set-env name=VERIBLOCK_POP_CPP_VERSION::$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)"
       - name: veriblock-pop-cpp release version
@@ -346,6 +359,8 @@ jobs:
       - name: install dependencies
         run: sudo apt-get install clang-8 llvm-8 python3-zmq python3-dev libboost-python-dev qtbase5-dev qttools5-dev-tools libevent-dev bsdmainutils libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libdb5.3++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev
       - name: install veriblock-pop-cpp
+        env:
+          BUILD_TYPE: Debug
         run: |
           (
           cd /opt;
@@ -354,7 +369,7 @@ jobs:
           cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
           mkdir build;
           cd build;
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_PYPOPMINER=ON;
+          cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF -DASAN=ON -DWITH_PYPOPMINER=ON;
           make -j2;
           sudo make install
           )
