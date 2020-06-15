@@ -11,14 +11,21 @@ template <typename PopDataType>
 bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altintegration::MemPool& pop_mempool)
 {
     AssertLockHeld(cs_main);
-    LogPrint(BCLog::NET, "received offered pop data: %s, bytes size: %d", PopDataType::name(), vRecv.size());
-    std::vector<uint8_t> data_hash;
-    vRecv >> data_hash;
+    LogPrint(BCLog::NET, "received get pop data: %s, bytes size: %d\n", PopDataType::name(), vRecv.size());
+    std::vector<std::vector<uint8_t>> requested_data;
+    vRecv >> requested_data;
 
-    const PopDataType* data = pop_mempool.get<PopDataType>(data_hash);
-    if (!data) {
-        const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
-        connman->PushMessage(node, msgMaker.Make(PopDataType::name(), *data));
+    if (requested_data.size() > MAX_POP_DATA_SENDING_AMOUNT) {
+        Misbehaving(node->GetId(), 20, strprintf("message getdata size() = %u", requested_data.size()));
+        return false;
+    }
+
+    const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
+    for (const auto& data_hash : requested_data) {
+        const PopDataType* data = pop_mempool.get<PopDataType>(data_hash);
+        if (data != nullptr) {
+            connman->PushMessage(node, msgMaker.Make(PopDataType::name(), *data));
+        }
     }
 
     return true;
@@ -28,13 +35,30 @@ template <typename PopDataType>
 bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altintegration::MemPool& pop_mempool)
 {
     AssertLockHeld(cs_main);
-    LogPrint(BCLog::NET, "received offered pop data: %s, bytes size: %d", PopDataType::name(), vRecv.size());
-    std::vector<uint8_t> data_hash;
-    vRecv >> data_hash;
+    LogPrint(BCLog::NET, "received offered pop data: %s, bytes size: %d\n", PopDataType::name(), vRecv.size());
+    std::vector<std::vector<uint8_t>> offered_data;
+    vRecv >> offered_data;
 
-    if (!pop_mempool.get<PopDataType>(data_hash)) {
-        const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
-        connman->PushMessage(node, msgMaker.Make(get_prefix + PopDataType::name(), data_hash));
+    if (offered_data.size() > MAX_POP_DATA_SENDING_AMOUNT) {
+        Misbehaving(node->GetId(), 20, strprintf("message getdata size() = %u", offered_data.size()));
+        return false;
+    }
+
+    std::vector<std::vector<uint8_t>> requested_data;
+    const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
+    for (const auto& data_hash : offered_data) {
+        if (!pop_mempool.get<PopDataType>(data_hash)) {
+            requested_data.push_back(data_hash);
+        }
+
+        if (requested_data.size() == MAX_POP_DATA_SENDING_AMOUNT) {
+            connman->PushMessage(node, msgMaker.Make(get_prefix + PopDataType::name(), requested_data));
+            requested_data.clear();
+        }
+    }
+
+    if (!requested_data.empty()) {
+        connman->PushMessage(node, msgMaker.Make(get_prefix + PopDataType::name(), requested_data));
     }
 
     return true;
@@ -57,7 +81,7 @@ bool processPopData(CDataStream& vRecv, altintegration::MemPool& pop_mempool)
     return true;
 }
 
-bool processPopData(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, int64_t nTimeReceived, const CChainParams& chainparams, CConnman* connman, BanMan* banman, const std::atomic<bool>& interruptMsgProc)
+bool processPopData(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
     auto& pop_mempool = VeriBlock::getService<VeriBlock::PopService>().getMemPool();
     // process Pop Data

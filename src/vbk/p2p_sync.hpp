@@ -20,16 +20,27 @@ namespace p2p {
 const static std::string get_prefix = "g";
 const static std::string offer_prefix = "of";
 
+const static uint32_t MAX_POP_DATA_SENDING_AMOUNT = MAX_INV_SZ;
+
 template <typename PopDataType>
 void offerPopData(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker)
 {
     AssertLockHeld(cs_main);
     auto& pop_mempool = VeriBlock::getService<VeriBlock::PopService>().getMemPool();
     auto data = pop_mempool.getMap<PopDataType>();
-    LogPrint(BCLog::NET, "request pop data: %s, known data count: %d", PopDataType::name(), data.size());
+    LogPrint(BCLog::NET, "offer pop data: %s, known data count: %d\n", PopDataType::name(), data.size());
 
+    std::vector<std::vector<uint8_t>> hashes;
     for (const auto& el : data) {
-        connman->PushMessage(node, msgMaker.Make(offer_prefix + PopDataType::name(), el.first.asVector()));
+        hashes.push_back(el.first.asVector());
+        if (hashes.size() == MAX_POP_DATA_SENDING_AMOUNT) {
+            connman->PushMessage(node, msgMaker.Make(offer_prefix + PopDataType::name(), hashes));
+            data.clear();
+        }
+    }
+
+    if (!hashes.empty()) {
+        connman->PushMessage(node, msgMaker.Make(offer_prefix + PopDataType::name(), hashes));
     }
 }
 
@@ -45,7 +56,7 @@ void sendPopData(CConnman* connman, const CNetMsgMaker& msgMaker, const std::vec
     });
 }
 
-bool processPopData(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, int64_t nTimeReceived, const CChainParams& chainparams, CConnman* connman, BanMan* banman, const std::atomic<bool>& interruptMsgProc);
+bool processPopData(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
 
 } // namespace p2p
 } // namespace VeriBlock

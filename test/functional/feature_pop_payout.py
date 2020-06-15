@@ -45,14 +45,16 @@ class PopPayouts(BitcoinTestFramework):
     def _case1_endorse_keystone_get_paid(self):
         self.log.warning("running _case1_endorse_keystone_get_paid()")
 
-        # stop node1
         self.stop_node(1)
-        self.log.info("node1 stopped with block height 10")
 
         # endorse block 5
         addr = self.nodes[0].getnewaddress()
         self.log.info("endorsing block 5 on node0 by miner {}".format(addr))
         txid = endorse_block(self.nodes[0], self.apm, 5, addr)
+
+        self.start_node(1)
+        connect_nodes(self.nodes[1], 0)
+        self.sync_blocks(self.nodes, timeout=120)
 
         # TODO fixed it after P2P modified for the pop_data
         # wait until node[1] gets relayed pop tx
