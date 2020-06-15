@@ -321,7 +321,7 @@ jobs:
       - name: run functional tests
         if: always()
         timeout-minutes: 20
-        run: python3 test/functional/test_runner.py --combinedlogslen=4000
+        run: python3 test/functional/test_runner.py
 
   linux-asan:
     runs-on: ubuntu-latest
@@ -407,4 +407,4 @@ jobs:
       - name: run functional tests
         if: always()
         timeout-minutes: 180
-        run: python3 test/functional/test_runner.py --exclude example_test.py
+        run: python3 test/functional/test_runner.py
