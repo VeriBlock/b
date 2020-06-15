@@ -171,7 +171,7 @@ jobs:
       - name: run functional tests
         if: always()
         timeout-minutes: 180
-        run: python3 test/functional/test_runner.py --exclude example_test.py
+        run: python3 test/functional/test_runner.py
 
   TSAN:
     runs-on: ubuntu-latest
@@ -239,7 +239,7 @@ jobs:
       - name: run functional tests
         if: always()
         timeout-minutes: 180
-        run: python3 test/functional/test_runner.py --exclude example_test.py
+        run: python3 test/functional/test_runner.py
       - name: upload logs
         uses: actions/upload-artifact@v1
         if: failure()
