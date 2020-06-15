@@ -360,6 +360,8 @@ jobs:
         run: sudo apt-get install clang-8 llvm-8 python3-zmq python3-dev libboost-python-dev qtbase5-dev qttools5-dev-tools libevent-dev bsdmainutils libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libdb5.3++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev
       - name: install veriblock-pop-cpp
         env:
+          CC: clang-8
+          CXX: clang++-8
           BUILD_TYPE: Debug
         run: |
           (
