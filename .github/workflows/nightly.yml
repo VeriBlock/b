@@ -1,12 +1,9 @@
 name: CI (nightly)
 
 on:
-  push:
-    branches:
-      - fix-nightly
-#  schedule:
-#    # create nightly full builds at 02:00 utc
-#    - cron:  '0 2 * * *'
+  schedule:
+    # create nightly full builds at 02:00 utc
+    - cron:  '0 2 * * *'
 
 jobs:
   linux:
@@ -242,7 +239,7 @@ jobs:
         run: python3 test/functional/test_runner.py --exclude example_test.py
       - name: upload logs
         uses: actions/upload-artifact@v1
-        if: always()
+        if: failure()
         with:
           name: nightly-logs
           path: ${{ github.workspace }}/sanitizer-output/tsan
