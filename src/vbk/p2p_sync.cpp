@@ -69,8 +69,10 @@ bool processPopData(CDataStream& vRecv, altintegration::MemPool& pop_mempool)
 {
     AssertLockHeld(cs_main);
     LogPrint(BCLog::NET, "received pop data: %s, bytes size: %d", PopDataType::name(), vRecv.size());
+    LogPrintf("try receive\n");
     PopDataType data;
     vRecv >> data;
+    LogPrintf("have received\n");
 
     altintegration::ValidationState state;
     if (!pop_mempool.submit(data, state)) {

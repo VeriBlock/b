@@ -3860,6 +3860,13 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
                         }
                     }
                     pto->m_tx_relay->m_last_mempool_req = GetTime<std::chrono::seconds>();
+
+                    // VeriBlock offer Pop Data
+                    {
+                        VeriBlock::p2p::offerPopData<altintegration::ATV>(pto, connman, msgMaker);
+                        VeriBlock::p2p::offerPopData<altintegration::VTB>(pto, connman, msgMaker);
+                        VeriBlock::p2p::offerPopData<altintegration::VbkBlock>(pto, connman, msgMaker);
+                    }
                 }
 
                 // Determine transactions to relay
@@ -3932,14 +3939,6 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
         }
         if (!vInv.empty())
             connman->PushMessage(pto, msgMaker.Make(NetMsgType::INV, vInv));
-
-        // VeriBlock offer Pop Data
-        {
-            VeriBlock::p2p::offerPopData<altintegration::ATV>(pto, connman, msgMaker);
-            VeriBlock::p2p::offerPopData<altintegration::VTB>(pto, connman, msgMaker);
-            VeriBlock::p2p::offerPopData<altintegration::VbkBlock>(pto, connman, msgMaker);
-        }
-
 
         // Detect whether we're stalling
         current_time = GetTime<std::chrono::microseconds>();
