@@ -87,6 +87,7 @@ const static uint32_t MAX_POP_DATA_SENDING_AMOUNT = MAX_INV_SZ;
 template <typename PopDataType>
 void offerPopData(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
+    AssertLockHeld(cs_main);
     auto& pop_mempool = VeriBlock::getService<VeriBlock::PopService>().getMemPool();
     auto data = pop_mempool.getMap<PopDataType>();
 
@@ -114,6 +115,7 @@ void offerPopData(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker) 
 template <typename PopDataType>
 void sendPopData(CConnman* connman, const CNetMsgMaker& msgMaker, const std::vector<PopDataType>& data) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
+    AssertLockHeld(cs_main);
     LogPrint(BCLog::NET, "send PopData: count %d\n", data.size());
 
     connman->ForEachNode([&connman, &msgMaker, &data](CNode* pnode) {
