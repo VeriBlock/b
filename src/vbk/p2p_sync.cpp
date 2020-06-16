@@ -7,11 +7,12 @@
 namespace VeriBlock {
 namespace p2p {
 
+std::map<NodeId, PopDataNodeState> mapPopDataNodeState;
+
 template <typename PopDataType>
 bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altintegration::MemPool& pop_mempool)
 {
     AssertLockHeld(cs_main);
-    LogPrint(BCLog::NET, "received get pop data: %s, bytes size: %d\n", PopDataType::name(), vRecv.size());
     std::vector<std::vector<uint8_t>> requested_data;
     vRecv >> requested_data;
 
@@ -20,9 +21,12 @@ bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altin
         return false;
     }
 
+    auto& known_set = mapPopDataNodeState[node->GetId()].getSet<PopDataType>();
+
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
     for (const auto& data_hash : requested_data) {
         const PopDataType* data = pop_mempool.get<PopDataType>(data_hash);
+        known_set.insert(data_hash);
         if (data != nullptr) {
             connman->PushMessage(node, msgMaker.Make(PopDataType::name(), *data));
         }
@@ -44,11 +48,14 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
         return false;
     }
 
+    auto& known_set = mapPopDataNodeState[node->GetId()].getSet<PopDataType>();
+
     std::vector<std::vector<uint8_t>> requested_data;
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
     for (const auto& data_hash : offered_data) {
         if (!pop_mempool.get<PopDataType>(data_hash)) {
             requested_data.push_back(data_hash);
+            known_set.insert(data_hash);
         }
 
         if (requested_data.size() == MAX_POP_DATA_SENDING_AMOUNT) {
