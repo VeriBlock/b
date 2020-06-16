@@ -58,15 +58,16 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
     std::vector<std::vector<uint8_t>> requested_data;
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
     for (const auto& data_hash : offered_data) {
+        uint32_t alreadySentCount = known_map[data_hash]++;
+
         if (!pop_mempool.get<PopDataType>(data_hash)) {
             requested_data.push_back(data_hash);
-        }
 
-        uint32_t alreadySentCount = known_map[data_hash];
 
-        if (alreadySentCount > MAX_KNOWN_POP_DATA_SEND_COUNT) {
-            Misbehaving(node->GetId(), 20, strprintf("peer is spamming pop data %s", PopDataType::name()));
-            return false;
+            if (alreadySentCount > MAX_KNOWN_POP_DATA_SEND_COUNT) {
+                Misbehaving(node->GetId(), 20, strprintf("peer is spamming pop data %s", PopDataType::name()));
+                return false;
+            }
         }
     }
 
