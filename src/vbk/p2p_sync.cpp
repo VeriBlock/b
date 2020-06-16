@@ -1,3 +1,8 @@
+// Copyright (c) 2019-2020 Xenios SEZC
+// https://www.veriblock.org
+// Distributed under the MIT software license, see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #include "vbk/p2p_sync.hpp"
 
 #include "veriblock/entities/atv.hpp"
@@ -21,12 +26,12 @@ bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altin
         return false;
     }
 
-    auto& known_set = getPopDataNodeState(node->GetId()).getSet<PopDataType>();
+    auto& known_map = getPopDataNodeState(node->GetId()).getMap<PopDataType>();
 
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
     for (const auto& data_hash : requested_data) {
         const PopDataType* data = pop_mempool.get<PopDataType>(data_hash);
-        known_set.insert(data_hash);
+        known_map[data_hash];
         if (data != nullptr) {
             connman->PushMessage(node, msgMaker.Make(PopDataType::name(), *data));
         }
@@ -48,14 +53,20 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
         return false;
     }
 
-    auto& known_set = getPopDataNodeState(node->GetId()).getSet<PopDataType>();
+    auto& known_map = getPopDataNodeState(node->GetId()).getMap<PopDataType>();
 
     std::vector<std::vector<uint8_t>> requested_data;
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
     for (const auto& data_hash : offered_data) {
         if (!pop_mempool.get<PopDataType>(data_hash)) {
             requested_data.push_back(data_hash);
-            known_set.insert(data_hash);
+        }
+
+        uint32_t alreadySentCount = known_map[data_hash];
+
+        if (alreadySentCount > MAX_KNOWN_POP_DATA_SEND_COUNT) {
+            Misbehaving(node->GetId(), 20, strprintf("peer is spamming pop data %s", PopDataType::name()));
+            return false;
         }
     }
 

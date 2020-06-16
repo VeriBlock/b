@@ -48,7 +48,7 @@ class PopPayouts(BitcoinTestFramework):
         # endorse block 5
         addr = self.nodes[0].getnewaddress()
         self.log.info("endorsing block 5 on node0 by miner {}".format(addr))
-        txid = endorse_block(self.nodes[0], self.apm, 5, addr)
+        endorse_block(self.nodes[0], self.apm, 5, addr)
 
         # TODO fixed it after P2P modified for the pop_data
         # wait until node[1] gets relayed pop tx
