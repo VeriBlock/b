@@ -27,7 +27,7 @@
 
 #define VBK_ALPHA 0x50
 #define VBK_BETA  0xa0
-#define VBK_VERSION (VBK_ALPHA + 0x1)
+#define VBK_VERSION (VBK_ALPHA + 0x2)
 
 /**
  * Main network
