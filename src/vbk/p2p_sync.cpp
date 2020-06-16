@@ -7,7 +7,7 @@
 namespace VeriBlock {
 namespace p2p {
 
-std::map<NodeId, PopDataNodeState> mapPopDataNodeState;
+std::map<NodeId, std::shared_ptr<PopDataNodeState>> mapPopDataNodeState;
 
 template <typename PopDataType>
 bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altintegration::MemPool& pop_mempool) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
@@ -21,7 +21,7 @@ bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altin
         return false;
     }
 
-    auto& known_set = mapPopDataNodeState[node->GetId()].getSet<PopDataType>();
+    auto& known_set = getPopDataNodeState(node->GetId()).getSet<PopDataType>();
 
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
     for (const auto& data_hash : requested_data) {
@@ -48,7 +48,7 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
         return false;
     }
 
-    auto& known_set = mapPopDataNodeState[node->GetId()].getSet<PopDataType>();
+    auto& known_set = getPopDataNodeState(node->GetId()).getSet<PopDataType>();
 
     std::vector<std::vector<uint8_t>> requested_data;
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
@@ -56,11 +56,6 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
         if (!pop_mempool.get<PopDataType>(data_hash)) {
             requested_data.push_back(data_hash);
             known_set.insert(data_hash);
-        }
-
-        if (requested_data.size() == MAX_POP_DATA_SENDING_AMOUNT) {
-            connman->PushMessage(node, msgMaker.Make(get_prefix + PopDataType::name(), requested_data));
-            requested_data.clear();
         }
     }
 
@@ -81,7 +76,7 @@ bool processPopData(CNode* node, CDataStream& vRecv, altintegration::MemPool& po
 
     altintegration::ValidationState state;
     if (!pop_mempool.submit(data, state)) {
-        LogPrint(BCLog::NET, "VeriBlock-PoP: %s ", state.GetPath());
+        LogPrint(BCLog::NET, "peer %d sent statelessly invalid pop data: %s", node->GetId(), state.GetPath());
         Misbehaving(node->GetId(), 20, strprintf("invalid pop data getdata, reason: %s", state.GetPath()));
         return false;
     }

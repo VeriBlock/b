@@ -67,6 +67,19 @@ inline altintegration::VbkBlock::id_t getId(const altintegration::VbkBlock& data
     return data.getShortHash();
 }
 
+/** Map maintaining peer PopData state  */
+extern std::map<NodeId, std::shared_ptr<PopDataNodeState>> mapPopDataNodeState GUARDED_BY(cs_main);
+
+inline PopDataNodeState& getPopDataNodeState(const NodeId& id) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+{
+    std::shared_ptr<PopDataNodeState> val = mapPopDataNodeState[id];
+    if (val == nullptr) {
+        val = std::make_shared<PopDataNodeState>();
+        mapPopDataNodeState[id] = val;
+    }
+    return *val;
+}
+
 } // namespace p2p
 
 } // namespace VeriBlock
@@ -75,9 +88,6 @@ inline altintegration::VbkBlock::id_t getId(const altintegration::VbkBlock& data
 namespace VeriBlock {
 
 namespace p2p {
-
-/** Map maintaining peer PopData state  */
-extern std::map<NodeId, PopDataNodeState> mapPopDataNodeState GUARDED_BY(cs_main);
 
 const static std::string get_prefix = "g";
 const static std::string offer_prefix = "of";
@@ -89,21 +99,21 @@ void offerPopData(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker) 
 {
     AssertLockHeld(cs_main);
     auto& pop_mempool = VeriBlock::getService<VeriBlock::PopService>().getMemPool();
-    auto data = pop_mempool.getMap<PopDataType>();
+    const auto& data = pop_mempool.getMap<PopDataType>();
 
-    auto& known_set = mapPopDataNodeState[node->GetId()].getSet<PopDataType>();
+    auto& known_set = getPopDataNodeState(node->GetId()).getSet<PopDataType>();
 
     std::vector<std::vector<uint8_t>>
         hashes;
     for (const auto& el : data) {
-        if (known_set.find(el.first) == known_set.end()) {
+        if (known_set.count(el.first) == 0) {
             hashes.push_back(el.first.asVector());
             known_set.insert(el.first);
         }
 
         if (hashes.size() == MAX_POP_DATA_SENDING_AMOUNT) {
             connman->PushMessage(node, msgMaker.Make(offer_prefix + PopDataType::name(), hashes));
-            data.clear();
+            hashes.clear();
         }
     }
 
@@ -113,15 +123,14 @@ void offerPopData(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker) 
 }
 
 template <typename PopDataType>
-void sendPopData(CConnman* connman, const CNetMsgMaker& msgMaker, const std::vector<PopDataType>& data) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+void sendPopData(CConnman* connman, const CNetMsgMaker& msgMaker, const std::vector<PopDataType>& data)
 {
-    AssertLockHeld(cs_main);
     LogPrint(BCLog::NET, "send PopData: count %d\n", data.size());
 
     connman->ForEachNode([&connman, &msgMaker, &data](CNode* pnode) {
-        TRY_LOCK(cs_main, locked);
+        LOCK(cs_main);
 
-        auto& known_set = mapPopDataNodeState[pnode->GetId()].getSet<PopDataType>();
+        auto& known_set = getPopDataNodeState(pnode->GetId()).getSet<PopDataType>();
         for (const auto& el : data) {
             known_set.insert(getId(el));
             connman->PushMessage(pnode, msgMaker.Make(PopDataType::name(), el));
