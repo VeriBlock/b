@@ -77,7 +77,7 @@ namespace VeriBlock {
 namespace p2p {
 
 /** Map maintaining peer PopData state  */
-extern std::map<NodeId, PopDataNodeState> mapPopDataNodeState;
+extern std::map<NodeId, PopDataNodeState> mapPopDataNodeState GUARDED_BY(cs_main);
 
 const static std::string get_prefix = "g";
 const static std::string offer_prefix = "of";
@@ -85,9 +85,8 @@ const static std::string offer_prefix = "of";
 const static uint32_t MAX_POP_DATA_SENDING_AMOUNT = MAX_INV_SZ;
 
 template <typename PopDataType>
-void offerPopData(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker)
+void offerPopData(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
-    AssertLockHeld(cs_main);
     auto& pop_mempool = VeriBlock::getService<VeriBlock::PopService>().getMemPool();
     auto data = pop_mempool.getMap<PopDataType>();
 
@@ -113,12 +112,13 @@ void offerPopData(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker)
 }
 
 template <typename PopDataType>
-void sendPopData(CConnman* connman, const CNetMsgMaker& msgMaker, const std::vector<PopDataType>& data)
+void sendPopData(CConnman* connman, const CNetMsgMaker& msgMaker, const std::vector<PopDataType>& data) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
-    AssertLockHeld(cs_main);
     LogPrint(BCLog::NET, "send PopData: count %d\n", data.size());
 
     connman->ForEachNode([&connman, &msgMaker, &data](CNode* pnode) {
+        TRY_LOCK(cs_main, locked);
+
         auto& known_set = mapPopDataNodeState[pnode->GetId()].getSet<PopDataType>();
         for (const auto& el : data) {
             known_set.insert(getId(el));

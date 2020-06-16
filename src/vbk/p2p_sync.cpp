@@ -10,7 +10,7 @@ namespace p2p {
 std::map<NodeId, PopDataNodeState> mapPopDataNodeState;
 
 template <typename PopDataType>
-bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altintegration::MemPool& pop_mempool)
+bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altintegration::MemPool& pop_mempool) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
     std::vector<std::vector<uint8_t>> requested_data;
@@ -36,7 +36,7 @@ bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altin
 }
 
 template <typename PopDataType>
-bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altintegration::MemPool& pop_mempool)
+bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altintegration::MemPool& pop_mempool) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
     LogPrint(BCLog::NET, "received offered pop data: %s, bytes size: %d\n", PopDataType::name(), vRecv.size());
@@ -72,7 +72,7 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
 }
 
 template <typename PopDataType>
-bool processPopData(CDataStream& vRecv, altintegration::MemPool& pop_mempool)
+bool processPopData(CNode* node, CDataStream& vRecv, altintegration::MemPool& pop_mempool) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
     LogPrint(BCLog::NET, "received pop data: %s, bytes size: %d", PopDataType::name(), vRecv.size());
@@ -82,6 +82,7 @@ bool processPopData(CDataStream& vRecv, altintegration::MemPool& pop_mempool)
     altintegration::ValidationState state;
     if (!pop_mempool.submit(data, state)) {
         LogPrint(BCLog::NET, "VeriBlock-PoP: %s ", state.GetPath());
+        Misbehaving(node->GetId(), 20, strprintf("invalid pop data getdata, reason: %s", state.GetPath()));
         return false;
     }
 
@@ -94,17 +95,17 @@ bool processPopData(CNode* pfrom, const std::string& strCommand, CDataStream& vR
     // process Pop Data
     if (strCommand == altintegration::ATV::name()) {
         LOCK(cs_main);
-        return processPopData<altintegration::ATV>(vRecv, pop_mempool);
+        return processPopData<altintegration::ATV>(pfrom, vRecv, pop_mempool);
     }
 
     if (strCommand == altintegration::VTB::name()) {
         LOCK(cs_main);
-        return processPopData<altintegration::VTB>(vRecv, pop_mempool);
+        return processPopData<altintegration::VTB>(pfrom, vRecv, pop_mempool);
     }
 
     if (strCommand == altintegration::VbkBlock::name()) {
         LOCK(cs_main);
-        return processPopData<altintegration::VbkBlock>(vRecv, pop_mempool);
+        return processPopData<altintegration::VbkBlock>(pfrom, vRecv, pop_mempool);
     }
     //----------------------
 
