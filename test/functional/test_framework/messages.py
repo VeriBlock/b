@@ -1492,7 +1492,10 @@ class msg_atv:
         pass
 
     def serialize(self):
-        return self.atv.serialize()
+        b = bytes.fromhex(self.atv)
+        r = ser_compact_size(len(b))
+        r += b
+        return r
 
     def __repr__(self):
         return "msg_offer_atv()"
@@ -1508,7 +1511,10 @@ class msg_vtb:
         pass
 
     def serialize(self):
-        return self.vtb.serialize()
+        b = bytes.fromhex(self.vtb)
+        r = ser_compact_size(len(b))
+        r += b
+        return r
 
     def __repr__(self):
         return "msg_offer_vtb()"
@@ -1524,7 +1530,10 @@ class msg_vbk:
         pass
 
     def serialize(self):
-        return self.vbk.serialize()
+        b = bytes.fromhex(self.vbk)
+        r = ser_compact_size(len(b))
+        r += b
+        return r
 
     def __repr__(self):
         return "msg_offer_vbk()"
