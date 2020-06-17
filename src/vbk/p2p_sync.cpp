@@ -30,7 +30,7 @@ bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altin
 
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
     for (const auto& data_hash : requested_data) {
-        const PopDataType* data = pop_mempool.get<PopDataType>(data_hash);
+        const auto * data = pop_mempool.get<PopDataType>(data_hash);
         known_map[data_hash];
         if (data != nullptr) {
             connman->PushMessage(node, msgMaker.Make(PopDataType::name(), *data));
@@ -59,12 +59,14 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
     for (const auto& data_hash : offered_data) {
         uint32_t alreadySentCount = known_map[data_hash]++;
+        LogPrintf("sent pop data count: %d\n", alreadySentCount);
 
         if (!pop_mempool.get<PopDataType>(data_hash)) {
             requested_data.push_back(data_hash);
-
-
+        }
+        else {
             if (alreadySentCount > MAX_KNOWN_POP_DATA_SEND_COUNT) {
+                LogPrintf("peer %d is spamming pop data %s", node->GetId(), PopDataType::name());
                 Misbehaving(node->GetId(), 20, strprintf("peer is spamming pop data %s", PopDataType::name()));
                 return false;
             }
@@ -82,13 +84,13 @@ template <typename PopDataType>
 bool processPopData(CNode* node, CDataStream& vRecv, altintegration::MemPool& pop_mempool) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
-    LogPrint(BCLog::NET, "received pop data: %s, bytes size: %d", PopDataType::name(), vRecv.size());
+    LogPrint(BCLog::NET, "received pop data: %s, bytes size: %d\n", PopDataType::name(), vRecv.size());
     PopDataType data;
     vRecv >> data;
 
     altintegration::ValidationState state;
     if (!pop_mempool.submit(data, state)) {
-        LogPrint(BCLog::NET, "peer %d sent statelessly invalid pop data: %s", node->GetId(), state.GetPath());
+        LogPrint(BCLog::NET, "peer %d sent statelessly invalid pop data: %s\n", node->GetId(), state.GetPath());
         Misbehaving(node->GetId(), 20, strprintf("invalid pop data getdata, reason: %s", state.GetPath()));
         return false;
     }
@@ -96,7 +98,7 @@ bool processPopData(CNode* node, CDataStream& vRecv, altintegration::MemPool& po
     return true;
 }
 
-bool processPopData(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
+int processPopData(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
     auto& pop_mempool = VeriBlock::getService<VeriBlock::PopService>().getMemPool();
     // process Pop Data
@@ -149,7 +151,7 @@ bool processPopData(CNode* pfrom, const std::string& strCommand, CDataStream& vR
         return processGetPopData<altintegration::VbkBlock>(pfrom, connman, vRecv, pop_mempool);
     }
 
-    return true;
+    return -1;
 }
 
 

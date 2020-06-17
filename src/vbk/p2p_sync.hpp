@@ -46,27 +46,6 @@ inline std::map<altintegration::VbkBlock::id_t, uint32_t>& PopDataNodeState::get
     return known_blocks;
 }
 
-template <typename PopDataType>
-typename PopDataType::id_t getId(const PopDataType& data);
-
-template <>
-inline altintegration::ATV::id_t getId(const altintegration::ATV& data)
-{
-    return data.getId();
-}
-
-template <>
-inline altintegration::VTB::id_t getId(const altintegration::VTB& data)
-{
-    return data.getId();
-}
-
-template <>
-inline altintegration::VbkBlock::id_t getId(const altintegration::VbkBlock& data)
-{
-    return data.getShortHash();
-}
-
 /** Map maintaining peer PopData state  */
 extern std::map<NodeId, std::shared_ptr<PopDataNodeState>> mapPopDataNodeState GUARDED_BY(cs_main);
 
@@ -134,13 +113,13 @@ void sendPopData(CConnman* connman, const CNetMsgMaker& msgMaker, const std::vec
 
         auto& known_map = getPopDataNodeState(pnode->GetId()).getMap<PopDataType>();
         for (const auto& el : data) {
-            known_map[getId(el)];
+            known_map[el.getId()];
             connman->PushMessage(pnode, msgMaker.Make(PopDataType::name(), el));
         }
     });
 }
 
-bool processPopData(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
+int processPopData(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
 
 } // namespace p2p
 } // namespace VeriBlock

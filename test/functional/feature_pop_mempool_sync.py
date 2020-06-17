@@ -60,8 +60,16 @@ class PoPMempoolSync(BitcoinTestFramework):
         assert atvid not in rawpopmempool1['atvs']
         self.log.info("node1 does not contain atv1 in its pop mempool after restart")
 
+        connect_nodes(self.nodes[0], 1)
+        self.log.info("node1 connect to node0")
+
         self.sync_pop_mempools(self.nodes, timeout=20)
         self.log.info("nodes[0,1] have syncd pop mempools")
+
+        rawpopmempool1 = self.nodes[1].getrawpopmempool()
+        assert atvid in rawpopmempool1['atvs']
+
+
 
 
 if __name__ == '__main__':
