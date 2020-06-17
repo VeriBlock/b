@@ -2379,13 +2379,12 @@ void static UpdateTip(const CBlockIndex* pindexNew, const CChainParams& chainPar
         g_best_block_cv.notify_all();
     }
     auto& pop = VeriBlock::getService<VeriBlock::PopService>();
+    altintegration::ValidationState state;
+    bool ret = pop.setState(pindexNew->GetBlockHash(), state);
+    assert(ret && "block has been checked previously and should be valid");
 
     std::string warningMessages;
     if (!::ChainstateActive().IsInitialBlockDownload()) {
-        altintegration::ValidationState state;
-        bool ret = pop.setState(pindexNew->GetBlockHash(), state);
-        assert(ret && "block has been checked previously and should be valid");
-
         int nUpgraded = 0;
         const CBlockIndex* pindex = pindexNew;
         for (int bit = 0; bit < VERSIONBITS_NUM_BITS; bit++) {
