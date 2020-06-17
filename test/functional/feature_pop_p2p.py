@@ -16,6 +16,8 @@ from test_framework.util import (
 from test_framework.mininode import (
     P2PInterface,
     msg_offer_atv,
+    msg_get_atv,
+    msg_atv,
 )
 
 class BaseNode(P2PInterface):
@@ -31,8 +33,8 @@ class BaseNode(P2PInterface):
 class PopP2PSync(BitcoinTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
-        self.num_nodes = 2
-        self.extra_args = [["-txindex"], ["-txindex"]]
+        self.num_nodes = 1
+        self.extra_args = [["-txindex"]]
 
     def skip_test_if_missing_module(self):
         self.skip_if_no_wallet()
@@ -44,20 +46,21 @@ class PopP2PSync(BitcoinTestFramework):
         connect_nodes(self.nodes[0], 1)
         self.sync_all(self.nodes)
 
-    def _case1_ddos_node_1(self):
-        self.log.warning("running _case1_ddos_node_1()")
+    def _case1_offer_pop_data_ddos_node_0(self):
+        self.nodes[0].add_p2p_connection(BaseNode())
+        self.log.warning("running _case1_offer_pop_data_ddos_node_0()")
 
-        # endorse block 5, 6, 7, 8, 9
+        # endorse block 5
         addr = self.nodes[0].getnewaddress()
         self.log.info("endorsing block 5 on node0 by miner {}".format(addr))
         atv_id = endorse_block(self.nodes[0], self.apm, 5, addr)
 
-        assert len(self.nodes[0].getpeerinfo()) == 2
-        peerinfo = self.nodes[0].getpeerinfo()[1]
+        assert len(self.nodes[0].getpeerinfo()) == 1
+        peerinfo = self.nodes[0].getpeerinfo()[0]
         assert(not 'noban' in peerinfo['permissions'])
 
         # spaming node1
-        self.log.info("spaming node1 ...")
+        self.log.info("spaming node0 ...")
         disconnected = False
         for i in range(1000):
             try:
@@ -70,12 +73,40 @@ class PopP2PSync(BitcoinTestFramework):
         self.log.info("node0 ban our peer")
         assert disconnected
 
+        assert len(self.nodes[0].getpeerinfo()) == 0
+
+    def _case2_get_pop_data_ddos_node_0(self):
+        self.nodes[0].add_p2p_connection(BaseNode())
+        self.log.warning("running _case2_get_pop_data_ddos_node_0()")
+
+        # endorse block 5
+        addr = self.nodes[0].getnewaddress()
+        self.log.info("endorsing block 5 on node0 by miner {}".format(addr))
+        atv_id = endorse_block(self.nodes[0], self.apm, 5, addr)
+
         assert len(self.nodes[0].getpeerinfo()) == 1
+        peerinfo = self.nodes[0].getpeerinfo()[0]
+        assert(not 'noban' in peerinfo['permissions'])
+
+        # spaming node1
+        self.log.info("spaming node0 ...")
+        disconnected = False
+        for i in range(1000):
+            try:
+                msg = msg_get_atv([atv_id])
+                # Send message is used to send a P2P message to the node over our P2PInterface
+                self.nodes[0].p2p.send_message(msg)
+            except IOError:
+                disconnected = True
+
+        self.log.info("node0 ban our peer")
+        assert disconnected
+
+        assert len(self.nodes[0].getpeerinfo()) == 0
 
 
     def run_test(self):
         """Main test logic"""
-        self.nodes[0].add_p2p_connection(BaseNode())
 
         self.nodes[0].generate(nblocks=100)
         self.sync_all(self.nodes)
@@ -83,7 +114,8 @@ class PopP2PSync(BitcoinTestFramework):
         from pypopminer import MockMiner
         self.apm = MockMiner()
 
-        self._case1_ddos_node_1()
+        self._case1_offer_pop_data_ddos_node_0()
+        self._case2_get_pop_data_ddos_node_0()
 
 
 if __name__ == '__main__':

@@ -30,8 +30,14 @@ bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altin
 
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
     for (const auto& data_hash : requested_data) {
-        const auto * data = pop_mempool.get<PopDataType>(data_hash);
-        known_map[data_hash];
+        uint32_t ddosPreventionCounter = known_map[data_hash]++;
+
+        if (ddosPreventionCounter > MAX_POP_MESSAGE_SENDING_COUNT) {
+            Misbehaving(node->GetId(), 20, strprintf("peer is spamming pop data %s", PopDataType::name()));
+            return false;
+        }
+
+        const auto* data = pop_mempool.get<PopDataType>(data_hash);
         if (data != nullptr) {
             connman->PushMessage(node, msgMaker.Make(PopDataType::name(), *data));
         }
@@ -58,18 +64,13 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
     std::vector<std::vector<uint8_t>> requested_data;
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
     for (const auto& data_hash : offered_data) {
-        uint32_t alreadySentCount = known_map[data_hash]++;
-        LogPrintf("sent pop data count: %d\n", alreadySentCount);
+        uint32_t ddosPreventionCounter = known_map[data_hash]++;
 
         if (!pop_mempool.get<PopDataType>(data_hash)) {
             requested_data.push_back(data_hash);
-        }
-        else {
-            if (alreadySentCount > MAX_KNOWN_POP_DATA_SEND_COUNT) {
-                LogPrintf("peer %d is spamming pop data %s", node->GetId(), PopDataType::name());
-                Misbehaving(node->GetId(), 20, strprintf("peer is spamming pop data %s", PopDataType::name()));
-                return false;
-            }
+        } else if (ddosPreventionCounter > MAX_POP_MESSAGE_SENDING_COUNT) {
+            Misbehaving(node->GetId(), 20, strprintf("peer is spamming pop data %s", PopDataType::name()));
+            return false;
         }
     }
 
@@ -87,6 +88,14 @@ bool processPopData(CNode* node, CDataStream& vRecv, altintegration::MemPool& po
     LogPrint(BCLog::NET, "received pop data: %s, bytes size: %d\n", PopDataType::name(), vRecv.size());
     PopDataType data;
     vRecv >> data;
+
+    auto& known_map = getPopDataNodeState(node->GetId()).getMap<PopDataType>();
+    uint32_t ddosPreventionCounter = known_map[data.getId()]++;
+
+    if (ddosPreventionCounter > MAX_POP_MESSAGE_SENDING_COUNT) {
+        Misbehaving(node->GetId(), 20, strprintf("peer is spamming pop dsata %s", PopDataType::name()));
+        return false;
+    }
 
     altintegration::ValidationState state;
     if (!pop_mempool.submit(data, state)) {

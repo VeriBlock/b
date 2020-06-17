@@ -20,6 +20,7 @@ namespace p2p {
 
 // The state of the Node that stores already known Pop Data
 struct PopDataNodeState {
+    // we use map to store DDoS prevention counter as a value in the map
     std::map<altintegration::ATV::id_t, uint32_t> known_atv{};
     std::map<altintegration::VTB::id_t, uint32_t> known_vtb{};
     std::map<altintegration::VbkBlock::id_t, uint32_t> known_blocks{};
@@ -72,7 +73,7 @@ const static std::string get_prefix = "g";
 const static std::string offer_prefix = "of";
 
 const static uint32_t MAX_POP_DATA_SENDING_AMOUNT = MAX_INV_SZ;
-const static uint32_t MAX_KNOWN_POP_DATA_SEND_COUNT = 10;
+const static uint32_t MAX_POP_MESSAGE_SENDING_COUNT = 30;
 
 
 template <typename PopDataType>
