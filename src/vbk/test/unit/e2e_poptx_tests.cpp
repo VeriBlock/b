@@ -53,6 +53,8 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
     // create block that is not on main chain
     auto fork1tip = CreateAndProcessBlock({}, ChainActive().Tip()->pprev->pprev->GetBlockHash(), cbKey);
 
+    CreateAndProcessBlock({}, cbKey);
+
     // endorse block that is not on main chain
     block = endorseAltBlockAndMine(fork1tip.GetHash(), 1);
     BOOST_CHECK(block.popData.atvs.size() == 0);
