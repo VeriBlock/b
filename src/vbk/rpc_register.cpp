@@ -82,15 +82,14 @@ void SaveState(std::string file_name)
 
     for (const auto& index : block_index) {
         auto alt_block = blockToAltBlock(*index);
-        std::vector<altintegration::AltPayloads> payloads;
+        altintegration::PopData popData;
         if (index->pprev) {
             CBlock block;
             if (ReadBlockFromDisk(block, index, Params().GetConsensus())) {
-                bool res = popDataToPayloads(block, *index->pprev, state, payloads);
-                assert(res);
+                popData = block.popData;
             }
         }
-        vbtc_state.alt_tree.push_back(std::make_pair(alt_block, payloads));
+        vbtc_state.alt_tree.push_back(std::make_pair(alt_block, popData));
     }
 
     std::ofstream file(file_name, std::ios::binary);
