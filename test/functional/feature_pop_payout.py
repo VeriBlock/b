@@ -64,7 +64,8 @@ class PopPayouts(BitcoinTestFramework):
         # assert that txid exists in this block
         block = self.nodes[0].getblock(containingblockhash)
 
-        assert atv_id in [el['atv'] for el in block['pop']['data']]
+        print(block['pop']['data'])
+        assert atv_id in block['pop']['data']['atvs']
 
         # target height is 5 + POP_PAYOUT_DELAY
         n = POP_PAYOUT_DELAY + 5 - block['height']
