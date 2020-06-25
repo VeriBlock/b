@@ -224,13 +224,15 @@ UniValue submitpop(const JSONRPCRequest& request)
         LOCK(cs_main);
         altintegration::ValidationState state;
         altintegration::ATV atv = altintegration::ATV::fromVbkEncoding(atv_bytes);
-        if (!pop_mempool.submitATV({atv}, state)) {
+        if (!pop_mempool.submit(atv, state)) {
             LogPrint(BCLog::POP, "VeriBlock-PoP: %s ", state.GetPath());
             return "ivalid ATV";
         }
-        if (!pop_mempool.submitVTB(vtbs, state)) {
-            LogPrint(BCLog::POP, "VeriBlock-PoP: %s ", state.GetPath());
-            return "invalid oone of the VTB";
+        for (const auto& vtb : vtbs) {
+            if (!pop_mempool.submit(vtb, state)) {
+                LogPrint(BCLog::POP, "VeriBlock-PoP: %s ", state.GetPath());
+                return "invalid oone of the VTB";
+            }
         }
 
         const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
