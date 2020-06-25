@@ -51,7 +51,7 @@ class PopPayouts(BitcoinTestFramework):
         atv_id = endorse_block(self.nodes[0], self.apm, 5, addr)
 
         # wait until node[1] gets relayed pop tx
-        sync_mempools(self.nodes)
+        self.sync_pop_mempools(self.nodes)
         self.log.info("node1 got relayed transaction")
 
         # mine a block on node[1] with this pop tx
@@ -64,7 +64,6 @@ class PopPayouts(BitcoinTestFramework):
         # assert that txid exists in this block
         block = self.nodes[0].getblock(containingblockhash)
 
-        print(block['pop']['data'])
         assert atv_id in block['pop']['data']['atvs']
 
         # target height is 5 + POP_PAYOUT_DELAY

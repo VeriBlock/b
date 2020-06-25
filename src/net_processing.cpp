@@ -2956,7 +2956,8 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             vRecv >> headers[n];
             ReadCompactSize(vRecv); // ignore tx count; assume it is 0.
             if (headers[n].nVersion & VeriBlock::POP_BLOCK_VERSION_BIT) {
-                ReadCompactSize(vRecv);
+                altintegration::PopData tmp;
+                vRecv >> tmp;
             }
         }
 

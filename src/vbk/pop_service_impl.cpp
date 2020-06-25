@@ -217,6 +217,8 @@ bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex*
 {
     AssertLockHeld(cs_main);
 
+    LogPrintf("popData atvs: %d, vtbs: %d, vbk_blocks: %d\n", block.popData.atvs.size(), block.popData.vtbs.size(), block.popData.context.size());
+
     int height = 0;
     if (indexPrev != nullptr) {
         height = indexPrev->nHeight + 1;
