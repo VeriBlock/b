@@ -71,6 +71,9 @@ std::ostream& operator<<(std::ostream& os, const uint256& num)
 BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
     : m_path_root{fs::temp_directory_path() / "test_common_" PACKAGE_NAME / std::to_string(g_insecure_rand_ctx_temp_path.rand32())}
 {
+    altintegration::AbortShutdown();
+    assert(!altintegration::IsShutdownRequested());
+
     fs::create_directories(m_path_root);
     gArgs.ForceSetArg("-datadir", m_path_root.string());
     ClearDatadirCache();

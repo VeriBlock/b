@@ -135,8 +135,6 @@ void BumpFee(TransactionView& view, const uint256& txid, bool expectDisabled, st
 void TestGUI(interfaces::Node& node)
 {
     // Set up wallet and chain with 105 blocks (5 mature blocks for spending).
-    altintegration::AbortShutdown();
-    assert(!altintegration::IsShutdownRequested());
     TestChain100Setup test;
     for (int i = 0; i < 5; ++i) {
         test.CreateAndProcessBlock({}, GetScriptForRawPubKey(test.coinbaseKey.GetPubKey()));
