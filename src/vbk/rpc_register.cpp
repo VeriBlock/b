@@ -27,6 +27,7 @@
 #include "vbk/adaptors/univalue_json.hpp"
 #include "vbk/config.hpp"
 #include "veriblock/entities/test_case_entity.hpp"
+#include "veriblock/mempool_result.hpp"
 
 namespace VeriBlock {
 
