@@ -213,9 +213,53 @@ void PopServiceImpl::removePayloadsFromMempool(const altintegration::PopData& po
     mempool->removePayloads(popData);
 }
 
+bool popdataSizeValidation(const altintegration::PopData& popData, altintegration::ValidationState& state)
+{
+    uint32_t nPopDataSize = ::GetSerializeSize(popData, CLIENT_VERSION);
+    auto& config = getService<Config>();
+
+    if (nPopDataSize >= config.popconfig.alt->getMaxPopDataSize()) {
+        return state.Invalid("popdataSizeValidation() fail: popData oversize", "popData raw size more than allowed");
+    }
+
+    return true;
+}
+
+bool popdataStatelessValidation(const altintegration::PopData& popData, altintegration::ValidationState& state)
+{
+    auto& config = getService<Config>();
+
+    for (const auto& b : popData.context) {
+        if (!altintegration::checkBlock(b, state, *config.popconfig.vbk.params)) {
+            return state.Invalid("popdataStatelessValidation() failed", "vbk block invalid");
+        }
+    }
+
+    for (const auto& vtb : popData.vtbs) {
+        if (!altintegration::checkVTB(vtb, state, *config.popconfig.vbk.params, *config.popconfig.btc.params)) {
+            return state.Invalid("popdataStatelessValidation() failed", "vtb invalid");
+        }
+    }
+
+    for (const auto& atv : popData.atvs) {
+        if (!altintegration::checkATV(atv, state, *config.popconfig.alt, *config.popconfig.vbk.params)) {
+            return state.Invalid("popdataStatelessValidation() failed", "atv invalid");
+        }
+    }
+
+    return true;
+}
+
 bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex* indexPrev, const CBlock& block, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
+
+    altintegration::ValidationState instate;
+
+    if (!popdataSizeValidation(block.popData, instate) || !popdataStatelessValidation(block.popData, instate)) {
+        return error("[%s] block %s is not accepted by popData: %s", __func__, block.GetHash().ToString(),
+            instate.toString());
+    }
 
     int height = 0;
     if (indexPrev != nullptr) {
@@ -223,8 +267,6 @@ bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex*
     }
 
     auto containing = VeriBlock::blockToAltBlock(height, block.GetBlockHeader());
-
-    altintegration::ValidationState instate;
 
     if (!tree.acceptBlock(containing, instate)) {
         return error("[%s] block %s is not accepted by altTree: %s", __func__, block.GetHash().ToString(),
