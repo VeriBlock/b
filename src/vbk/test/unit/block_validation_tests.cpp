@@ -209,7 +209,15 @@ BOOST_FIXTURE_TEST_CASE(PopData_oversized_test, E2eFixture)
     BOOST_CHECK(popDataSize > config.popconfig.alt->getMaxPopDataSize());
 
     altintegration::ValidationState state;
-    BOOST_CHECK(!VeriBlock::popdataSizeValidation(popData, state));
+    BOOST_CHECK(!VeriBlock::checkPopDataSize(popData, state));
+
+    CBlock block;
+    block.popData = popData;
+
+    CBlockIndex prevIndex;
+    BlockValidationState blockState;
+    auto& pop_service = VeriBlock::getService<VeriBlock::PopService>();
+    BOOST_CHECK(!pop_service.addAllBlockPayloads(&prevIndex, block, blockState));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -67,7 +67,7 @@ public:
     int compareForks(const CBlockIndex& left, const CBlockIndex& right) override;
 };
 
-bool popdataSizeValidation(const altintegration::PopData& popData, altintegration::ValidationState& state);
+bool checkPopDataSize(const altintegration::PopData& popData, altintegration::ValidationState& state);
 
 bool popdataStatelessValidation(const altintegration::PopData& popData, altintegration::ValidationState& state);
 
