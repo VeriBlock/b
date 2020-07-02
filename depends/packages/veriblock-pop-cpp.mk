@@ -14,7 +14,7 @@ endef
 ifeq ($(strip $(HOST)),)
   define $(package)_config_cmds
     cmake -DCMAKE_INSTALL_PREFIX=$(host_prefix) -DCMAKE_BUILD_TYPE=$(package)_build_type \
-    -DTESTING=OFF -DSHARED=OFF -DWITH_ROCKSDB=OFF -DASAN:BOOL=$(package)_asan ..
+    -DTESTING=OFF -DSHARED=OFF -DASAN:BOOL=$(package)_asan ..
   endef
 else ifeq ($(HOST), x86_64-apple-darwin16)
   define $(package)_config_cmds
