@@ -84,8 +84,8 @@ def endorse_block(node, apm, height: int, addr: str) -> str:
     pub.payoutInfo = payoutInfo
     pub.identifier = 0x3ae6ca
     payloads = apm.endorseAltBlock(pub, last_vbk)
-    vtbs = [x.toHex() for x in payloads.vtbs]
-    node.submitpop([], vtbs, [payloads.atv.toHex()])
+    vtbs = [x.toVbkEncodingHex() for x in payloads.vtbs]
+    node.submitpop([], vtbs, [payloads.atv.toVbkEncodingHex()])
     return payloads.atv.getId()
 
 def mine_vbk_blocks(node, apm, amount : int):
@@ -93,9 +93,8 @@ def mine_vbk_blocks(node, apm, amount : int):
     for i in range(amount):
         vbks.append(apm.mineVbkBlocks(amount))
 
-    node.submitpop([b.toHex() for b in vbks], [], [])
-
-    return [b.getHash() for b in vbks]
+    result = node.submitpop([b.toVbkEncodingHex() for b in vbks], [], [])
+    return result['vbkblocks']
 
 
 class ContextInfoContainer:

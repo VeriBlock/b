@@ -197,8 +197,6 @@ std::vector<pop_t> parsePayloads(const UniValue& array)
         payloads.push_back(pop_t::fromVbkEncoding(stream));
     }
 
-    LogPrintf("parsePayloads() \n");
-
     return payloads;
 }
 
@@ -227,7 +225,6 @@ UniValue submitpop(const JSONRPCRequest& request)
     auto& pop_service = VeriBlock::getService<VeriBlock::PopService>();
     auto& pop_mempool = pop_service.getMemPool();
     auto& alt_tree = pop_service.getAltTree();
-    LogPrintf("Vbkblocks size: %d \n", popData.context.size());
 
     {
         LOCK(cs_main);
@@ -236,6 +233,7 @@ UniValue submitpop(const JSONRPCRequest& request)
         const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
         VeriBlock::p2p::sendPopData<altintegration::ATV>(g_rpc_node->connman.get(), msgMaker, popData.atvs);
         VeriBlock::p2p::sendPopData<altintegration::VTB>(g_rpc_node->connman.get(), msgMaker, popData.vtbs);
+        VeriBlock::p2p::sendPopData<altintegration::VbkBlock>(g_rpc_node->connman.get(), msgMaker, popData.context);
 
         return altintegration::ToJSON<UniValue>(result);
     }

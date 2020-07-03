@@ -33,25 +33,18 @@ class PopPayouts(BitcoinTestFramework):
         connect_nodes(self.nodes[0], 1)
         self.sync_all(self.nodes)
 
-    def _test_case(self):
-        self.log.warning("running _test_case()")
+    def _test_case_vbk(self, payloads_amount):
+        self.log.warning("running _test_case_vbk()")
 
-        # endorse block 5
-        addr = self.nodes[0].getnewaddress()
-        self.log.info("endorsing block 5 on node0 by miner {}".format(addr))
-
-        vbk_blocks = 1
-        for i in range(atv_count):
-            endorse_block(self.nodes[0], self.apm, 5, addr)
+        vbk_blocks = mine_vbk_blocks(self.nodes[0], self.apm, payloads_amount)
 
         # mine a block on node[1] with this pop tx
         containingblockhash = self.nodes[0].generate(nblocks=1)[0]
         containingblock = self.nodes[0].getblock(containingblockhash)
 
-        print(len(containingblock['pop']['data']['atvs']))
+        assert len(containingblock['pop']['data']) == payloads_amount == len(vbk_blocks)
 
-        assert len(containingblock['pop']['data']['atvs']) == atv_count
-        self.log.warning("success! _test_case()")
+        self.log.warning("success! _test_case_vbk()")
 
     def run_test(self):
         """Main test logic"""
@@ -62,7 +55,7 @@ class PopPayouts(BitcoinTestFramework):
         from pypopminer import MockMiner
         self.apm = MockMiner()
 
-        self._test_case()
+        self._test_case_vbk(10)
 
 if __name__ == '__main__':
     PopPayouts().main()
