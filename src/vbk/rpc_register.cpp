@@ -189,17 +189,15 @@ std::vector<pop_t> parsePayloads(const UniValue& array)
     std::vector<pop_t> payloads;
     LogPrint(BCLog::POP, "VeriBlock-PoP: submitpop RPC called with %s, amount %d \n", pop_t::name(), array.size());
     for (uint32_t idx = 0u, size = array.size(); idx < size; ++idx) {
-        auto& payload_hex = array[idx];
+        auto& payloads_hex = array[idx];
 
+        auto payloads_bytes = ParseHexV(payloads_hex, "vtb[" + std::to_string(idx) + "]");
 
-        std::string strHex;
-        if (payload_hex.isStr())
-            strHex = payload_hex.get_str();
-        if (!IsHex(strHex))
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "payloads[" + std::to_string(idx) + "]" + " must be hexadecimal string (not '" + strHex + "')");
-
-        payloads.push_back(pop_t::fromHex(strHex));
+        altintegration::ReadStream stream(payloads_bytes);
+        payloads.push_back(pop_t::fromVbkEncoding(stream));
     }
+
+    LogPrintf("parsePayloads() \n");
 
     return payloads;
 }
@@ -238,7 +236,6 @@ UniValue submitpop(const JSONRPCRequest& request)
         const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
         VeriBlock::p2p::sendPopData<altintegration::ATV>(g_rpc_node->connman.get(), msgMaker, popData.atvs);
         VeriBlock::p2p::sendPopData<altintegration::VTB>(g_rpc_node->connman.get(), msgMaker, popData.vtbs);
-        VeriBlock::p2p::sendPopData<altintegration::VbkBlock>(g_rpc_node->connman.get(), msgMaker, popData.context);
 
         return altintegration::ToJSON<UniValue>(result);
     }

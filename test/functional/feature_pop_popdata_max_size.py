@@ -35,18 +35,22 @@ class PopPayouts(BitcoinTestFramework):
 
     def _test_case(self):
         self.log.warning("running _test_case()")
-        mine_vbk_blocks(self.nodes[0], self.apm, 5)
 
         # endorse block 5
         addr = self.nodes[0].getnewaddress()
         self.log.info("endorsing block 5 on node0 by miner {}".format(addr))
-        atv_id = endorse_block(self.nodes[0], self.apm, 5, addr)
+
+        atv_count = 2000
+        for i in range(atv_count):
+            endorse_block(self.nodes[0], self.apm, 5, addr)
 
         # mine a block on node[1] with this pop tx
         containingblockhash = self.nodes[0].generate(nblocks=1)[0]
         containingblock = self.nodes[0].getblock(containingblockhash)
-        print(len(containingblock['pop']['data']['vbkblocks']))
 
+        print(len(containingblock['pop']['data']['atvs']))
+
+        assert len(containingblock['pop']['data']['atvs']) == atv_count
         self.log.warning("success! _test_case()")
 
     def run_test(self):
