@@ -191,7 +191,7 @@ std::vector<pop_t> parsePayloads(const UniValue& array)
     for (uint32_t idx = 0u, size = array.size(); idx < size; ++idx) {
         auto& payloads_hex = array[idx];
 
-        auto payloads_bytes = ParseHexV(payloads_hex, "vtb[" + std::to_string(idx) + "]");
+        auto payloads_bytes = ParseHexV(payloads_hex, strprintf("%s[%d]", pop_t::name(), idx));
 
         altintegration::ReadStream stream(payloads_bytes);
         payloads.push_back(pop_t::fromVbkEncoding(stream));
