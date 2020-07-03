@@ -10,8 +10,7 @@ Feature POP popdata max size test
 
 """
 
-from test_framework.payout import POW_PAYOUT
-from test_framework.pop import POP_PAYOUT_DELAY, endorse_block
+from test_framework.pop import POP_PAYOUT_DELAY, mine_vbk_blocks, endorse_block
 from test_framework.test_framework import BitcoinTestFramework
 from test_framework.util import (
     connect_nodes,
@@ -36,7 +35,17 @@ class PopPayouts(BitcoinTestFramework):
 
     def _test_case(self):
         self.log.warning("running _test_case()")
+        mine_vbk_blocks(self.nodes[0], self.apm, 5)
 
+        # endorse block 5
+        addr = self.nodes[0].getnewaddress()
+        self.log.info("endorsing block 5 on node0 by miner {}".format(addr))
+        atv_id = endorse_block(self.nodes[0], self.apm, 5, addr)
+
+        # mine a block on node[1] with this pop tx
+        containingblockhash = self.nodes[0].generate(nblocks=1)[0]
+        containingblock = self.nodes[0].getblock(containingblockhash)
+        print(len(containingblock['pop']['data']['vbkblocks']))
 
         self.log.warning("success! _test_case()")
 

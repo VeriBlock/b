@@ -189,10 +189,16 @@ std::vector<pop_t> parsePayloads(const UniValue& array)
     std::vector<pop_t> payloads;
     LogPrint(BCLog::POP, "VeriBlock-PoP: submitpop RPC called with %s, amount %d \n", pop_t::name(), array.size());
     for (uint32_t idx = 0u, size = array.size(); idx < size; ++idx) {
-        auto& vtbhex = array[idx];
-        auto vtb_bytes = ParseHexV(vtbhex, "vtb[" + std::to_string(idx) + "]");
-        altintegration::ReadStream stream(vtb_bytes);
-        payloads.push_back(pop_t::fromVbkEncoding(stream));
+        auto& payload_hex = array[idx];
+
+
+        std::string strHex;
+        if (payload_hex.isStr())
+            strHex = payload_hex.get_str();
+        if (!IsHex(strHex))
+            throw JSONRPCError(RPC_INVALID_PARAMETER, "payloads[" + std::to_string(idx) + "]" + " must be hexadecimal string (not '" + strHex + "')");
+
+        payloads.push_back(pop_t::fromHex(strHex));
     }
 
     return payloads;
@@ -215,7 +221,6 @@ UniValue submitpop(const JSONRPCRequest& request)
 
     RPCTypeCheck(request.params, {UniValue::VARR, UniValue::VARR, UniValue::VARR});
 
-
     altintegration::PopData popData;
     popData.context = parsePayloads<altintegration::VbkBlock>(request.params[0].get_array());
     popData.vtbs = parsePayloads<altintegration::VTB>(request.params[1].get_array());
@@ -224,6 +229,7 @@ UniValue submitpop(const JSONRPCRequest& request)
     auto& pop_service = VeriBlock::getService<VeriBlock::PopService>();
     auto& pop_mempool = pop_service.getMemPool();
     auto& alt_tree = pop_service.getAltTree();
+    LogPrintf("Vbkblocks size: %d \n", popData.context.size());
 
     {
         LOCK(cs_main);
@@ -232,6 +238,7 @@ UniValue submitpop(const JSONRPCRequest& request)
         const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
         VeriBlock::p2p::sendPopData<altintegration::ATV>(g_rpc_node->connman.get(), msgMaker, popData.atvs);
         VeriBlock::p2p::sendPopData<altintegration::VTB>(g_rpc_node->connman.get(), msgMaker, popData.vtbs);
+        VeriBlock::p2p::sendPopData<altintegration::VbkBlock>(g_rpc_node->connman.get(), msgMaker, popData.context);
 
         return altintegration::ToJSON<UniValue>(result);
     }

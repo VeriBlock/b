@@ -88,6 +88,15 @@ def endorse_block(node, apm, height: int, addr: str) -> str:
     node.submitpop([], vtbs, [payloads.atv.toHex()])
     return payloads.atv.getId()
 
+def mine_vbk_blocks(node, apm, amount : int):
+    vbks = []
+    for i in range(amount):
+        vbks.append(apm.mineVbkBlocks(amount))
+
+    node.submitpop([b.toHex() for b in vbks], [], [])
+
+    return [b.getHash() for b in vbks]
+
 
 class ContextInfoContainer:
     __slots__ = ("height", "keystone1", "keystone2", "txRoot")
