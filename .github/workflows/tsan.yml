@@ -54,8 +54,6 @@ jobs:
           --enable-zmq
           --with-gui=qt5
           CPPFLAGS='-DARENA_DEBUG -DDEBUG_LOCKORDER'
-          CXXFLAGS='-fsanitize=thread'
-          LDFLAGS='-fsanitize=thread'
           --with-sanitizers=thread
           --disable-hardening
           --disable-asm
