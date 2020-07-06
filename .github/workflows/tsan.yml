@@ -45,7 +45,9 @@ jobs:
           sudo make install
           )
       - name: set TSAN options
-        run: echo "::set-env name=TSAN_OPTIONS::suppressions=${{ github.workspace }}/test/sanitizer_suppressions/tsan log_path=${{ github.workspace }}/sanitizer-output/tsan/tsan verbosity=2"
+        run: |
+          mkdir -p "${{ github.workspace }}/sanitizer-output/tsan/"
+          echo "::set-env name=TSAN_OPTIONS::suppressions=${{ github.workspace }}/test/sanitizer_suppressions/tsan log_path=${{ github.workspace }}/sanitizer-output/tsan/tsan verbosity=2"
       - name: autogen
         run: ./autogen.sh
       - name: configure
