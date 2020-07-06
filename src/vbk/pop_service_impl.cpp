@@ -193,7 +193,7 @@ PopServiceImpl::PopServiceImpl(const altintegration::Config& config, const fs::p
     config.validate();
 
     storeman = std::make_shared<altintegration::StorageManagerRocks>(popPath.string());
-    LogPrintf("Initializing pop storage into %s...\n", popPath.string());
+    LogPrintf("Init POP storage in %s...\n", popPath.string());
     payloadsStore = &storeman->getPayloadsStorage();
     popStorage = &storeman->getPopStorage();
 

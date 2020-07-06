@@ -1255,7 +1255,7 @@ bool AppInitMain(NodeContext& node)
             gArgs.GetArg("-datadir", ""), fs::current_path().string());
     }
 
-    VeriBlock::InitPopService(GetDataDir());
+    VeriBlock::InitPopService(GetDataDir(true) / "pop");
 
     InitSignatureCache();
     InitScriptExecutionCache();
