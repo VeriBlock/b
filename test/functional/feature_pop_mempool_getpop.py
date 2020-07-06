@@ -42,7 +42,8 @@ class PopPayouts(BitcoinTestFramework):
         containingblockhash = self.nodes[0].generate(nblocks=1)[0]
         containingblock = self.nodes[0].getblock(containingblockhash)
 
-        assert len(containingblock['pop']['data']) == payloads_amount == len(vbk_blocks)
+        print(len(containingblock['pop']['data']['vbkblocks']))
+        assert len(containingblock['pop']['data']['vbkblocks']) == payloads_amount == len(vbk_blocks)
 
         self.log.warning("success! _test_case_vbk()")
 

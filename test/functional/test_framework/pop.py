@@ -54,14 +54,14 @@ def create_endorsed_chain(node, apm, size: int, addr: str) -> None:
     height = block['height']
 
     for i in range(size):
-        txid = endorse_block(node, apm, height, addr)
+        atv_id = endorse_block(node, apm, height, addr)
         containinghash = node.generate(nblocks=1)[0]
         # endorsing prev tip
         node.waitforblockheight(height + 1)
         containing = node.getblock(containinghash)
-        assert txid in containing['tx'], \
+        assert atv_id in containing['pop']['data']['atvs'], \
             "iteration {}: containing block at height {}" \
-            "does not contain pop tx {}".format(i, containing['height'], txid)
+            "does not contain pop tx {}".format(i, containing['height'], atv_id)
 
         # we advanced 1 block further
         height += 1
