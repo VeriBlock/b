@@ -206,7 +206,7 @@ bool PopServiceImpl::setState(const uint256& block, altintegration::ValidationSt
     return altTree->setState(block.asVector(), state);
 }
 
-altintegration::PopData PopServiceImpl::getPopData(const CBlockIndex& currentBlockIndex) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+altintegration::PopData PopServiceImpl::getPopData() EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
     return mempool->getPop(*this->altTree);

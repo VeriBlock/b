@@ -222,12 +222,12 @@ UniValue submitpop(const JSONRPCRequest& request)
     popData.vtbs = parsePayloads<altintegration::VTB>(request.params[1].get_array());
     popData.atvs = parsePayloads<altintegration::ATV>(request.params[2].get_array());
 
-    auto& pop_service = VeriBlock::getService<VeriBlock::PopService>();
-    auto& pop_mempool = pop_service.getMemPool();
-    auto& alt_tree = pop_service.getAltTree();
-
     {
         LOCK(cs_main);
+        auto& pop_service = VeriBlock::getService<VeriBlock::PopService>();
+        auto& pop_mempool = pop_service.getMemPool();
+        auto& alt_tree = pop_service.getAltTree();
+
         altintegration::MempoolResult result = pop_mempool.submitAll(popData, alt_tree);
 
         const CNetMsgMaker msgMaker(PROTOCOL_VERSION);

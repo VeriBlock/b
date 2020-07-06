@@ -88,10 +88,10 @@ def endorse_block(node, apm, height: int, addr: str) -> str:
     node.submitpop([], vtbs, [payloads.atv.toVbkEncodingHex()])
     return payloads.atv.getId()
 
-def mine_vbk_blocks(node, apm, amount : int):
+def mine_vbk_blocks(node, apm, amount : int) -> str:
     vbks = []
     for i in range(amount):
-        vbks.append(apm.mineVbkBlocks(amount))
+        vbks.append(apm.mineVbkBlocks(1))
 
     result = node.submitpop([b.toVbkEncodingHex() for b in vbks], [], [])
     return result['vbkblocks']
