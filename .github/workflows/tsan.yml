@@ -78,4 +78,4 @@ jobs:
         if: failure()
         with:
           name: nightly-logs
-          path: ${{ github.workspace }}/sanitizer-output/tsan/tsan
+          path: ${{ github.workspace }}/sanitizer-output/tsan/
