@@ -26,7 +26,8 @@
 #include <veriblock/stateless_validation.hpp>
 #include <veriblock/validation_state.hpp>
 
-#include <veriblock/storage/rocks/storage_manager_rocks.hpp>
+//#include <veriblock/storage/rocks/storage_manager_rocks.hpp>
+#include <veriblock/storage/inmem/storage_manager_inmem.hpp>
 
 namespace VeriBlock {
 
@@ -192,7 +193,7 @@ PopServiceImpl::PopServiceImpl(const altintegration::Config& config, const fs::p
 {
     config.validate();
 
-    storeman = std::make_shared<altintegration::StorageManagerRocks>(popPath.string());
+    storeman = std::make_shared<altintegration::StorageManagerInmem>();
     LogPrintf("Init POP storage in %s...\n", popPath.string());
     payloadsStore = &storeman->getPayloadsStorage();
     popStorage = &storeman->getPopStorage();
