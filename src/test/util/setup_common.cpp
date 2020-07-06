@@ -77,7 +77,7 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
     SelectParams(chainName);
     VeriBlock::InitConfig();
     selectPopConfig("regtest", "regtest", true);
-    VeriBlock::InitPopService();
+    VeriBlock::InitPopService(m_path_root);
     SeedInsecureRand();
     gArgs.ForceSetArg("-printtoconsole", "0");
     InitLogging();
