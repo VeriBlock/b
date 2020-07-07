@@ -684,10 +684,6 @@ static void ThreadImport(std::vector<fs::path> vImportFiles)
 
     // -reindex
     if (fReindex) {
-        // remove pop storage
-        auto& pop = VeriBlock::getService<VeriBlock::PopService>();
-        pop.clearPopDataStorage();
-
         int nFile = 0;
         while (true) {
             FlatFilePos pos(nFile, 0);
