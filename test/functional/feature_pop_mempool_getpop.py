@@ -36,7 +36,7 @@ class PopPayouts(BitcoinTestFramework):
     def _test_case_vbk(self, payloads_amount):
         self.log.warning("running _test_case_vbk()")
 
-        vbk_blocks = mine_vbk_blocks(self.nodes[0], self.apm, 10)
+        vbk_blocks = mine_vbk_blocks(self.nodes[0], self.apm, payloads_amount)
 
         # mine a block on node[1] with this pop tx
         containingblockhash = self.nodes[0].generate(nblocks=1)[0]
@@ -72,8 +72,13 @@ class PopPayouts(BitcoinTestFramework):
         from pypopminer import MockMiner
         self.apm = MockMiner()
 
-        self._test_case_vbk(10)
-        self._test_case_atv(10)
+        self._test_case_vbk(113)
+        self._test_case_vbk(236)
+        self._test_case_vbk(75)
+
+        self._test_case_atv(42)
+        self._test_case_atv(135)
+        self._test_case_atv(25)
 
 if __name__ == '__main__':
     PopPayouts().main()

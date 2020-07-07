@@ -261,10 +261,10 @@ bool addAllPayloadsToBlockImpl(altintegration::AltTree& tree, const CBlockIndex*
 
     altintegration::ValidationState instate;
 
-    /*if (!checkPopDataSize(block.popData, instate) || !popdataStatelessValidation(block.popData, instate)) {
+    if (!checkPopDataSize(block.popData, instate) || !popdataStatelessValidation(block.popData, instate)) {
         return error("[%s] block %s is not accepted by popData: %s", __func__, block.GetHash().ToString(),
             instate.toString());
-    }*/
+    }
 
     int height = 0;
     if (indexPrev != nullptr) {
