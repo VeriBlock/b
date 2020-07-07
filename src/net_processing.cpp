@@ -3308,7 +3308,6 @@ bool PeerLogicValidation::ProcessMessages(CNode* pfrom, std::atomic<bool>& inter
         if (pfrom->vProcessMsg.empty())
             return false;
         // Just take one message
-        LogPrintf("ProcessMessages() %d bytes\n", pfrom->vProcessMsg.front().m_recv.size());
         msgs.splice(msgs.begin(), pfrom->vProcessMsg, pfrom->vProcessMsg.begin());
         pfrom->nProcessQueueSize -= msgs.front().m_raw_message_size;
         pfrom->fPauseRecv = pfrom->nProcessQueueSize > connman->GetReceiveFloodSize();
