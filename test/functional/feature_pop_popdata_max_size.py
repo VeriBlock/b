@@ -75,12 +75,13 @@ class PopPayouts(BitcoinTestFramework):
 
         # Generate simple transactions
         tx_amount = 10000
+        self.log.info("generate simple transactions on node0, amount {}".format(tx_amount))
         self.generate_simple_transaction(node_id = 0, tx_amount = tx_amount)
 
         # Generate vbk_blocks
         vbk_blocks = 15000
         self.log.info("generate vbk blocks on node0, amount {}".format(vbk_blocks))
-        result = mine_vbk_blocks(self.nodes[0], self.apm, vbk_blocks)
+        mine_vbk_blocks(self.nodes[0], self.apm, vbk_blocks)
 
         containingblockhash = self.nodes[0].generate(nblocks=1)[0]
         containingblock = self.nodes[0].getblock(containingblockhash)
@@ -90,14 +91,14 @@ class PopPayouts(BitcoinTestFramework):
         assert len(containingblock['pop']['data']['vbkblocks']) != 0
         assert len(containingblock['pop']['data']['vbkblocks']) < vbk_blocks
 
-        self.sync_blocks(self.nodes, timeout=30)
+        self.log.info("sync nodes")
+        self.sync_blocks(self.nodes, timeout=600)
 
         containingblock = self.nodes[1].getblock(containingblockhash)
         assert len(containingblock['tx']) > 1
         assert len(containingblock['tx']) < tx_amount + 1
         assert len(containingblock['pop']['data']['vbkblocks']) != 0
         assert len(containingblock['pop']['data']['vbkblocks']) < vbk_blocks
-
 
         self.log.warning("success! _test_case()")
 
