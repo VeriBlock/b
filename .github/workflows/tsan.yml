@@ -44,10 +44,10 @@ jobs:
           make -j2;
           sudo make install
           )
-      - name: set TSAN options
-        run: |
-          mkdir -p "${{ github.workspace }}/sanitizer-output/tsan/"
-          echo "::set-env name=TSAN_OPTIONS::suppressions=${{ github.workspace }}/test/sanitizer_suppressions/tsan"
+#      - name: set TSAN options
+#        run: |
+#          mkdir -p "${{ github.workspace }}/sanitizer-output/tsan/"
+#          echo "::set-env name=TSAN_OPTIONS::suppressions=${{ github.workspace }}/test/sanitizer_suppressions/tsan"
       - name: autogen
         run: ./autogen.sh
       - name: configure
@@ -64,7 +64,7 @@ jobs:
         run: make -j2 deploy
       - name: make check
         timeout-minutes: 20
-        run: TSAN_OPTIONS="suppressions=${{ github.workspace }}/test/sanitizer_suppressions/tsan" make check
+        run: make check
       - name: upload logs
         uses: actions/upload-artifact@v1
         if: failure()
@@ -74,4 +74,4 @@ jobs:
       - name: run functional tests
         if: always()
         timeout-minutes: 180
-        run: TSAN_OPTIONS="suppressions=${{ github.workspace }}/test/sanitizer_suppressions/tsan" python3 test/functional/test_runner.py --combinedlogslen=4000
+        run: python3 test/functional/test_runner.py --combinedlogslen=4000
