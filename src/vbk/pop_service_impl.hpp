@@ -25,13 +25,20 @@ namespace VeriBlock {
 class PopServiceImpl : public PopService
 {
 private:
-    std::shared_ptr<altintegration::StorageManager> storeman;
     std::shared_ptr<altintegration::MemPool> mempool;
     std::shared_ptr<altintegration::AltTree> altTree;
+    std::shared_ptr<altintegration::StorageManager> storeman;
     altintegration::PayloadsStorage* payloadsStore;
     altintegration::PopStorage* popStorage;
 
 public:
+    void clearPopDataStorage() override {
+        VBK_ASSERT(payloadsStore);
+        VBK_ASSERT(popStorage);
+        // TODO: clear pop data
+        storeman->clear();
+    }
+
     std::string toPrettyString() const override
     {
         return altTree->toPrettyString();
