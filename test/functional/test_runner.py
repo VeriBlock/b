@@ -116,6 +116,7 @@ BASE_SCRIPTS = [
     'feature_pop_merkleroot.py',
     'feature_pop_payout.py',
     'feature_pop_sync.py',
+    # 'feature_pop_init.py',
     'feature_pop_mempool_sync.py',
     'feature_pop_p2p.py',
     'feature_pop_p2p_ddos.py',
