@@ -26,10 +26,12 @@
 #include <veriblock/stateless_validation.hpp>
 #include <veriblock/validation_state.hpp>
 
-//#include <veriblock/storage/rocks/storage_manager_rocks.hpp>
-#include <veriblock/storage/inmem/storage_manager_inmem.hpp>
+#include <veriblock/storage/rocks/storage_manager_rocks.hpp>
+
 
 namespace VeriBlock {
+
+const std::string PopServiceImpl::ROCKS_DB_NAME = "veriblock-db";
 
 void PopServiceImpl::addPopPayoutsIntoCoinbaseTx(CMutableTransaction& coinbaseTx, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
@@ -193,7 +195,7 @@ PopServiceImpl::PopServiceImpl(const altintegration::Config& config, const fs::p
 {
     config.validate();
 
-    storeman = std::make_shared<altintegration::StorageManagerInmem>();
+    storeman = std::make_shared<altintegration::StorageManagerRocks>(ROCKS_DB_NAME);
     LogPrintf("Init POP storage in %s...\n", popPath.string());
     payloadsStore = &storeman->getPayloadsStorage();
     popStorage = &storeman->getPopStorage();

@@ -18,6 +18,7 @@ src/qt/test/test_bitcoin-qt
 
 # functional tests
 test/functional/temp
+veriblock-db
 
 # autoreconf
 Makefile.in

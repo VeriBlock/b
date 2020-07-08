@@ -12,6 +12,7 @@
 #include <memory>
 #include <mutex>
 #include <vector>
+#include <string>
 
 #include <util/system.h>
 #include <veriblock/altintegration.hpp>
@@ -25,6 +26,8 @@ namespace VeriBlock {
 class PopServiceImpl : public PopService
 {
 private:
+    const static std::string ROCKS_DB_NAME;
+
     std::shared_ptr<altintegration::MemPool> mempool;
     std::shared_ptr<altintegration::AltTree> altTree;
     std::shared_ptr<altintegration::StorageManager> storeman;
