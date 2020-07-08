@@ -1,13 +1,9 @@
 name: CI (nightly)
 
 on:
-  push:
-    branches:
-      - TSAN
-#on:
-#  schedule:
-#    # create nightly full builds at 02:00 utc
-#    - cron:  '0 2 * * *'
+  schedule:
+    # create nightly full builds at 02:00 utc
+    - cron:  '0 2 * * *'
 
 jobs:
   linux:
@@ -176,79 +172,74 @@ jobs:
         timeout-minutes: 180
         run: python3 test/functional/test_runner.py
 
-#  TSAN:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: checkout
-#        uses: actions/checkout@v1
-#        with:
-#          path: main
-#      - name: Extract branch name & commit
-#        id: extract_branch
-#        run: |
-#          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
-#          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
-#          echo "::set-output name=commits_ahead::$(git rev-list $(git describe --tags $(git rev-list --tags --max-count=1)).. --count)"
-#          echo "::set-output name=last_tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
-#      - name: get version for veriblock-pop-cpp
-#        run: echo "::set-env name=VERIBLOCK_POP_CPP_VERSION::$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)"
-#      - name: veriblock-pop-cpp release version
-#        run: echo Using veriblock-pop-cpp version $VERIBLOCK_POP_CPP_VERSION
-#      - name: install build requirements
-#        run: sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils curl ca-certificates ccache python3
-#      - name: install dependencies
-#        run: sudo apt-get install clang-9 llvm-9 python3-zmq qtbase5-dev qttools5-dev-tools libevent-dev bsdmainutils libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libdb5.3++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev python3-zmq python3-dev libboost-python-dev
-#      - name: install veriblock-pop-cpp
-#        env:
-#          CC: clang-9
-#          CXX: clang++-9
-#        run: |
-#          (
-#          cd /opt;
-#          wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
-#          tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
-#          cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
-#          mkdir build;
-#          cd build;
-#          cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_PYPOPMINER=ON;
-#          make -j2;
-#          sudo make install
-#          )
-#      - name: set TSAN options
-#        run: echo "::set-env name=TSAN_OPTIONS::suppressions=${{ github.workspace }}/test/sanitizer_suppressions/tsan:log_path=${{ github.workspace }}/sanitizer-output/tsan"
-#      - name: autogen
-#        run: ./autogen.sh
-#      - name: configure
-#        run: ./configure
-#          --with-incompatible-bdb
-#          --enable-zmq
-#          --with-gui=qt5
-#          CPPFLAGS='-DARENA_DEBUG -DDEBUG_LOCKORDER'
-#          --with-sanitizers=thread
-#          --disable-hardening
-#          --disable-asm
-#          CC=clang-9 CXX=clang++-9
-#      - name: make
-#        run: make -j2 deploy
-#      - name: make check
-#        timeout-minutes: 20
-#        run: make check
-#      - name: upload logs
-#        uses: actions/upload-artifact@v1
-#        if: failure()
-#        with:
-#          name: nightly-logs
-#          path: src/test-suite.log
-#      - name: run functional tests
-#        if: always()
-#        timeout-minutes: 180
-#        run: python3 test/functional/test_runner.py
-#      - name: upload logs
-#        uses: actions/upload-artifact@v1
-#        if: failure()
-#        with:
-#          name: nightly-logs
-#          path: ${{ github.workspace }}/sanitizer-output/tsan
+  TSAN:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v1
+        with:
+          path: main
+      - name: Extract branch name & commit
+        id: extract_branch
+        run: |
+          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
+          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
+          echo "::set-output name=commits_ahead::$(git rev-list $(git describe --tags $(git rev-list --tags --max-count=1)).. --count)"
+          echo "::set-output name=last_tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
+      - name: get version for veriblock-pop-cpp
+        run: echo "::set-env name=VERIBLOCK_POP_CPP_VERSION::$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)"
+      - name: veriblock-pop-cpp release version
+        run: echo Using veriblock-pop-cpp version $VERIBLOCK_POP_CPP_VERSION
+      - name: install build requirements
+        run: sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils curl ca-certificates ccache python3
+      - name: install dependencies
+        run: sudo apt-get install clang-9 llvm-9 python3-zmq qtbase5-dev qttools5-dev-tools libevent-dev bsdmainutils libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libdb5.3++-dev libminiupnpc-dev libzmq3-dev libqrencode-dev python3-zmq python3-dev libboost-python-dev
+      - name: install veriblock-pop-cpp
+        env:
+          CC: clang-9
+          CXX: clang++-9
+        run: |
+          (
+          cd /opt;
+          wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
+          tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
+          cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
+          mkdir build;
+          cd build;
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF -DWITH_PYPOPMINER=ON;
+          make -j2;
+          sudo make install
+          )
+      - name: set TSAN options
+        run: |
+          echo "::set-env name=TSAN_OPTIONS::suppressions=${{ github.workspace }}/test/sanitizer_suppressions/tsan"
+      - name: autogen
+        run: ./autogen.sh
+      - name: configure
+        run: ./configure
+          --with-incompatible-bdb
+          --enable-zmq
+          --with-gui=qt5
+          CPPFLAGS='-DARENA_DEBUG -DDEBUG_LOCKORDER'
+          --with-sanitizers=thread
+          --disable-hardening
+          --disable-asm
+          CC=clang-9 CXX=clang++-9
+      - name: make
+        run: make -j2 deploy
+      - name: make check
+        timeout-minutes: 20
+        run: make check
+      - name: upload logs
+        uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: nightly-logs
+          path: src/test-suite.log
+      - name: run functional tests
+        if: always()
+        timeout-minutes: 180
+        run: python3 test/functional/test_runner.py --combinedlogslen=4000
 
 #  windows:
 #    runs-on: windows-latest
