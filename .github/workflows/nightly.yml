@@ -1,9 +1,13 @@
 name: CI (nightly)
 
 on:
-  schedule:
-    # create nightly full builds at 02:00 utc
-    - cron:  '0 2 * * *'
+  push:
+    branches:
+      - TSAN
+#on:
+#  schedule:
+#    # create nightly full builds at 02:00 utc
+#    - cron:  '0 2 * * *'
 
 jobs:
   linux:
