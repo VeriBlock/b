@@ -11,8 +11,8 @@
 
 #include <memory>
 #include <mutex>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include <util/system.h>
 #include <veriblock/altintegration.hpp>
@@ -35,7 +35,8 @@ private:
     altintegration::PopStorage* popStorage;
 
 public:
-    void clearPopDataStorage() override {
+    void clearPopDataStorage() override
+    {
         VBK_ASSERT(payloadsStore);
         VBK_ASSERT(popStorage);
         // TODO: clear pop data
@@ -60,7 +61,10 @@ public:
 
     PopServiceImpl(const altintegration::Config& config, const fs::path& dbPath);
 
-    ~PopServiceImpl() override = default;
+    ~PopServiceImpl() override
+    {
+        std::cout << "PopServiceImpl removed" << std::endl;
+    };
 
     PoPRewards getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) override;
     void addPopPayoutsIntoCoinbaseTx(CMutableTransaction& coinbaseTx, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) override;

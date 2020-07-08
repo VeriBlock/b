@@ -26,6 +26,7 @@
 #include <veriblock/stateless_validation.hpp>
 #include <veriblock/validation_state.hpp>
 
+#include <veriblock/storage/inmem/storage_manager_inmem.hpp>
 #include <veriblock/storage/rocks/storage_manager_rocks.hpp>
 
 
@@ -154,7 +155,9 @@ bool PopServiceImpl::acceptBlock(const CBlockIndex& indexNew, BlockValidationSta
 bool PopServiceImpl::addAllBlockPayloads(const CBlockIndex* indexPrev, const CBlock& connecting, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
-    return addAllPayloadsToBlockImpl(*altTree, indexPrev, connecting, state);
+    bool ret = addAllPayloadsToBlockImpl(*altTree, indexPrev, connecting, state);
+    this->storeman->flush();
+    return ret;
 }
 
 std::vector<BlockBytes> PopServiceImpl::getLastKnownVBKBlocks(size_t blocks)
@@ -194,11 +197,10 @@ int PopServiceImpl::compareForks(const CBlockIndex& leftForkTip, const CBlockInd
 PopServiceImpl::PopServiceImpl(const altintegration::Config& config, const fs::path& popPath)
 {
     config.validate();
-
     storeman = std::make_shared<altintegration::StorageManagerRocks>(ROCKS_DB_NAME);
+    //storeman = std::make_shared<altintegration::StorageManagerInmem>();
     LogPrintf("Init POP storage in %s...\n", popPath.string());
     payloadsStore = &storeman->getPayloadsStorage();
-    popStorage = &storeman->getPopStorage();
 
     altTree = altintegration::Altintegration::create(config, *payloadsStore);
     mempool = std::make_shared<altintegration::MemPool>(altTree->getParams(), altTree->vbk().getParams(), altTree->btc().getParams());

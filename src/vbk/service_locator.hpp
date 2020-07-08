@@ -37,6 +37,11 @@ public:
         this->ptr = std::move(instance);
     }
 
+    void reset() noexcept
+    {
+        this->ptr = nullptr;
+    }
+
     bool has() const noexcept
     {
         return ptr != nullptr;
@@ -82,6 +87,18 @@ void setService(T* ptr)
 {
     std::shared_ptr<T> p(ptr);
     SingletonContainer<T, Tag>::instance().set(std::move(p));
+}
+
+template <
+    typename T,
+    typename Tag = struct VbkDefaultTag,
+    // this condition forbids using setService<Impl>(...). should be setService<Interface>(...)
+    typename = typename std::enable_if<
+        std::is_abstract<T>::value ||
+        !std::is_polymorphic<T>::value>::type>
+void resetService()
+{
+    SingletonContainer<T, Tag>::instance().reset();
 }
 
 template <

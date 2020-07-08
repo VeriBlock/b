@@ -17,6 +17,7 @@ namespace VeriBlock {
 
 inline PopService& InitPopService(const fs::path& dbpath)
 {
+    resetService<PopService>();
     auto& config = getService<VeriBlock::Config>();
     auto* ptr = new PopServiceImpl(config.popconfig, dbpath);
     setService<PopService>(ptr);
@@ -25,6 +26,7 @@ inline PopService& InitPopService(const fs::path& dbpath)
 
 inline Config& InitConfig()
 {
+    resetService<Config>();
     auto* cfg = new Config();
     setService<Config>(cfg);
     return *cfg;
