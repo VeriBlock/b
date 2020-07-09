@@ -1698,7 +1698,7 @@ BOOST_AUTO_TEST_CASE(test_LockDirectory)
     // Re-lock the lock in the child process, then wait for it to exit, check
     // successful return. After that, we check that exiting the process
     // has released the lock as we would expect by probing it.
-    int processstatus;
+    int processstatus = 0;
     BOOST_CHECK_EQUAL(write(fd[1], &LockCommand, 1), 1);
     BOOST_CHECK_EQUAL(write(fd[1], &ExitCommand, 1), 1);
     BOOST_CHECK_EQUAL(waitpid(pid, &processstatus, 0), pid);

@@ -61,11 +61,6 @@ public:
 
     PopServiceImpl(const altintegration::Config& config, const fs::path& dbPath);
 
-    ~PopServiceImpl() override
-    {
-        std::cout << "PopServiceImpl removed" << std::endl;
-    };
-
     PoPRewards getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) override;
     void addPopPayoutsIntoCoinbaseTx(CMutableTransaction& coinbaseTx, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) override;
     bool checkCoinbaseTxWithPopRewards(const CTransaction& tx, const CAmount& PoWBlockReward, const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams, BlockValidationState& state) override;

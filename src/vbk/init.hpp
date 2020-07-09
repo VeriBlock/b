@@ -17,6 +17,7 @@ namespace VeriBlock {
 
 inline PopService& InitPopService(const fs::path& dbpath)
 {
+    fs::create_directories(dbpath);
     resetService<PopService>();
     auto& config = getService<VeriBlock::Config>();
     auto* ptr = new PopServiceImpl(config.popconfig, dbpath);

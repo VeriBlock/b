@@ -77,7 +77,7 @@ struct BasicTestingSetup {
     ECCVerifyHandle globalVerifyHandle;
     explicit BasicTestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
     ~BasicTestingSetup();
-private:
+protected:
     const fs::path m_path_root;
 };
 

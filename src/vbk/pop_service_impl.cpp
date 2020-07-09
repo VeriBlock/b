@@ -197,7 +197,7 @@ int PopServiceImpl::compareForks(const CBlockIndex& leftForkTip, const CBlockInd
 PopServiceImpl::PopServiceImpl(const altintegration::Config& config, const fs::path& popPath)
 {
     config.validate();
-    storeman = std::make_shared<altintegration::StorageManagerRocks>(ROCKS_DB_NAME);
+    storeman = std::make_shared<altintegration::StorageManagerRocks>(popPath.generic_string() + "/" + ROCKS_DB_NAME);
     //storeman = std::make_shared<altintegration::StorageManagerInmem>();
     LogPrintf("Init POP storage in %s...\n", popPath.string());
     payloadsStore = &storeman->getPayloadsStorage();

@@ -31,9 +31,9 @@
 #include <validation.h>
 #include <validationinterface.h>
 
+#include <bootstraps.h>
 #include <vbk/init.hpp>
 #include <vbk/test/util/mock.hpp>
-#include <bootstraps.h>
 
 #include <functional>
 
@@ -77,7 +77,6 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
     SelectParams(chainName);
     VeriBlock::InitConfig();
     selectPopConfig("regtest", "regtest", true);
-    VeriBlock::InitPopService(m_path_root / "pop");
     SeedInsecureRand();
     gArgs.ForceSetArg("-printtoconsole", "0");
     InitLogging();
@@ -98,13 +97,15 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
 
 BasicTestingSetup::~BasicTestingSetup()
 {
+    VeriBlock::resetService<VeriBlock::PopService>();
     LogInstance().DisconnectTestLogger();
-    fs::remove_all(m_path_root);
+    //fs::remove_all(m_path_root);
     ECC_Stop();
 }
 
 TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(chainName)
 {
+    VeriBlock::InitPopService(this->m_path_root / "pop");
     const CChainParams& chainparams = Params();
     // Ideally we'd move all the RPC tests to the functional testing framework
     // instead of unit tests, but for now we need these here.
@@ -160,7 +161,7 @@ TestingSetup::~TestingSetup()
     pblocktree.reset();
 }
 
-TestChain100Setup::TestChain100Setup(): RegTestingSetup()
+TestChain100Setup::TestChain100Setup() : RegTestingSetup()
 {
     // CreateAndProcessBlock() does not support building SegWit blocks, so don't activate in these tests.
     // TODO: fix the code to support SegWit blocks.
@@ -170,9 +171,8 @@ TestChain100Setup::TestChain100Setup(): RegTestingSetup()
 
     // Generate a 100-block chain:
     coinbaseKey.MakeNewKey(true);
-    CScript scriptPubKey = CScript() <<  ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
-    for (int i = 0; i < COINBASE_MATURITY; i++)
-    {
+    CScript scriptPubKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
+    for (int i = 0; i < COINBASE_MATURITY; i++) {
         std::vector<CMutableTransaction> noTxns;
         CBlock b = CreateAndProcessBlock(noTxns, scriptPubKey);
         m_coinbase_txns.push_back(b.vtx[0]);
@@ -186,9 +186,8 @@ TestChain100Setup::TestChain100Setup(): RegTestingSetup()
     assert(tree.getBestChain().tip()->height == ChainActive().Tip()->nHeight);
 }
 
-CBlock TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction>& txns, uint256 prevBlock,
-                             const CScript& scriptPubKey, bool* isBlockValid) {
-
+CBlock TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction>& txns, uint256 prevBlock, const CScript& scriptPubKey, bool* isBlockValid)
+{
     CBlockIndex* pPrev = nullptr;
     {
         LOCK(cs_main);
@@ -213,12 +212,13 @@ CBlock TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransa
 
     block.nTime = pPrev->nTime + (rand() % 100 + 1);
 
-    while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())) ++block.nNonce;
+    while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus()))
+        ++block.nNonce;
 
     std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(block);
 
     bool isValid = ProcessNewBlock(chainparams, shared_pblock, true, nullptr);
-    if(isBlockValid != nullptr) {
+    if (isBlockValid != nullptr) {
         *isBlockValid = isValid;
     }
 
@@ -239,14 +239,15 @@ TestChain100Setup::~TestChain100Setup()
 }
 
 
-CTxMemPoolEntry TestMemPoolEntryHelper::FromTx(const CMutableTransaction &tx) {
+CTxMemPoolEntry TestMemPoolEntryHelper::FromTx(const CMutableTransaction& tx)
+{
     return FromTx(MakeTransactionRef(tx));
 }
 
 CTxMemPoolEntry TestMemPoolEntryHelper::FromTx(const CTransactionRef& tx)
 {
     return CTxMemPoolEntry(tx, nFee, nTime, nHeight,
-                           spendsCoinbase, sigOpCost, lp);
+        spendsCoinbase, sigOpCost, lp);
 }
 
 /**
@@ -260,4 +261,3 @@ CBlock getBlock13b8a()
     stream >> block;
     return block;
 }
-
