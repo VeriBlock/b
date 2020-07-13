@@ -3649,7 +3649,7 @@ bool BlockManager::AcceptBlockHeader(const CBlockHeader& block, BlockValidationS
             // Block header is already known.
             pindex = miSelf->second;
             if (ppindex) {
-                LogPrintf("ProcessNewBlockHeaders() ppindex %d, \n", pindex != nullptr);
+                LogPrintf("AcceptBlockHeader() ppindex %d, \n", pindex != nullptr);
                 assert(pindex);
                 *ppindex = pindex;
             }
@@ -3657,7 +3657,7 @@ bool BlockManager::AcceptBlockHeader(const CBlockHeader& block, BlockValidationS
                 LogPrintf("ERROR: %s: block %s is marked invalid\n", __func__, hash.ToString());
                 return state.Invalid(BlockValidationResult::BLOCK_CACHED_INVALID, "duplicate");
             }
-            LogPrintf("ProcessNewBlockHeaders() ppindex %d, \n", *ppindex != nullptr);
+            LogPrintf("AcceptBlockHeader() ppindex %d, \n", *ppindex != nullptr);
             assert(*ppindex);
             return true;
         }
@@ -3723,12 +3723,12 @@ bool BlockManager::AcceptBlockHeader(const CBlockHeader& block, BlockValidationS
         pindex = AddToBlockIndex(block);
 
     if (ppindex) {
-        LogPrintf("ProcessNewBlockHeaders() ppindex %d, \n", pindex != nullptr);
+        LogPrintf("AcceptBlockHeader() ppindex %d, \n", pindex != nullptr);
         assert(pindex);
         *ppindex = pindex;
     }
 
-    LogPrintf("ProcessNewBlockHeaders() ppindex %d, \n", *ppindex != nullptr);
+    LogPrintf("AcceptBlockHeader() ppindex %d, \n", *ppindex != nullptr);
     assert(*ppindex);
     auto& pop = VeriBlock::getService<VeriBlock::PopService>();
     return pop.acceptBlock(*pindex, state);
@@ -3745,6 +3745,7 @@ bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& headers, BlockValid
             ::ChainstateActive().CheckBlockIndex(chainparams.GetConsensus());
 
             if (!accepted) {
+                LogPrintf("ProcessNewBlockHeaders() return false \n");
                 return false;
             }
             if (ppindex) {
