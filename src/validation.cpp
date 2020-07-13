@@ -3648,17 +3648,12 @@ bool BlockManager::AcceptBlockHeader(const CBlockHeader& block, BlockValidationS
         if (miSelf != m_block_index.end()) {
             // Block header is already known.
             pindex = miSelf->second;
-            if (ppindex) {
-                LogPrintf("AcceptBlockHeader() ppindex %d, \n", pindex != nullptr);
-                assert(pindex);
+            if (ppindex)
                 *ppindex = pindex;
-            }
             if (pindex->nStatus & BLOCK_FAILED_MASK) {
                 LogPrintf("ERROR: %s: block %s is marked invalid\n", __func__, hash.ToString());
                 return state.Invalid(BlockValidationResult::BLOCK_CACHED_INVALID, "duplicate");
             }
-            LogPrintf("AcceptBlockHeader() ppindex %d, \n", *ppindex != nullptr);
-            assert(*ppindex);
             return true;
         }
 
@@ -3722,16 +3717,13 @@ bool BlockManager::AcceptBlockHeader(const CBlockHeader& block, BlockValidationS
     if (pindex == nullptr)
         pindex = AddToBlockIndex(block);
 
-    if (ppindex) {
-        LogPrintf("AcceptBlockHeader() ppindex %d, \n", pindex != nullptr);
-        assert(pindex);
+    if (ppindex)
         *ppindex = pindex;
-    }
 
-    LogPrintf("AcceptBlockHeader() ppindex %d, \n", *ppindex != nullptr);
-    assert(*ppindex);
     auto& pop = VeriBlock::getService<VeriBlock::PopService>();
-    return pop.acceptBlock(*pindex, state);
+    bool res = pop.acceptBlock(*pindex, state);
+    assert(res);
+    return true;
 }
 
 // Exposed wrapper for AcceptBlockHeader
@@ -3745,12 +3737,9 @@ bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& headers, BlockValid
             ::ChainstateActive().CheckBlockIndex(chainparams.GetConsensus());
 
             if (!accepted) {
-                LogPrintf("ProcessNewBlockHeaders() return false \n");
                 return false;
             }
             if (ppindex) {
-                LogPrintf("ProcessNewBlockHeaders() ppindex %d, \n", pindex != nullptr);
-                assert(pindex);
                 *ppindex = pindex;
             }
         }
@@ -3760,8 +3749,6 @@ bool ProcessNewBlockHeaders(const std::vector<CBlockHeader>& headers, BlockValid
             LogPrintf("Synchronizing blockheaders, height: %d (~%.2f%%)\n", (*ppindex)->nHeight, 100.0 / ((*ppindex)->nHeight + (GetAdjustedTime() - (*ppindex)->GetBlockTime()) / Params().GetConsensus().nPowTargetSpacing) * (*ppindex)->nHeight);
         }
     }
-    LogPrintf("ProcessNewBlockHeaders() ppindex %d, \n", *ppindex != nullptr);
-    assert(*ppindex);
     return true;
 }
 
