@@ -1710,6 +1710,7 @@ bool static ProcessHeadersMessage(CNode *pfrom, CConnman *connman, const std::ve
     }
 
     BlockValidationState state;
+    LogPrintf("ProcessHeadersMessage() pindexLast %d, headers count %d \n", pindexLast != nullptr, headers.size());
     if (!ProcessNewBlockHeaders(headers, state, chainparams, &pindexLast)) {
         if (state.IsInvalid()) {
             MaybePunishNodeForBlock(pfrom->GetId(), state, via_compact_block, "invalid header received");
