@@ -143,8 +143,8 @@ bool PopServiceImpl::acceptBlock(const CBlockIndex& indexNew, BlockValidationSta
     auto containing = VeriBlock::blockToAltBlock(indexNew);
     altintegration::ValidationState instate;
     if (!altTree->acceptBlock(containing, instate)) {
-        LogPrintf("ERROR: %s: alt block cannot accepts\n", instate.GetDebugMessage());
-        return state.Invalid(BlockValidationResult::BLOCK_CACHED_INVALID, instate.GetDebugMessage());
+        LogPrintf("ERROR: alt tree cannot accept block %s\n", instate.toString());
+        return state.Invalid(BlockValidationResult::BLOCK_CACHED_INVALID, instate.GetPath());
     }
 
     return true;
