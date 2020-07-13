@@ -19,8 +19,8 @@ namespace VeriBlock {
 
 using KeystoneArray = std::array<uint256, 2>;
 
-// 0000 0000 0000 1000 0000 0000 0000 0000
-const static int32_t POP_BLOCK_VERSION_BIT = 0x80000UL;
+// 0100 0000 0000 0000 0000 0000 0000 0000
+const static int32_t POP_BLOCK_VERSION_BIT = 0x400UL;
 
 
 struct Config {
