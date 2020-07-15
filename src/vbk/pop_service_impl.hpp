@@ -76,7 +76,7 @@ public:
     altintegration::PopData getPopData() override;
     void removePayloadsFromMempool(const altintegration::PopData& popData) override;
     void addDisconnectedPopdata(const altintegration::PopData& popData) override;
-    void popMempoolReorg() override;
+    void updatePopMempoolForReorg() override;
 
 
     int compareForks(const CBlockIndex& left, const CBlockIndex& right) override;

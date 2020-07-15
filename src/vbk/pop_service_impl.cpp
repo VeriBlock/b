@@ -226,7 +226,7 @@ void PopServiceImpl::addDisconnectedPopdata(const altintegration::PopData& popDa
     this->disconnected_popdata.push_back(popData);
 }
 
-void PopServiceImpl::popMempoolReorg() EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+void PopServiceImpl::updatePopMempoolForReorg() EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     for (const auto& popData : disconnected_popdata) {
         mempool->submitAll(popData, *altTree);

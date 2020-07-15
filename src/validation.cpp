@@ -364,7 +364,7 @@ static void UpdateMempoolForReorg(DisconnectedBlockTransactions& disconnectpool,
     AssertLockHeld(cs_main);
 
     // VeriBlock
-    VeriBlock::getService<VeriBlock::PopService>().popMempoolReorg();
+    VeriBlock::getService<VeriBlock::PopService>().updatePopMempoolForReorg();
 
     std::vector<uint256> vHashUpdate;
     // disconnectpool's insertion_order index sorts the entries from
