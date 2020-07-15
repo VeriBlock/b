@@ -76,7 +76,7 @@ class PopPayouts(BitcoinTestFramework):
 
         assert_equal(self.get_best_block(1), self.get_best_block(0))
 
-        # mine a block on node[0] with these vbk blocks
+        # mine a block on node[1] with these vbk blocks
         tip_hash = self.nodes[1].generate(nblocks=1)[0]
         tip = self.nodes[1].getblock(tip_hash)
 
