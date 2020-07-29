@@ -31,11 +31,10 @@ void popDataToHash(const std::vector<pop_t>& data, std::vector<uint256>& leaves)
 {
     for (const auto& el : data) {
         auto id = el.getId();
-        std::vector<uint8_t> hash(32);
-        for (size_t i = 0; i < hash.size(); ++i) {
+        std::vector<uint8_t> hash(32, 0);
+        for (size_t i = 0; i < hash.size() && i < id.size(); ++i) {
             hash[i] = id[i];
         }
-
         leaves.push_back(uint256(hash));
     }
 }
