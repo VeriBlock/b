@@ -31,11 +31,9 @@ void popDataToHash(const std::vector<pop_t>& data, std::vector<uint256>& leaves)
 {
     for (const auto& el : data) {
         auto id = el.getId();
-        std::vector<uint8_t> hash(32, 0);
-        for (size_t i = 0; i < hash.size() && i < id.size(); ++i) {
-            hash[i] = id[i];
-        }
-        leaves.push_back(uint256(hash));
+        uint256 leaf;
+        std::copy(id.begin(), id.end(), leaf.begin());
+        leaves.push_back(leaf);
     }
 }
 
@@ -60,8 +58,8 @@ inline uint256 BlockPopDataMerkleRoot(const CBlock& block)
     std::vector<uint256> leaves;
 
     popDataToHash(block.popData.context, leaves);
-    popDataToHash(block.popData.atvs, leaves);
     popDataToHash(block.popData.vtbs, leaves);
+    popDataToHash(block.popData.atvs, leaves);
 
     return ComputeMerkleRoot(std::move(leaves), nullptr);
 }
