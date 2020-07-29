@@ -6,6 +6,8 @@
 #ifndef BITCOIN_SRC_VBK_MERKLE_HPP
 #define BITCOIN_SRC_VBK_MERKLE_HPP
 
+#include <iostream>
+
 #include "chainparams.h"
 #include "vbk/config.hpp"
 #include "vbk/pop_service.hpp"
@@ -21,6 +23,24 @@
 
 
 namespace VeriBlock {
+
+namespace {
+
+template <typename pop_t>
+void popDataToHash(const std::vector<pop_t>& data, std::vector<uint256>& leaves)
+{
+    for (const auto& el : data) {
+        auto id = el.getId();
+        std::vector<uint8_t> hash(32);
+        for (size_t i = 0; i < hash.size(); ++i) {
+            hash[i] = id[i];
+        }
+
+        leaves.push_back(uint256(hash));
+    }
+}
+
+} // namespace
 
 inline int GetPopMerkleRootCommitmentIndex(const CBlock& block)
 {
@@ -39,8 +59,10 @@ inline int GetPopMerkleRootCommitmentIndex(const CBlock& block)
 inline uint256 BlockPopDataMerkleRoot(const CBlock& block)
 {
     std::vector<uint256> leaves;
-    auto bytes = block.popData.toVbkEncoding();
-    leaves.push_back(Hash(bytes.begin(), bytes.end()));
+
+    popDataToHash(block.popData.context, leaves);
+    popDataToHash(block.popData.atvs, leaves);
+    popDataToHash(block.popData.vtbs, leaves);
 
     return ComputeMerkleRoot(std::move(leaves), nullptr);
 }
@@ -48,8 +70,7 @@ inline uint256 BlockPopDataMerkleRoot(const CBlock& block)
 inline uint256 makeTopLevelRoot(int height, const KeystoneArray& keystones, const uint256& txRoot)
 {
     ContextInfoContainer context(height, keystones, txRoot);
-    auto contextHash = context.getUnauthenticatedHash();
-    return Hash(txRoot.begin(), txRoot.end(), contextHash.begin(), contextHash.end());
+    return context.getTopLevelMerkleRoot();
 }
 
 inline bool isKeystone(const CBlockIndex& block)
