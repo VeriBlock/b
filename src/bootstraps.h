@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 
-#include "chainparams.h"
 #include <primitives/block.h>
 #include <util/system.h> // for gArgs
 #include <veriblock/config.hpp>
@@ -49,11 +48,14 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
     }
 
     altintegration::AltBlock bootstrap;
+    uint32_t mPopMaxFutureBlockTime = 10 * 60;
+    uint32_t mPopRewardPercentage = 40;
+    int32_t mPopRewardCoefficient = 20;
 };
 
 void printConfig(const altintegration::Config& config);
-void selectPopConfig(const ArgsManager& mgr);
-void selectPopConfig(
+const std::shared_ptr<AltChainParamsVBTC> selectPopConfig(const ArgsManager& mgr);
+const std::shared_ptr<AltChainParamsVBTC> selectPopConfig(
     const std::string& btcnet,
     const std::string& vbknet,
     bool popautoconfig = true,

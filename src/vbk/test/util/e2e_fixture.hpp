@@ -10,6 +10,8 @@
 
 #include <bootstraps.h>
 #include <chain.h>
+#include <chainparams.h>
+#include <consensus/validation.h>
 #include <test/util/setup_common.h>
 #include <validation.h>
 #include <vbk/log.hpp>
@@ -38,14 +40,14 @@ struct E2eFixture : public TestChain100Setup {
     CScript cbKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
     MockMiner popminer;
     altintegration::ValidationState state;
-    VeriBlock::PopService* pop;
+    altintegration::Altintegration* pop;
     std::vector<uint8_t> defaultPayoutInfo = {1, 2, 3, 4, 5};
 
     E2eFixture()
     {
         altintegration::SetLogger<TestLogger>();
         altintegration::GetLogger().level = altintegration::LogLevel::off;
-        pop = &VeriBlock::getService<VeriBlock::PopService>();
+        pop = &VeriBlock::GetPop();
     }
 
     void InvalidateTestBlock(CBlockIndex* pblock)
@@ -112,7 +114,7 @@ struct E2eFixture : public TestChain100Setup {
             return endorseAltBlock(hash, {}, payoutInfo);
         });
 
-        auto& pop_mempool = pop->getMemPool();
+        auto& pop_mempool = *pop->mempool;
         altintegration::ValidationState state;
         for (const auto& atv : atvs) {
             pop_mempool.submit(atv, state);
@@ -180,15 +182,14 @@ struct E2eFixture : public TestChain100Setup {
 
     BtcBlock::hash_t getLastKnownBTCblock()
     {
-        auto blocks = pop->getLastKnownBTCBlocks(1);
+        auto blocks = VeriBlock::getLastKnownBTCBlocks(1);
         BOOST_CHECK(blocks.size() == 1);
         return blocks[0];
     }
 
     VbkBlock::hash_t getLastKnownVBKblock()
     {
-        auto& pop = VeriBlock::getService<VeriBlock::PopService>();
-        auto blocks = pop.getLastKnownVBKBlocks(1);
+        auto blocks = VeriBlock::getLastKnownVBKBlocks(1);
         BOOST_CHECK(blocks.size() == 1);
         return blocks[0];
     }
@@ -197,8 +198,8 @@ struct E2eFixture : public TestChain100Setup {
     {
         PublicationData p;
 
-        auto& config = VeriBlock::getService<VeriBlock::Config>();
-        p.identifier = config.popconfig.alt->getIdentifier();
+        auto& config = *pop->config;
+        p.identifier = config.alt->getIdentifier();
         p.payoutInfo = payoutInfo;
 
         // serialize block header

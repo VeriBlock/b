@@ -8,6 +8,7 @@
 #ifndef BITCOIN_CHAINPARAMS_H
 #define BITCOIN_CHAINPARAMS_H
 
+#include <bootstraps.h>
 #include <chainparamsbase.h>
 #include <consensus/params.h>
 #include <primitives/block.h>
@@ -88,6 +89,9 @@ public:
     const CCheckpointData& Checkpoints() const { return checkpointData; }
     const ChainTxData& TxData() const { return chainTxData; }
 
+    // VBK
+    std::shared_ptr<AltChainParamsVBTC> _altparams;
+
 protected:
     CChainParams() {}
 
@@ -112,10 +116,11 @@ protected:
 
 /**
  * Creates and returns a std::unique_ptr<CChainParams> of the chosen chain.
+ * Set altparams to nullptr to skip POP parameters initialization.
  * @returns a CChainParams* of the chosen chain.
  * @throws a std::runtime_error if the chain is not supported.
  */
-std::unique_ptr<const CChainParams> CreateChainParams(const std::string& chain);
+std::unique_ptr<const CChainParams> CreateChainParams(const std::string& chain, const std::shared_ptr<AltChainParamsVBTC>& altparams = nullptr);
 
 /**
  * Return the currently selected parameters. This won't change after app
@@ -127,6 +132,6 @@ const CChainParams& Params();
  * Sets the params returned by Params() to those for the given chain name.
  * @throws std::runtime_error when the chain is not supported.
  */
-void SelectParams(const std::string& chain);
+void SelectParams(const std::string& network, const std::shared_ptr<AltChainParamsVBTC>& altparams = nullptr);
 
 #endif // BITCOIN_CHAINPARAMS_H

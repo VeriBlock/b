@@ -20,7 +20,6 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
 
-#include <vbk/service_locator.hpp>
 #include <vbk/config.hpp>
 #include <vbk/util.hpp>
 

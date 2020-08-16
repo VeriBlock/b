@@ -12,9 +12,7 @@
 #include <streams.h>
 #include <version.h>
 
-#include <vbk/config.hpp>
-#include <vbk/service_locator.hpp>
-
+#include <vbk/pop_service.hpp>
 #include <veriblock/entities/popdata.hpp>
 
 #include <algorithm>
@@ -40,11 +38,6 @@ Container filter_if(const Container& inp, std::function<bool(const typename Cont
                 }),
         v.end());
     return v;
-}
-
-inline CAmount getCoinbaseSubsidy(const CAmount& subsidy)
-{
-    return subsidy * (100 - VeriBlock::getService<VeriBlock::Config>().POP_REWARD_PERCENTAGE) / 100;
 }
 
 inline CBlockHeader headerFromBytes(const std::vector<uint8_t>& v)

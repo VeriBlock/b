@@ -346,8 +346,9 @@ const CChainParams& Params()
     return *globalChainParams;
 }
 
-std::unique_ptr<const CChainParams> CreateChainParams(const std::string& chain)
+static std::unique_ptr<CChainParams> CreateChainParamsInner(const std::string& chain)
 {
+    std::unique_ptr<CChainParams> params;
     if (chain == CBaseChainParams::MAIN)
         return std::unique_ptr<CChainParams>(new CMainParams());
     else if (chain == CBaseChainParams::TESTNET)
@@ -355,11 +356,21 @@ std::unique_ptr<const CChainParams> CreateChainParams(const std::string& chain)
     else if (chain == CBaseChainParams::REGTEST)
         return std::unique_ptr<CChainParams>(new CRegTestParams(gArgs));
     throw std::runtime_error(strprintf("%s: Unknown chain %s.", __func__, chain));
+    return nullptr;
 }
 
-void SelectParams(const std::string& network)
+std::unique_ptr<const CChainParams> CreateChainParams(const std::string& chain, const std::shared_ptr<AltChainParamsVBTC>& altparams)
+{
+    auto params = CreateChainParamsInner(chain);
+    if(altparams != nullptr) {
+        params->_altparams = altparams;
+    }
+    return params;
+}
+
+void SelectParams(const std::string& network, const std::shared_ptr<AltChainParamsVBTC>& altparams)
 {
     SelectBaseParams(network);
-    globalChainParams = CreateChainParams(network);
+    globalChainParams = CreateChainParams(network, altparams);
     assert(globalChainParams != nullptr);
 }

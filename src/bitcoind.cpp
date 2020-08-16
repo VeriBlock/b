@@ -9,9 +9,11 @@
 #include <config/bitcoin-config.h>
 #endif
 
+#include <bootstraps.h>
 #include <chainparams.h>
 #include <clientversion.h>
 #include <compat.h>
+#include <functional>
 #include <init.h>
 #include <interfaces/chain.h>
 #include <node/context.h>
@@ -22,11 +24,6 @@
 #include <util/system.h>
 #include <util/threadnames.h>
 #include <util/translation.h>
-
-#include <vbk/init.hpp>
-
-#include "bootstraps.h"
-#include <functional>
 
 const std::function<std::string(const char*)> G_TRANSLATION_FUN = nullptr;
 
@@ -45,7 +42,6 @@ static void WaitForShutdown(NodeContext& node)
 //
 static bool AppInit(int argc, char* argv[])
 {
-    VeriBlock::InitConfig();
     NodeContext node;
     node.chain = interfaces::MakeChain(node);
 
@@ -95,8 +91,8 @@ static bool AppInit(int argc, char* argv[])
             if(gArgs.GetChainName() == CBaseChainParams::MAIN) {
                 throw std::runtime_error("Mainnet is disabled. Use testnet.");
             }
-            SelectParams(gArgs.GetChainName());
-            selectPopConfig(gArgs);
+            auto altparams = selectPopConfig(gArgs);
+            SelectParams(gArgs.GetChainName(), altparams);
         } catch (const std::exception& e) {
             return InitError(strprintf("%s\n", e.what()));
         }

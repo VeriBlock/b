@@ -3,12 +3,13 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bootstraps.h"
 #include <boost/algorithm/string.hpp>
+#include <chainparams.h>
 #include <util/strencodings.h>
 #include <vbk/config.hpp>
-#include <vbk/service_locator.hpp>
 #include <veriblock/config.hpp>
+#include <vbk/pop_service.hpp>
+#include <bootstraps.h>
 
 static std::vector<std::string> parseBlocks(const std::string& s)
 {
@@ -57,7 +58,7 @@ void printConfig(const altintegration::Config& config)
         config.alt->getIdentifier());
 }
 
-void selectPopConfig(
+const std::shared_ptr<AltChainParamsVBTC> selectPopConfig(
     const std::string& btcnet,
     const std::string& vbknet,
     bool popautoconfig,
@@ -106,14 +107,14 @@ void selectPopConfig(
         throw std::invalid_argument("vbknet currently only supports test/regtest");
     }
 
-    popconfig.alt = std::make_shared<AltChainParamsVBTC>(Params().GenesisBlock());
-
-    auto& config = VeriBlock::getService<VeriBlock::Config>();
-    config.popconfig = std::move(popconfig);
-    printConfig(config.popconfig);
+    auto altparams = std::make_shared<AltChainParamsVBTC>(Params().GenesisBlock());
+    popconfig.alt = altparams;
+    VeriBlock::GetPop().config = std::make_shared<altintegration::Config>(std::move(popconfig));
+    printConfig(*VeriBlock::GetPop().config);
+    return altparams;
 }
 
-void selectPopConfig(const ArgsManager& args)
+const std::shared_ptr<AltChainParamsVBTC> selectPopConfig(const ArgsManager& args)
 {
     std::string btcnet = args.GetArg("-popbtcnetwork", "regtest");
     std::string vbknet = args.GetArg("-popvbknetwork", "regtest");
@@ -123,7 +124,7 @@ void selectPopConfig(const ArgsManager& args)
     int vbkstart = args.GetArg("-popvbkstartheight", 0);
     std::string vbkblocks = args.GetArg("-popvbkblocks", "");
 
-    selectPopConfig(btcnet, vbknet, popautoconfig, btcstart, btcblocks, vbkstart, vbkblocks);
+    return selectPopConfig(btcnet, vbknet, popautoconfig, btcstart, btcblocks, vbkstart, vbkblocks);
 }
 
 int testnetVBKstartHeight = 492041;

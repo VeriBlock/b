@@ -14,8 +14,6 @@
 
 #include <vbk/util.hpp>
 #include <vbk/config.hpp>
-#include <vbk/service_locator.hpp>
-
 
 CAmount GetDustThreshold(const CTxOut& txout, const CFeeRate& dustRelayFeeIn)
 {

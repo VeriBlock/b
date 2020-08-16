@@ -106,9 +106,7 @@ endif
 VBK_H = \
   vbk/entity/context_info_container.hpp \
   vbk/init.hpp \
-  vbk/service_locator.hpp \
   vbk/pop_service.hpp \
-  vbk/pop_service_impl.hpp \
   vbk/config.hpp \
   vbk/typed_wrapper.hpp \
   vbk/merkle.hpp \
@@ -300,13 +298,13 @@ libbitcoin_util_a-clientversion.$(OBJEXT): obj/build.h
 libbitcoin_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 libbitcoin_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_server_a_SOURCES = \
-  vbk/pop_service_impl.cpp \
-  vbk/pop_service_impl.hpp \
+  vbk/pop_service.cpp \
   addrdb.cpp \
   addrman.cpp \
   banman.cpp \
   blockencodings.cpp \
   blockfilter.cpp \
+  bootstraps.cpp \
   chain.cpp \
   consensus/tx_verify.cpp \
   flatfile.cpp \
@@ -497,7 +495,6 @@ libbitcoin_common_a_SOURCES = \
   base58.cpp \
   bech32.cpp \
   bloom.cpp \
-  bootstraps.cpp \
   chainparams.cpp \
   coins.cpp \
   compressor.cpp \
