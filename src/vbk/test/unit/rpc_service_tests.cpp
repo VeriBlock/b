@@ -16,12 +16,9 @@
 #include <validation.h>
 #include <wallet/wallet.h>
 
-#include <vbk/service_locator.hpp>
 #include <vbk/test/util/e2e_fixture.hpp>
-#include <vbk/test/util/mock.hpp>
 
 #include <string>
-#include <vbk/init.hpp>
 #include <vbk/merkle.hpp>
 
 #include <vbk/test/util/e2e_fixture.hpp>

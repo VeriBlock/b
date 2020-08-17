@@ -58,7 +58,7 @@ void printConfig(const altintegration::Config& config)
         config.alt->getIdentifier());
 }
 
-const std::shared_ptr<AltChainParamsVBTC> selectPopConfig(
+void selectPopConfig(
     const std::string& btcnet,
     const std::string& vbknet,
     bool popautoconfig,
@@ -110,11 +110,11 @@ const std::shared_ptr<AltChainParamsVBTC> selectPopConfig(
     auto altparams = std::make_shared<AltChainParamsVBTC>(Params().GenesisBlock());
     popconfig.alt = altparams;
     VeriBlock::GetPop().config = std::make_shared<altintegration::Config>(std::move(popconfig));
+    SetAltParams(altparams);
     printConfig(*VeriBlock::GetPop().config);
-    return altparams;
 }
 
-const std::shared_ptr<AltChainParamsVBTC> selectPopConfig(const ArgsManager& args)
+void selectPopConfig(const ArgsManager& args)
 {
     std::string btcnet = args.GetArg("-popbtcnetwork", "regtest");
     std::string vbknet = args.GetArg("-popvbknetwork", "regtest");
@@ -124,7 +124,7 @@ const std::shared_ptr<AltChainParamsVBTC> selectPopConfig(const ArgsManager& arg
     int vbkstart = args.GetArg("-popvbkstartheight", 0);
     std::string vbkblocks = args.GetArg("-popvbkblocks", "");
 
-    return selectPopConfig(btcnet, vbknet, popautoconfig, btcstart, btcblocks, vbkstart, vbkblocks);
+    selectPopConfig(btcnet, vbknet, popautoconfig, btcstart, btcblocks, vbkstart, vbkblocks);
 }
 
 int testnetVBKstartHeight = 492041;

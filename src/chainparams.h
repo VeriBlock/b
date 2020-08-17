@@ -89,9 +89,6 @@ public:
     const CCheckpointData& Checkpoints() const { return checkpointData; }
     const ChainTxData& TxData() const { return chainTxData; }
 
-    // VBK
-    std::shared_ptr<AltChainParamsVBTC> _altparams;
-
 protected:
     CChainParams() {}
 
@@ -133,5 +130,16 @@ const CChainParams& Params();
  * @throws std::runtime_error when the chain is not supported.
  */
 void SelectParams(const std::string& network, const std::shared_ptr<AltChainParamsVBTC>& altparams = nullptr);
+
+/**
+ * Return the currently selected altchain parameters. This won't change after app
+ * startup, except for unit tests.
+ */
+const AltChainParamsVBTC& AltParams();
+
+/**
+ * Sets the params returned by AltParams().
+ */
+void SetAltParams(const std::shared_ptr<AltChainParamsVBTC>& altparams);
 
 #endif // BITCOIN_CHAINPARAMS_H

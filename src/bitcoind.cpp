@@ -91,8 +91,8 @@ static bool AppInit(int argc, char* argv[])
             if(gArgs.GetChainName() == CBaseChainParams::MAIN) {
                 throw std::runtime_error("Mainnet is disabled. Use testnet.");
             }
-            auto altparams = selectPopConfig(gArgs);
-            SelectParams(gArgs.GetChainName(), altparams);
+            SelectParams(gArgs.GetChainName());
+            selectPopConfig(gArgs);
         } catch (const std::exception& e) {
             return InitError(strprintf("%s\n", e.what()));
         }

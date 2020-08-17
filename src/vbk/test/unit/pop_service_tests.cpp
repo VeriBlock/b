@@ -4,7 +4,6 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include <boost/test/unit_test.hpp>
-#include <gmock/gmock.h>
 
 #include <consensus/validation.h>
 #include <shutdown.h>
@@ -12,11 +11,7 @@
 #include <validation.h>
 
 #include <vbk/config.hpp>
-#include <vbk/init.hpp>
 #include <vbk/pop_service.hpp>
-#include <vbk/pop_service_impl.hpp>
-#include <vbk/service_locator.hpp>
-#include <vbk/test/util/mock.hpp>
 
 using ::testing::Return;
 

@@ -347,13 +347,12 @@ void SetupServerArgs()
     SetupHelpOptions(gArgs);
     gArgs.AddArg("-help-debug", "Print help message with debugging options and exit", ArgsManager::ALLOW_ANY, OptionsCategory::DEBUG_TEST); // server-only for now
 
-    auto altparams = selectPopConfig(gArgs);
     const auto defaultBaseParams = CreateBaseChainParams(CBaseChainParams::MAIN);
     const auto testnetBaseParams = CreateBaseChainParams(CBaseChainParams::TESTNET);
     const auto regtestBaseParams = CreateBaseChainParams(CBaseChainParams::REGTEST);
-    const auto defaultChainParams = CreateChainParams(CBaseChainParams::MAIN, altparams);
-    const auto testnetChainParams = CreateChainParams(CBaseChainParams::TESTNET, altparams);
-    const auto regtestChainParams = CreateChainParams(CBaseChainParams::REGTEST, altparams);
+    const auto defaultChainParams = CreateChainParams(CBaseChainParams::MAIN);
+    const auto testnetChainParams = CreateChainParams(CBaseChainParams::TESTNET);
+    const auto regtestChainParams = CreateChainParams(CBaseChainParams::REGTEST);
 
     // Hidden Options
     std::vector<std::string> hidden_args = {
@@ -1499,6 +1498,7 @@ bool AppInitMain(NodeContext& node)
                 pblocktree.reset(new CBlockTreeDB(nBlockTreeDBCache, false, fReset));
 
                 VeriBlock::SetPop(*pblocktree);
+                selectPopConfig(gArgs);
 
                 if (fReset) {
                     pblocktree->WriteReindexing(true);

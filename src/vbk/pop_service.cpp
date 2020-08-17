@@ -490,7 +490,7 @@ PoPRewards getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params&
     auto rewards = pop.altTree->getPopPayout(blockHash.asVector());
     int halvings = (pindexPrev.nHeight + 1) / consensusParams.nSubsidyHalvingInterval;
     PoPRewards btcRewards{};
-    auto& altparams = *Params()._altparams;
+    auto& altparams = AltParams();
     //erase rewards, that pay 0 satoshis and halve rewards
     for (const auto& r : rewards) {
         auto rewardValue = r.second;
@@ -725,7 +725,7 @@ int compareForks(const CBlockIndex& leftForkTip, const CBlockIndex& rightForkTip
 
 CAmount getCoinbaseSubsidy(const CAmount& subsidy)
 {
-    return subsidy * (100 - Params()._altparams->mPopRewardPercentage) / 100;
+    return subsidy * (100 - AltParams().mPopRewardPercentage) / 100;
 }
 
 } // namespace VeriBlock

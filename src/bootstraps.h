@@ -54,8 +54,8 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
 };
 
 void printConfig(const altintegration::Config& config);
-const std::shared_ptr<AltChainParamsVBTC> selectPopConfig(const ArgsManager& mgr);
-const std::shared_ptr<AltChainParamsVBTC> selectPopConfig(
+void selectPopConfig(const ArgsManager& mgr);
+void selectPopConfig(
     const std::string& btcnet,
     const std::string& vbknet,
     bool popautoconfig = true,

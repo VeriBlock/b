@@ -7,10 +7,7 @@
 #include <chainparams.h>
 #include <net.h>
 #include <validation.h>
-
 #include <vbk/config.hpp>
-#include <vbk/service_locator.hpp>
-
 #include <test/util/setup_common.h>
 
 #include <boost/signals2/signal.hpp>
@@ -20,9 +17,9 @@ BOOST_FIXTURE_TEST_SUITE(validation_tests, TestingSetup)
 
 static void setConfig()
 {
-    VeriBlock::Config* config = new VeriBlock::Config();
-    config->POP_REWARD_PERCENTAGE = 0;
-    VeriBlock::setService<VeriBlock::Config>(config);
+    auto altparams = std::make_shared<AltChainParamsVBTC>(Params().GenesisBlock());
+    altparams->mPopRewardPercentage = 0;
+    SetAltParams(altparams);
 }
 
 static void TestBlockSubsidyHalvings(const Consensus::Params& consensusParams)

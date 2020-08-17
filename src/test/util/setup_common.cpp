@@ -30,11 +30,7 @@
 #include <util/validation.h>
 #include <validation.h>
 #include <validationinterface.h>
-
-#include <vbk/init.hpp>
-#include <vbk/test/util/mock.hpp>
 #include <bootstraps.h>
-
 #include <functional>
 
 const std::function<std::string(const char*)> G_TRANSLATION_FUN = nullptr;
@@ -75,8 +71,6 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
     gArgs.ForceSetArg("-datadir", m_path_root.string());
     ClearDatadirCache();
     SelectParams(chainName);
-    VeriBlock::InitConfig();
-    selectPopConfig("regtest", "regtest", true);
     SeedInsecureRand();
     gArgs.ForceSetArg("-printtoconsole", "0");
     InitLogging();
@@ -116,7 +110,8 @@ TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(cha
     GetMainSignals().RegisterBackgroundSignalScheduler(scheduler);
 
     pblocktree.reset(new CBlockTreeDB(1 << 20, true));
-    VeriBlock::InitPopService(*pblocktree);
+    VeriBlock::SetPop(*pblocktree);
+    selectPopConfig("regtest", "regtest", true);
 
     g_chainstate = MakeUnique<CChainState>();
     ::ChainstateActive().InitCoinsDB(
@@ -183,7 +178,7 @@ TestChain100Setup::TestChain100Setup(): RegTestingSetup()
     assert(ChainActive().Tip()->nHeight == 100);
     assert(BlockIndex().size() == 101);
 
-    auto& tree = VeriBlock::getService<VeriBlock::PopService>().getAltTree();
+    auto& tree = *VeriBlock::GetPop().altTree;
     assert(tree.getBestChain().tip()->getHeight() == ChainActive().Tip()->nHeight);
 }
 

@@ -346,6 +346,18 @@ const CChainParams& Params()
     return *globalChainParams;
 }
 
+static std::shared_ptr<AltChainParamsVBTC> globalAltChainParams;
+
+const AltChainParamsVBTC& AltParams()
+{
+    assert(globalAltChainParams);
+    return *globalAltChainParams;
+}
+
+void SetAltParams(const std::shared_ptr<AltChainParamsVBTC>& altparams) {
+    globalAltChainParams = std::move(altparams);
+}
+
 static std::unique_ptr<CChainParams> CreateChainParamsInner(const std::string& chain)
 {
     std::unique_ptr<CChainParams> params;
@@ -363,7 +375,7 @@ std::unique_ptr<const CChainParams> CreateChainParams(const std::string& chain, 
 {
     auto params = CreateChainParamsInner(chain);
     if(altparams != nullptr) {
-        params->_altparams = altparams;
+        globalAltChainParams = std::move(altparams);
     }
     return params;
 }

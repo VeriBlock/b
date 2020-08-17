@@ -6,7 +6,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "vbk/genesis.hpp"
-#include "vbk/init.hpp"
 #include <chainparams.h>
 #include <consensus/validation.h>
 #include <validation.h>
