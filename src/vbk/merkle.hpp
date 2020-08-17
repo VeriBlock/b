@@ -6,14 +6,12 @@
 #ifndef BITCOIN_SRC_VBK_MERKLE_HPP
 #define BITCOIN_SRC_VBK_MERKLE_HPP
 
-#include "chainparams.h"
-#include "vbk/config.hpp"
-#include "vbk/pop_service.hpp"
-#include "vbk/service_locator.hpp"
-
+#include <chainparams.h>
 #include <chain.h>            // for CBlockIndex
 #include <consensus/merkle.h> // for BlockMerkleRoot
 #include <consensus/validation.h>
+#include <vbk/entity/context_info_container.hpp>
+#include <vbk/pop_service.hpp>
 #include <primitives/block.h> // for CBlock
 #include <primitives/transaction.h>
 
@@ -54,8 +52,8 @@ inline uint256 makeTopLevelRoot(int height, const KeystoneArray& keystones, cons
 
 inline bool isKeystone(const CBlockIndex& block)
 {
-    auto& c = getService<Config>();
-    return (block.nHeight % c.popconfig.alt->getKeystoneInterval()) == 0;
+    auto keystoneInterval = VeriBlock::GetPop().config->alt->getKeystoneInterval();
+    return (block.nHeight % keystoneInterval) == 0;
 }
 
 inline const CBlockIndex* getPreviousKeystone(const CBlockIndex& block)

@@ -105,10 +105,7 @@ endif
 ### VeriBlock section start
 VBK_H = \
   vbk/entity/context_info_container.hpp \
-  vbk/init.hpp \
-  vbk/service_locator.hpp \
   vbk/pop_service.hpp \
-  vbk/pop_service_impl.hpp \
   vbk/config.hpp \
   vbk/typed_wrapper.hpp \
   vbk/merkle.hpp \
@@ -116,6 +113,7 @@ VBK_H = \
   vbk/altchainparam.hpp \
   vbk/p2p_sync.hpp \
   vbk/util.hpp \
+  vbk/vbk.hpp \
   vbk/adaptors/univalue_json.hpp \
   vbk/adaptors/batch_adapter.hpp \
   vbk/adaptors/batch.hpp \
@@ -300,8 +298,7 @@ libbitcoin_util_a-clientversion.$(OBJEXT): obj/build.h
 libbitcoin_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 libbitcoin_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_server_a_SOURCES = \
-  vbk/pop_service_impl.cpp \
-  vbk/pop_service_impl.hpp \
+  vbk/pop_service.cpp \
   addrdb.cpp \
   addrman.cpp \
   banman.cpp \

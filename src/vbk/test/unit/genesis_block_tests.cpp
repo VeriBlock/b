@@ -6,7 +6,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "vbk/genesis.hpp"
-#include "vbk/init.hpp"
 #include <chainparams.h>
 #include <consensus/validation.h>
 #include <validation.h>
@@ -16,7 +15,7 @@ BOOST_AUTO_TEST_SUITE(VBK_GenesisBlock)
 struct GenesisBlockFixture {
     GenesisBlockFixture()
     {
-        VeriBlock::InitConfig();
+        //VeriBlock::InitConfig();
     }
 
     static void init(const std::string& name)

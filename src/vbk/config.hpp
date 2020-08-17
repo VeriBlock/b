@@ -13,15 +13,8 @@
 #include <array>
 #include <cstdint>
 #include <uint256.h>
-#include <veriblock/config.hpp>
 
 namespace VeriBlock {
-
-using KeystoneArray = std::array<uint256, 2>;
-
-// 0000 0000 0000 1000 0000 0000 0000 0000
-const static int32_t POP_BLOCK_VERSION_BIT = 0x80000UL;
-
 
 struct Config {
     // unique index to this chain; network id across chains
@@ -35,8 +28,6 @@ struct Config {
     uint32_t min_atv_size = 1;      // TODO: figure out number
 
     uint32_t max_future_block_time = 10 * 60; // 10 minutes
-
-    altintegration::Config popconfig;
 
     /////// Pop Rewards section start
     uint32_t POP_REWARD_PERCENTAGE = 40;

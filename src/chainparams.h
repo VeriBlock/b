@@ -8,11 +8,12 @@
 #ifndef BITCOIN_CHAINPARAMS_H
 #define BITCOIN_CHAINPARAMS_H
 
+#include <bootstraps.h>
 #include <chainparamsbase.h>
 #include <consensus/params.h>
 #include <primitives/block.h>
 #include <protocol.h>
-#include <veriblock/config.hpp>
+#include <vbk/config.hpp>
 
 #include <memory>
 #include <vector>
@@ -128,5 +129,20 @@ const CChainParams& Params();
  * @throws std::runtime_error when the chain is not supported.
  */
 void SelectParams(const std::string& chain);
+
+/**
+ * Return the currently selected altchain config.
+ */
+VeriBlock::Config& PopConfig();
+
+/**
+ * Sets the default params returned by PopConfig().
+ */
+void SelectPopConfig();
+
+/**
+ * Sets the params returned by PopConfig() from the params copy.
+ */
+void SelectPopConfig(VeriBlock::Config& config);
 
 #endif // BITCOIN_CHAINPARAMS_H
