@@ -113,7 +113,7 @@ void selectPopConfig(
 
     auto altparams = std::make_shared<AltChainParamsVBTC>(Params().GenesisBlock());
     popconfig.alt = altparams;
-    VeriBlock::SetPopConfig(popconfig);
+    //VeriBlock::SetPopConfig(popconfig);
     SelectPopConfig();
     printConfig(popconfig);
 }

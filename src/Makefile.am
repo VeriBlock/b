@@ -107,13 +107,13 @@ VBK_H = \
   vbk/entity/context_info_container.hpp \
   vbk/pop_service.hpp \
   vbk/config.hpp \
+  vbk/vbk.hpp \
   vbk/typed_wrapper.hpp \
   vbk/merkle.hpp \
   vbk/genesis.hpp \
   vbk/altchainparam.hpp \
   vbk/p2p_sync.hpp \
   vbk/util.hpp \
-  vbk/vbk.hpp \
   vbk/adaptors/univalue_json.hpp \
   vbk/adaptors/batch_adapter.hpp \
   vbk/adaptors/batch.hpp \
@@ -299,12 +299,12 @@ libbitcoin_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(MINIUPNPC_CP
 libbitcoin_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_server_a_SOURCES = \
   vbk/pop_service.cpp \
+  vbk/merkle.cpp \
   addrdb.cpp \
   addrman.cpp \
   banman.cpp \
   blockencodings.cpp \
   blockfilter.cpp \
-  bootstraps.cpp \
   chain.cpp \
   consensus/tx_verify.cpp \
   flatfile.cpp \
@@ -495,6 +495,7 @@ libbitcoin_common_a_SOURCES = \
   base58.cpp \
   bech32.cpp \
   bloom.cpp \
+  bootstraps.cpp \
   chainparams.cpp \
   coins.cpp \
   compressor.cpp \
@@ -643,9 +644,6 @@ vbitcoin_tx_LDADD = \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CONSENSUS) \
   $(LIBBITCOIN_CRYPTO) \
-  $(LIBBITCOIN_SERVER) \
-  $(LIBLEVELDB) \
-  $(LIBLEVELDB_SSE42) \
   $(LIBSECP256K1)
 
 vbitcoin_tx_LDADD += $(BOOST_LIBS) $(VERIBLOCK_POP_CPP_LIBS)

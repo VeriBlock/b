@@ -59,6 +59,8 @@ int compareForks(const CBlockIndex& left, const CBlockIndex& right);
 
 CAmount getCoinbaseSubsidy(const CAmount& subsidy);
 
+bool isKeystone(const CBlockIndex& block);
+
 } // namespace VeriBlock
 
 #endif //BITCOIN_SRC_VBK_POP_SERVICE_HPP
