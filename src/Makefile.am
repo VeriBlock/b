@@ -304,6 +304,7 @@ libbitcoin_server_a_SOURCES = \
   banman.cpp \
   blockencodings.cpp \
   blockfilter.cpp \
+  bootstraps.cpp \
   chain.cpp \
   consensus/tx_verify.cpp \
   flatfile.cpp \
@@ -494,7 +495,6 @@ libbitcoin_common_a_SOURCES = \
   base58.cpp \
   bech32.cpp \
   bloom.cpp \
-  bootstraps.cpp \
   chainparams.cpp \
   coins.cpp \
   compressor.cpp \
