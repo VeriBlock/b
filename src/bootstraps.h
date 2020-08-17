@@ -48,14 +48,11 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
     }
 
     altintegration::AltBlock bootstrap;
-    uint32_t mPopMaxFutureBlockTime = 10 * 60;
-    uint32_t mPopRewardPercentage = 40;
-    int32_t mPopRewardCoefficient = 20;
 };
 
 void printConfig(const altintegration::Config& config);
-void selectPopConfig(const ArgsManager& mgr);
-void selectPopConfig(
+altintegration::Config createPopConfig(const ArgsManager& mgr);
+altintegration::Config createPopConfig(
     const std::string& btcnet,
     const std::string& vbknet,
     bool popautoconfig = true,
@@ -63,4 +60,5 @@ void selectPopConfig(
     const std::string& btcblocks = {},
     int vbkstart = 0,
     const std::string& vbkblocks = {});
-#endif
+
+#endif //__BOOTSTRAPS_BTC_VBK

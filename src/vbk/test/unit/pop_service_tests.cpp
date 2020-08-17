@@ -13,8 +13,6 @@
 #include <vbk/config.hpp>
 #include <vbk/pop_service.hpp>
 
-using ::testing::Return;
-
 static CBlock createBlockWithPopTx(TestChain100Setup& test)
 {
     CScript scriptPubKey = CScript() << ToByteVector(test.coinbaseKey.GetPubKey()) << OP_CHECKSIG;

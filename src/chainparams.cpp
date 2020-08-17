@@ -20,9 +20,7 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-
 #include "bootstraps.h"
-#include <veriblock/blockchain/alt_chain_params.hpp>
 
 #define VBK_ALPHA 0x50
 #define VBK_BETA  0xa0
@@ -346,21 +344,8 @@ const CChainParams& Params()
     return *globalChainParams;
 }
 
-static std::shared_ptr<AltChainParamsVBTC> globalAltChainParams;
-
-const AltChainParamsVBTC& AltParams()
+std::unique_ptr<const CChainParams> CreateChainParams(const std::string& chain)
 {
-    assert(globalAltChainParams);
-    return *globalAltChainParams;
-}
-
-void SetAltParams(const std::shared_ptr<AltChainParamsVBTC>& altparams) {
-    globalAltChainParams = std::move(altparams);
-}
-
-static std::unique_ptr<CChainParams> CreateChainParamsInner(const std::string& chain)
-{
-    std::unique_ptr<CChainParams> params;
     if (chain == CBaseChainParams::MAIN)
         return std::unique_ptr<CChainParams>(new CMainParams());
     else if (chain == CBaseChainParams::TESTNET)
@@ -371,18 +356,9 @@ static std::unique_ptr<CChainParams> CreateChainParamsInner(const std::string& c
     return nullptr;
 }
 
-std::unique_ptr<const CChainParams> CreateChainParams(const std::string& chain, const std::shared_ptr<AltChainParamsVBTC>& altparams)
-{
-    auto params = CreateChainParamsInner(chain);
-    if(altparams != nullptr) {
-        globalAltChainParams = std::move(altparams);
-    }
-    return params;
-}
-
-void SelectParams(const std::string& network, const std::shared_ptr<AltChainParamsVBTC>& altparams)
+void SelectParams(const std::string& network)
 {
     SelectBaseParams(network);
-    globalChainParams = CreateChainParams(network, altparams);
+    globalChainParams = CreateChainParams(network);
     assert(globalChainParams != nullptr);
 }

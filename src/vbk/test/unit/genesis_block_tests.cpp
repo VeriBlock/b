@@ -15,7 +15,6 @@ BOOST_AUTO_TEST_SUITE(VBK_GenesisBlock)
 struct GenesisBlockFixture {
     GenesisBlockFixture()
     {
-        VeriBlock::InitConfig();
     }
 
     static void init(const std::string& name)

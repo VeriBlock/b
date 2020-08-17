@@ -13,7 +13,6 @@
 #include <consensus/params.h>
 #include <primitives/block.h>
 #include <protocol.h>
-#include <veriblock/config.hpp>
 
 #include <memory>
 #include <vector>
@@ -117,7 +116,7 @@ protected:
  * @returns a CChainParams* of the chosen chain.
  * @throws a std::runtime_error if the chain is not supported.
  */
-std::unique_ptr<const CChainParams> CreateChainParams(const std::string& chain, const std::shared_ptr<AltChainParamsVBTC>& altparams = nullptr);
+std::unique_ptr<const CChainParams> CreateChainParams(const std::string& chain);
 
 /**
  * Return the currently selected parameters. This won't change after app
@@ -129,17 +128,6 @@ const CChainParams& Params();
  * Sets the params returned by Params() to those for the given chain name.
  * @throws std::runtime_error when the chain is not supported.
  */
-void SelectParams(const std::string& network, const std::shared_ptr<AltChainParamsVBTC>& altparams = nullptr);
-
-/**
- * Return the currently selected altchain parameters. This won't change after app
- * startup, except for unit tests.
- */
-const AltChainParamsVBTC& AltParams();
-
-/**
- * Sets the params returned by AltParams().
- */
-void SetAltParams(const std::shared_ptr<AltChainParamsVBTC>& altparams);
+void SelectParams(const std::string& network);
 
 #endif // BITCOIN_CHAINPARAMS_H

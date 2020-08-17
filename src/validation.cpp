@@ -3540,7 +3540,7 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidatio
     if (block.GetBlockTime() > nAdjustedTime + MAX_FUTURE_BLOCK_TIME)
         return state.Invalid(BlockValidationResult::BLOCK_TIME_FUTURE, "time-too-new", "block timestamp too far in the future");
 
-    if (block.GetBlockTime() > nAdjustedTime + AltParams().mPopMaxFutureBlockTime)
+    if (block.GetBlockTime() > nAdjustedTime + VeriBlock::GetPop().config->alt->getMaxFutureBlockTime())
         return state.Invalid(BlockValidationResult::BLOCK_TIME_FUTURE, "time-too-new", "block timestamp too far in the future for the VeriBlock security");
 
     // Reject outdated version blocks when 95% (75% on testnet) of the network has upgraded:

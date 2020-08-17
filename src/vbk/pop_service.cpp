@@ -383,8 +383,9 @@ altintegration::Altintegration& GetPop() {
     return *app;
 }
 
-void SetPop(CDBWrapper& db) {
-    auto cfg = std::make_shared<altintegration::Config>();
+void SetPop(CDBWrapper& db, const altintegration::Config& config)
+{
+    auto cfg = std::make_shared<altintegration::Config>(config);
     std::shared_ptr<altintegration::Repository> dbrepo = std::make_shared<Repository>(db);
     app = altintegration::Altintegration::create(cfg, dbrepo);
 }
@@ -490,14 +491,14 @@ PoPRewards getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params&
     auto rewards = pop.altTree->getPopPayout(blockHash.asVector());
     int halvings = (pindexPrev.nHeight + 1) / consensusParams.nSubsidyHalvingInterval;
     PoPRewards btcRewards{};
-    auto& altparams = AltParams();
+    auto& rewardparams = pop.config->alt->getRewardParams();
     //erase rewards, that pay 0 satoshis and halve rewards
     for (const auto& r : rewards) {
         auto rewardValue = r.second;
         rewardValue >>= halvings;
         if ((rewardValue != 0) && (halvings < 64)) {
             CScript key = CScript(r.first.begin(), r.first.end());
-            btcRewards[key] = altparams.mPopRewardCoefficient * rewardValue;
+            btcRewards[key] = rewardparams.rewardCoefficient() * rewardValue;
         }
     }
 
@@ -725,7 +726,7 @@ int compareForks(const CBlockIndex& leftForkTip, const CBlockIndex& rightForkTip
 
 CAmount getCoinbaseSubsidy(const CAmount& subsidy)
 {
-    return subsidy * (100 - AltParams().mPopRewardPercentage) / 100;
+    return subsidy * (100 - GetPop().config->alt->getRewardParams().rewardPercentage()) / 100;
 }
 
 } // namespace VeriBlock

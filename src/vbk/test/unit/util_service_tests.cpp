@@ -16,15 +16,11 @@
 #include <vbk/util.hpp>
 #include <bootstraps.h>
 
-using ::testing::Return;
-
 BOOST_AUTO_TEST_SUITE(util_service_tests)
 
 BOOST_AUTO_TEST_CASE(is_keystone)
 {
-    VeriBlock::InitConfig();
     SelectParams("regtest");
-    selectPopConfig("regtest", "regtest", true);
 
     CBlockIndex index;
     index.nHeight = 100; // multiple of 5
@@ -35,9 +31,7 @@ BOOST_AUTO_TEST_CASE(is_keystone)
 
 BOOST_AUTO_TEST_CASE(get_previous_keystone)
 {
-    VeriBlock::InitConfig();
     SelectParams("regtest");
-    selectPopConfig("regtest", "regtest", true);
 
     std::vector<CBlockIndex> blocks;
     blocks.resize(10);

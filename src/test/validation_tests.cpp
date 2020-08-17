@@ -15,11 +15,30 @@
 
 BOOST_FIXTURE_TEST_SUITE(validation_tests, TestingSetup)
 
+struct PopRewardsParamsMock : public altintegration::PopRewardsParams {
+    uint32_t rewardPercentage() const noexcept
+    {
+        return 0;
+    }
+};
+
+struct AltChainParamsMock : public AltChainParamsVBTC {
+    ~AltChainParamsMock() override = default;
+
+    AltChainParamsMock(const CBlock& genesis) : AltChainParamsVBTC(genesis) { }
+
+    // getter for reward parameters
+    const PopRewardsParamsMock& getRewardParams() const noexcept
+    {
+        return mPopRewardsParams;
+    }
+
+    PopRewardsParamsMock mPopRewardsParams{};
+};
+
 static void setConfig()
 {
-    auto altparams = std::make_shared<AltChainParamsVBTC>(Params().GenesisBlock());
-    altparams->mPopRewardPercentage = 0;
-    SetAltParams(altparams);
+    VeriBlock::GetPop().config->alt = std::make_shared<AltChainParamsMock>(Params().GenesisBlock());
 }
 
 static void TestBlockSubsidyHalvings(const Consensus::Params& consensusParams)

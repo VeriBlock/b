@@ -26,7 +26,7 @@ using BlockBytes = std::vector<uint8_t>;
 using PoPRewards = std::map<CScript, CAmount>;
 
 altintegration::Altintegration& GetPop();
-void SetPop(CDBWrapper& db);
+void SetPop(CDBWrapper& db, const altintegration::Config& config);
 std::string toPrettyString(const altintegration::Altintegration& pop);
 
 bool acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state);

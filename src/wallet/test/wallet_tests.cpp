@@ -10,6 +10,8 @@
 #include <stdint.h>
 #include <vector>
 
+#include <bootstraps.h>
+#include <chainparams.h>
 #include <interfaces/chain.h>
 #include <node/context.h>
 #include <policy/policy.h>
@@ -20,7 +22,6 @@
 #include <wallet/test/wallet_test_fixture.h>
 
 #include <vbk/config.hpp>
-#include <vbk/service_locator.hpp>
 
 #include <boost/test/unit_test.hpp>
 #include <univalue.h>
@@ -30,6 +31,27 @@ extern UniValue dumpwallet(const JSONRPCRequest& request);
 extern UniValue importwallet(const JSONRPCRequest& request);
 
 BOOST_FIXTURE_TEST_SUITE(wallet_tests, WalletTestingSetup)
+
+struct PopRewardsParamsMock : public altintegration::PopRewardsParams {
+    uint32_t rewardPercentage() const noexcept
+    {
+        return 0;
+    }
+};
+
+struct AltChainParamsMock : public AltChainParamsVBTC {
+    ~AltChainParamsMock() override = default;
+
+    AltChainParamsMock(const CBlock& genesis) : AltChainParamsVBTC(genesis) {}
+
+    // getter for reward parameters
+    const PopRewardsParamsMock& getRewardParams() const noexcept
+    {
+        return mPopRewardsParams;
+    }
+
+    PopRewardsParamsMock mPopRewardsParams{};
+};
 
 static void AddKey(CWallet& wallet, const CKey& key)
 {
@@ -41,9 +63,7 @@ static void AddKey(CWallet& wallet, const CKey& key)
 
 static void setConfig()
 {
-    VeriBlock::Config* config = new VeriBlock::Config();
-    config->POP_REWARD_PERCENTAGE = 0;
-    VeriBlock::setService<VeriBlock::Config>(config);
+    VeriBlock::GetPop().config->alt = std::make_shared<AltChainParamsMock>(Params().GenesisBlock());
 }
 
 BOOST_FIXTURE_TEST_CASE(scan_for_wallet_transactions, TestChain100Setup)

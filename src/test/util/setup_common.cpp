@@ -110,8 +110,8 @@ TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(cha
     GetMainSignals().RegisterBackgroundSignalScheduler(scheduler);
 
     pblocktree.reset(new CBlockTreeDB(1 << 20, true));
-    VeriBlock::SetPop(*pblocktree);
-    selectPopConfig("regtest", "regtest", true);
+    auto config = createPopConfig("regtest", "regtest", true);
+    VeriBlock::SetPop(*pblocktree, config);
 
     g_chainstate = MakeUnique<CChainState>();
     ::ChainstateActive().InitCoinsDB(
