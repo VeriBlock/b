@@ -106,9 +106,7 @@ endif
 VBK_H = \
   vbk/entity/context_info_container.hpp \
   vbk/pop_service.hpp \
-  vbk/config.hpp \
   vbk/vbk.hpp \
-  vbk/typed_wrapper.hpp \
   vbk/merkle.hpp \
   vbk/genesis.hpp \
   vbk/altchainparam.hpp \
