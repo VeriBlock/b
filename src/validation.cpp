@@ -3906,6 +3906,7 @@ bool TestBlockValidity(BlockValidationState& state, const CChainParams& chainpar
     indexDummy.pprev = pindexPrev;
     indexDummy.nHeight = pindexPrev->nHeight + 1;
     indexDummy.phashBlock = &block_hash;
+    indexDummy.nTime = block.nTime;
 
     // NOTE: CheckBlockHeader is called by CheckBlock
     if (!ContextualCheckBlockHeader(block, state, chainparams, pindexPrev, GetAdjustedTime()))
