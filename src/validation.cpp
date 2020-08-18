@@ -3918,7 +3918,7 @@ bool TestBlockValidity(BlockValidationState& state, const CChainParams& chainpar
     // VeriBlock: Block that have been passed to TestBlockValidity may not exist in alt tree, because technically it was not created ("mined").
     // in this case, add it and then remove
     auto& tree = *VeriBlock::GetPop().altTree;
-    auto _hash = block.GetHash().asVector();
+    auto _hash = block_hash.asVector();
     bool shouldRemove = false;
     if (!tree.getBlockIndex(_hash)) {
         shouldRemove = true;
