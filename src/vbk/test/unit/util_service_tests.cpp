@@ -11,6 +11,7 @@
 #include <string>
 #include <test/util/setup_common.h>
 #include <validation.h>
+#include <vbk/entity/context_info_container.hpp>
 #include <vbk/merkle.hpp>
 #include <vbk/pop_service.hpp>
 #include <vbk/util.hpp>

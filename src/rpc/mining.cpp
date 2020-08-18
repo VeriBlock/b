@@ -36,6 +36,7 @@
 #include <versionbitsinfo.h>
 #include <warnings.h>
 
+#include <vbk/pop_service.hpp>
 #include <vbk/merkle.hpp>
 
 #include <memory>

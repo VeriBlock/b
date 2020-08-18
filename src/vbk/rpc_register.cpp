@@ -9,6 +9,7 @@
 #include <rpc/util.h>
 #include <util/validation.h>
 #include <validation.h>
+#include <vbk/entity/context_info_container.hpp>
 #include <vbk/p2p_sync.hpp>
 #include <wallet/rpcwallet.h>
 #include <wallet/wallet.h> // for CWallet
