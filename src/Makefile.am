@@ -642,6 +642,7 @@ endif
 
 vbitcoin_tx_LDADD = \
   $(LIBUNIVALUE) \
+  $(MINIUPNPC_LIBS) \
   $(VERIBLOCK_POP_CPP_LIBS) \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_COMMON) \
