@@ -3,15 +3,15 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include <validation.h>
 #include <chain.h>
 #include <chainparams.h>
+#include <consensus/validation.h>
 #include <dbwrapper.h>
 #include <shutdown.h>
-#include <consensus/validation.h>
-#include <veriblock/storage/util.hpp>
-#include <vbk/adaptors/repository.hpp>
+#include <validation.h>
 #include <vbk/adaptors/batch_adapter.hpp>
+#include <vbk/adaptors/repository.hpp>
+#include <veriblock/storage/util.hpp>
 
 #ifdef WIN32
 #include <boost/thread/interruption.hpp>
@@ -24,12 +24,14 @@ namespace VeriBlock {
 static std::shared_ptr<altintegration::Altintegration> app = nullptr;
 static std::shared_ptr<altintegration::Config> config = nullptr;
 
-altintegration::Altintegration& GetPop() {
+altintegration::Altintegration& GetPop()
+{
     assert(app && "Altintegration is not initialized. Invoke SetPop.");
     return *app;
 }
 
-void SetPopConfig(const altintegration::Config& newConfig) {
+void SetPopConfig(const altintegration::Config& newConfig)
+{
     config = std::make_shared<altintegration::Config>(newConfig);
 }
 
@@ -40,7 +42,8 @@ void SetPop(CDBWrapper& db)
     app = altintegration::Altintegration::create(config, dbrepo);
 }
 
-bool acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state) {
+bool acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state)
+{
     AssertLockHeld(cs_main);
     auto containing = VeriBlock::blockToAltBlock(indexNew);
     altintegration::ValidationState instate;
@@ -133,22 +136,22 @@ PoPRewards getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params&
     (void)ret;
     assert(ret);
 
-    auto& config = *pop.config;
-    if ((pindexPrev.nHeight + 1) < (int)config.alt->getEndorsementSettlementInterval()) {
+    auto& cfg = *pop.config;
+    if ((pindexPrev.nHeight + 1) < (int)cfg.alt->getEndorsementSettlementInterval()) {
         return {};
     }
     auto blockHash = pindexPrev.GetBlockHash();
     auto rewards = pop.altTree->getPopPayout(blockHash.asVector());
     int halvings = (pindexPrev.nHeight + 1) / consensusParams.nSubsidyHalvingInterval;
     PoPRewards btcRewards{};
-    auto& altbtcparams = PopConfig();
+    auto& param = Params();
     //erase rewards, that pay 0 satoshis and halve rewards
     for (const auto& r : rewards) {
         auto rewardValue = r.second;
         rewardValue >>= halvings;
         if ((rewardValue != 0) && (halvings < 64)) {
             CScript key = CScript(r.first.begin(), r.first.end());
-            btcRewards[key] = altbtcparams.POP_REWARD_COEFFICIENT * rewardValue;
+            btcRewards[key] = param.PopRewardCoefficient() * rewardValue;
         }
     }
 
@@ -228,17 +231,20 @@ bool checkCoinbaseTxWithPopRewards(const CTransaction& tx, const CAmount& PoWBlo
     return true;
 }
 
-std::vector<BlockBytes> getLastKnownVBKBlocks(size_t blocks) {
+std::vector<BlockBytes> getLastKnownVBKBlocks(size_t blocks)
+{
     LOCK(cs_main);
     return altintegration::getLastKnownBlocks(GetPop().altTree->vbk(), blocks);
 }
 
-std::vector<BlockBytes> getLastKnownBTCBlocks(size_t blocks) {
+std::vector<BlockBytes> getLastKnownBTCBlocks(size_t blocks)
+{
     LOCK(cs_main);
     return altintegration::getLastKnownBlocks(GetPop().altTree->btc(), blocks);
 }
 
-std::string toPrettyString(const altintegration::Altintegration& pop) {
+std::string toPrettyString(const altintegration::Altintegration& pop)
+{
     return pop.altTree->toPrettyString();
 }
 
@@ -247,7 +253,8 @@ bool hasPopData(CBlockTreeDB& db)
     return db.Exists(BatchAdapter::btctip()) && db.Exists(BatchAdapter::vbktip()) && db.Exists(BatchAdapter::alttip());
 }
 
-void saveTrees(altintegration::BatchAdaptor& batch) {
+void saveTrees(altintegration::BatchAdaptor& batch)
+{
     AssertLockHeld(cs_main);
     altintegration::SaveAllTrees(*GetPop().altTree, batch);
 }
@@ -376,7 +383,7 @@ int compareForks(const CBlockIndex& leftForkTip, const CBlockIndex& rightForkTip
 
 CAmount getCoinbaseSubsidy(const CAmount& subsidy)
 {
-    return subsidy * (100 - PopConfig().POP_REWARD_PERCENTAGE) / 100;
+    return subsidy * (100 - Params().PopRewardPercentage()) / 100;
 }
 
 } // namespace VeriBlock

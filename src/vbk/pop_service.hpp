@@ -6,8 +6,8 @@
 #ifndef BITCOIN_SRC_VBK_POP_SERVICE_HPP
 #define BITCOIN_SRC_VBK_POP_SERVICE_HPP
 
-#include <veriblock/storage/batch_adaptor.hpp>
 #include <veriblock/altintegration.hpp>
+#include <veriblock/storage/batch_adaptor.hpp>
 
 class BlockValidationState;
 class CBlock;
@@ -17,7 +17,7 @@ class CDBIterator;
 class CDBWrapper;
 
 namespace Consensus {
-    struct Params;
+struct Params;
 }
 
 namespace VeriBlock {

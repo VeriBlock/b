@@ -363,21 +363,3 @@ void SelectParams(const std::string& network)
     globalChainParams = CreateChainParams(network);
     assert(globalChainParams != nullptr);
 }
-
-static std::shared_ptr<VeriBlock::Config> globalPopConfig;
-
-VeriBlock::Config& PopConfig()
-{
-    assert(globalPopConfig);
-    return *globalPopConfig;
-}
-
-void SelectPopConfig()
-{
-    globalPopConfig = std::make_shared<VeriBlock::Config>();
-}
-
-void SelectPopConfig(VeriBlock::Config& config)
-{
-    globalPopConfig = std::make_shared<VeriBlock::Config>(config);
-}
