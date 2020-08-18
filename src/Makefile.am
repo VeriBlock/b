@@ -628,7 +628,6 @@ vbitcoin_cli_LDADD = \
   $(VERIBLOCK_POP_CPP_LIBS)
 
 vbitcoin_cli_LDADD += $(BOOST_LIBS) $(EVENT_LIBS)
-#
 
 # vbitcoin-tx binary #
 vbitcoin_tx_SOURCES = bitcoin-tx.cpp
