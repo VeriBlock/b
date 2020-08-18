@@ -298,13 +298,15 @@ libbitcoin_util_a-clientversion.$(OBJEXT): obj/build.h
 libbitcoin_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
 libbitcoin_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_server_a_SOURCES = \
+  vbk/pop_service.hpp \
   vbk/pop_service.cpp \
-  vbk/merkle.cpp \
   addrdb.cpp \
   addrman.cpp \
   banman.cpp \
   blockencodings.cpp \
   blockfilter.cpp \
+  bootstraps.cpp \
+  chainparams.cpp \
   chain.cpp \
   consensus/tx_verify.cpp \
   flatfile.cpp \
@@ -331,6 +333,10 @@ libbitcoin_server_a_SOURCES = \
   policy/settings.cpp \
   pow.cpp \
   rest.cpp \
+  vbk/merkle.hpp \
+  vbk/merkle.cpp \
+  vbk/genesis.hpp \
+  vbk/genesis.cpp \
   vbk/rpc_register.hpp \
   vbk/rpc_register.cpp \
   vbk/p2p_sync.hpp \
@@ -495,8 +501,6 @@ libbitcoin_common_a_SOURCES = \
   base58.cpp \
   bech32.cpp \
   bloom.cpp \
-  bootstraps.cpp \
-  chainparams.cpp \
   coins.cpp \
   compressor.cpp \
   core_read.cpp \
@@ -640,10 +644,15 @@ endif
 
 vbitcoin_tx_LDADD = \
   $(LIBUNIVALUE) \
+  $(VERIBLOCK_POP_CPP_LIBS) \
+  $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CONSENSUS) \
   $(LIBBITCOIN_CRYPTO) \
+  $(LIBLEVELDB) \
+  $(LIBLEVELDB_SSE42) \
+  $(LIBMEMENV) \
   $(LIBSECP256K1)
 
 vbitcoin_tx_LDADD += $(BOOST_LIBS) $(VERIBLOCK_POP_CPP_LIBS)
@@ -660,6 +669,8 @@ vbitcoin_wallet_SOURCES += bitcoin-wallet-res.rc
 endif
 
 vbitcoin_wallet_LDADD = \
+  $(VERIBLOCK_POP_CPP_LIBS) \
+  $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_WALLET_TOOL) \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_COMMON) \
@@ -674,7 +685,7 @@ vbitcoin_wallet_LDADD = \
   $(LIBUNIVALUE) \
   $(VERIBLOCK_POP_CPP_LIBS)
 
-vbitcoin_wallet_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(MINIUPNPC_LIBS) $(ZMQ_LIBS)
+vbitcoin_wallet_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(MINIUPNPC_LIBS) $(ZMQ_LIBS)  $(VERIBLOCK_POP_CPP_LIBS)
 #
 
 # bitcoinconsensus library #
