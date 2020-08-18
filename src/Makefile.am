@@ -643,7 +643,6 @@ endif
 vbitcoin_tx_LDADD = \
   $(LIBUNIVALUE) \
   $(VERIBLOCK_POP_CPP_LIBS) \
-  $(MINIUPNPC_LIBS) \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \
@@ -654,8 +653,7 @@ vbitcoin_tx_LDADD = \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-vbitcoin_tx_LDADD += $(BOOST_LIBS) $(VERIBLOCK_POP_CPP_LIBS)
-#
+vbitcoin_tx_LDADD += $(BOOST_LIBS) $(VERIBLOCK_POP_CPP_LIBS) $(MINIUPNPC_LIBS)
 
 # vbitcoin-wallet binary #
 vbitcoin_wallet_SOURCES = bitcoin-wallet.cpp
