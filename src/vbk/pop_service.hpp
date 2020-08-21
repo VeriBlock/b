@@ -30,6 +30,7 @@ void SetPopConfig(const altintegration::Config& config);
 void SetPop(CDBWrapper& db);
 std::string toPrettyString(const altintegration::Altintegration& pop);
 
+CBlockIndex* compareTipToBlock(CBlockIndex* candidate);
 bool acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state);
 bool checkPopDataSize(const altintegration::PopData& popData, altintegration::ValidationState& state);
 bool popdataStatelessValidation(const altintegration::PopData& popData, altintegration::ValidationState& state);
