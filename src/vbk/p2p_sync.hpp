@@ -12,7 +12,7 @@
 #include <netmessagemaker.h>
 #include <node/context.h>
 #include <rpc/blockchain.h>
-#include <vbk/pop_service.hpp>
+#include <vbk/pop_common.hpp>
 
 #include "veriblock/mempool.hpp"
 
