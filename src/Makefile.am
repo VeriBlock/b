@@ -494,6 +494,8 @@ libbitcoin_consensus_a_SOURCES = \
 libbitcoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_common_a_SOURCES = \
+  vbk/pop_common.hpp \
+  vbk/pop_common.cpp \
   base58.cpp \
   bech32.cpp \
   bloom.cpp \
@@ -644,6 +646,7 @@ vbitcoin_tx_SOURCES += bitcoin-tx-res.rc
 endif
 
 vbitcoin_tx_LDADD = \
+  $(VERIBLOCK_POP_CPP_LIBS) \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_COMMON) \
   $(LIBBITCOIN_UTIL) \

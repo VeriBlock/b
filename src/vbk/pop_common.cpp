@@ -27,7 +27,7 @@ void SetPopConfig(const altintegration::Config& newConfig)
 void SetPop(std::shared_ptr<altintegration::Repository>& db)
 {
     assert(config && "Config is not initialized. Invoke SetPopConfig.");
-    app = altintegration::Altintegration::create(config, std::move(db));
+    app = altintegration::Altintegration::create(config, db);
 }
 
 std::string toPrettyString(const altintegration::Altintegration& pop)
