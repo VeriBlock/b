@@ -4,22 +4,18 @@
 # https://www.veriblock.org
 # Distributed under the MIT software license, see the accompanying
 # file LICENSE or http://www.opensource.org/licenses/mit-license.php.
-from test_framework.pop import POP_PAYOUT_DELAY, endorse_block
-from test_framework.test_framework import BitcoinTestFramework
-from test_framework.util import (
-    connect_nodes,
-    sync_mempools,
-    p2p_port, assert_equal,
-)
+import time
 
 from test_framework.mininode import (
     P2PInterface,
-    msg_offer_atv,
     msg_get_atv,
-    msg_atv,
+)
+from test_framework.pop import endorse_block
+from test_framework.test_framework import BitcoinTestFramework
+from test_framework.util import (
+    connect_nodes, assert_equal,
 )
 
-import time
 
 class BaseNode(P2PInterface):
     def __init__(self, log = None):
@@ -133,10 +129,11 @@ class PopP2P(BitcoinTestFramework):
         msg = msg_get_atv([atv_id])
         self.nodes[0].p2p.send_message(msg)
 
-        time.sleep(2)
+        time.sleep(5)
 
-        assert bn.executed_msg_atv == 1
-        assert bn.executed_msg_offer_vbk == 2
+        assert_equal(bn.executed_msg_atv, 1)
+        assert_equal(bn.executed_msg_offer_vbk, 2)
+
 
         self.log.info("_run_sync_after_generating successful")
 

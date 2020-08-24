@@ -10,6 +10,8 @@
 
 #include <bootstraps.h>
 #include <chain.h>
+#include <chainparams.h>
+#include <consensus/validation.h>
 #include <test/util/setup_common.h>
 #include <validation.h>
 #include <vbk/log.hpp>
@@ -38,14 +40,14 @@ struct E2eFixture : public TestChain100Setup {
     CScript cbKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;
     MockMiner popminer;
     altintegration::ValidationState state;
-    VeriBlock::PopService* pop;
+    altintegration::Altintegration* pop;
     std::vector<uint8_t> defaultPayoutInfo = {1, 2, 3, 4, 5};
 
     E2eFixture()
     {
         altintegration::SetLogger<TestLogger>();
         altintegration::GetLogger().level = altintegration::LogLevel::off;
-        pop = &VeriBlock::getService<VeriBlock::PopService>();
+        pop = &VeriBlock::GetPop();
     }
 
     void InvalidateTestBlock(CBlockIndex* pblock)
@@ -67,6 +69,20 @@ struct E2eFixture : public TestChain100Setup {
         ActivateBestChain(state, Params(), std::shared_ptr<const CBlock>());
     }
 
+    BtcBlock::hash_t getLastKnownBTCblock()
+    {
+        auto blocks = VeriBlock::getLastKnownBTCBlocks(1);
+        BOOST_CHECK(blocks.size() == 1);
+        return blocks[0];
+    }
+
+    VbkBlock::hash_t getLastKnownVBKblock()
+    {
+        auto blocks = VeriBlock::getLastKnownVBKBlocks(1);
+        BOOST_CHECK(blocks.size() == 1);
+        return blocks[0];
+    }
+
     ATV endorseAltBlock(uint256 hash, const std::vector<VTB>& vtbs, const std::vector<uint8_t>& payoutInfo)
     {
         CBlockIndex* endorsed = nullptr;
@@ -78,7 +94,7 @@ struct E2eFixture : public TestChain100Setup {
 
         auto publicationdata = createPublicationData(endorsed, payoutInfo);
         auto vbktx = popminer.createVbkTxEndorsingAltBlock(publicationdata);
-        auto atv = popminer.generateATV(vbktx, getLastKnownVBKblock(), state);
+        auto atv = popminer.applyATV(vbktx, state);
         BOOST_CHECK(state.IsValid());
         return atv;
     }
@@ -112,7 +128,7 @@ struct E2eFixture : public TestChain100Setup {
             return endorseAltBlock(hash, {}, payoutInfo);
         });
 
-        auto& pop_mempool = pop->getMemPool();
+        auto& pop_mempool = *pop->mempool;
         altintegration::ValidationState state;
         for (const auto& atv : atvs) {
             pop_mempool.submit(atv, state);
@@ -164,41 +180,15 @@ struct E2eFixture : public TestChain100Setup {
 
         auto vtbs = popminer.vbkPayloads[vbkcontaining->getHash()];
         BOOST_CHECK(vtbs.size() == 1);
-        VTB& vtb = vtbs[0];
-
-        // fill VTB context: from last known VBK block to containing
-        auto* current = vbkcontaining;
-        auto lastKnownVbk = getLastKnownVBKblock();
-        while (current != nullptr && current->getHash() != lastKnownVbk) {
-            vtb.context.push_back(current->getHeader());
-            current = current->pprev;
-        }
-        std::reverse(vtb.context.begin(), vtb.context.end());
-
-        return vtb;
-    }
-
-    BtcBlock::hash_t getLastKnownBTCblock()
-    {
-        auto blocks = pop->getLastKnownBTCBlocks(1);
-        BOOST_CHECK(blocks.size() == 1);
-        return blocks[0];
-    }
-
-    VbkBlock::hash_t getLastKnownVBKblock()
-    {
-        auto& pop = VeriBlock::getService<VeriBlock::PopService>();
-        auto blocks = pop.getLastKnownVBKBlocks(1);
-        BOOST_CHECK(blocks.size() == 1);
-        return blocks[0];
+        return vtbs[0];
     }
 
     PublicationData createPublicationData(CBlockIndex* endorsed, const std::vector<uint8_t>& payoutInfo)
     {
         PublicationData p;
 
-        auto& config = VeriBlock::getService<VeriBlock::Config>();
-        p.identifier = config.popconfig.alt->getIdentifier();
+        auto& config = *VeriBlock::GetPop().config;
+        p.identifier = config.alt->getIdentifier();
         p.payoutInfo = payoutInfo;
 
         // serialize block header

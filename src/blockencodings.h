@@ -208,11 +208,9 @@ protected:
     std::vector<CTransactionRef> txn_available;
     size_t prefilled_count = 0, mempool_count = 0, extra_count = 0;
     CTxMemPool* pool;
-
-    // VeriBlock data
-    std::vector<altintegration::PopData> v_popData;
 public:
     CBlockHeader header;
+    altintegration::PopData popData;
     explicit PartiallyDownloadedBlock(CTxMemPool* poolIn) : pool(poolIn) {}
 
     // extra_txn is a list of extra transactions to look at, in <witness hash, reference> form
