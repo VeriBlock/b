@@ -7,6 +7,7 @@
 #define BITCOIN_SRC_VBK_GENESIS_HPP
 
 #include <primitives/block.h>
+#include <vbk/genesis_common.hpp>
 
 namespace VeriBlock {
 

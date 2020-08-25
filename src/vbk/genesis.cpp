@@ -5,7 +5,6 @@
 
 #include <pow.h>
 #include <util/strencodings.h>
-#include <vbk/genesis_common.hpp>
 #include <vbk/merkle.hpp>
 #include "genesis.hpp"
 
