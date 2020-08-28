@@ -179,7 +179,7 @@ UniValue submitpop(const JSONRPCRequest& request)
     ret = ret && parsePayloads<altintegration::ATV>(request.params[2].get_array(), popData.atvs, state);
 
     if (!ret) {
-        throw std::runtime_error(state.GetPath());
+        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, state.GetPath());
     }
 
     {
