@@ -7,6 +7,7 @@
 #define INTEGRATION_REFERENCE_BTC_PAYLOADS_PROVIDER_HPP
 
 #include <dbwrapper.h>
+#include <vbk/pop_common.hpp>
 #include <veriblock/storage/payloads_provider.hpp>
 
 namespace VeriBlock {
