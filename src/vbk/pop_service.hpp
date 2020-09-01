@@ -55,6 +55,10 @@ int compareForks(const CBlockIndex& left, const CBlockIndex& right);
 
 CAmount getCoinbaseSubsidy(const CAmount& subsidy);
 
+void updatePopMempoolForReorg();
+
+void addDisconnectedPopdata(const altintegration::PopData& popData);
+
 } // namespace VeriBlock
 
 #endif //BITCOIN_SRC_VBK_POP_SERVICE_HPP
