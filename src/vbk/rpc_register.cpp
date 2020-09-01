@@ -17,7 +17,6 @@
 #include <fstream>
 #include <set>
 
-#include <vbk/adaptors/univalue_json.hpp>
 #include <vbk/merkle.hpp>
 #include <vbk/pop_service.hpp>
 #include <veriblock/mempool_result.hpp>
