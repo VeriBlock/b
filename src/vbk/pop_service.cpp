@@ -340,7 +340,7 @@ bool loadTrees(CDBIterator& iter)
 void removePayloadsFromMempool(const altintegration::PopData& popData) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
-    GetPop().mempool->removePayloads(popData);
+    GetPop().mempool->removeAll(popData);
 }
 
 int compareForks(const CBlockIndex& leftForkTip, const CBlockIndex& rightForkTip) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
