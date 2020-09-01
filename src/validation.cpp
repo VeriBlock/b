@@ -55,8 +55,7 @@
 
 #include <string>
 
-#include "vbk/adaptors/batch_adapter.hpp"
-#include "vbk/merkle.hpp"
+#include <vbk/merkle.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/thread.hpp>
 
@@ -363,7 +362,7 @@ static void UpdateMempoolForReorg(DisconnectedBlockTransactions& disconnectpool,
     AssertLockHeld(cs_main);
 
     // VeriBlock
-    VeriBlock::updatePopMempoolForReorg();
+    //VeriBlock::updatePopMempoolForReorg();
 
     std::vector<uint256> vHashUpdate;
     // disconnectpool's insertion_order index sorts the entries from
@@ -2479,7 +2478,7 @@ bool CChainState::DisconnectTip(BlockValidationState& state, const CChainParams&
     }
 
     // VeriBlock
-    VeriBlock::addDisconnectedPopdata(block.popData);
+    //VeriBlock::addDisconnectedPopdata(block.popData);
 
     m_chain.SetTip(pindexDelete->pprev);
 

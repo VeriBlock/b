@@ -9,8 +9,8 @@
 #include <dbwrapper.h>
 #include <shutdown.h>
 #include <validation.h>
-#include <vbk/adaptors/batch_adapter.hpp>
-#include <vbk/adaptors/repository.hpp>
+#include <vbk/adaptors/block_batch_adaptor.hpp>
+#include <vbk/adaptors/payloads_provider.hpp>
 #include <veriblock/storage/util.hpp>
 
 #ifdef WIN32
@@ -19,19 +19,27 @@
 
 #include <vbk/p2p_sync.hpp>
 #include <vbk/pop_common.hpp>
-#include <vbk/pop_service.hpp>
+#include "pop_service.hpp"
 
 namespace VeriBlock {
 
+static std::shared_ptr<PayloadsProvider> payloads = nullptr;
+
 void SetPop(CDBWrapper& db)
 {
-    std::shared_ptr<altintegration::Repository> dbrepo = std::make_shared<Repository>(db);
+    payloads = std::make_shared<PayloadsProvider>(db);
+    std::shared_ptr<altintegration::PayloadsProvider> dbrepo = payloads;
     SetPop(dbrepo);
 
     auto& app = GetPop();
     app.mempool->onAccepted<altintegration::ATV>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::ATV>);
     app.mempool->onAccepted<altintegration::VTB>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::VTB>);
     app.mempool->onAccepted<altintegration::VbkBlock>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::VbkBlock>);
+}
+
+PayloadsProvider& GetPayloadsProvider()
+{
+    return *payloads;
 }
 
 bool acceptBlock(const CBlockIndex& indexNew, BlockValidationState& state)
@@ -97,6 +105,9 @@ bool addAllBlockPayloads(const CBlock& block, BlockValidationState& state) EXCLU
         return error("[%s] block %s is not accepted by popData: %s", __func__, block.GetHash().ToString(),
             instate.toString());
     }
+
+    auto& provider = GetPayloadsProvider();
+    provider.write(block.popData);
 
     if (!GetPop().altTree->addPayloads(block.GetHash().asVector(), block.popData, instate)) {
         state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, instate.toString(), "");
@@ -237,10 +248,10 @@ std::vector<BlockBytes> getLastKnownBTCBlocks(size_t blocks)
 
 bool hasPopData(CBlockTreeDB& db)
 {
-    return db.Exists(BatchAdapter::btctip()) && db.Exists(BatchAdapter::vbktip()) && db.Exists(BatchAdapter::alttip());
+    return db.Exists(BlockBatchAdaptor::btctip()) && db.Exists(BlockBatchAdaptor::vbktip()) && db.Exists(BlockBatchAdaptor::alttip());
 }
 
-void saveTrees(altintegration::BatchAdaptor& batch)
+void saveTrees(altintegration::BlockBatchAdaptor& batch)
 {
     AssertLockHeld(cs_main);
     altintegration::SaveAllTrees(*GetPop().altTree, batch);
@@ -314,30 +325,16 @@ bool loadTrees(CDBIterator& iter)
 {
     auto& pop = GetPop();
     altintegration::ValidationState state;
-    if (!LoadTree(iter, DB_BTC_BLOCK, BatchAdapter::btctip(), pop.altTree->btc(), state)) {
+    if (!LoadTree(iter, DB_BTC_BLOCK, BlockBatchAdaptor::btctip(), pop.altTree->btc(), state)) {
         return error("%s: failed to load BTC tree %s", __func__, state.toString());
     }
-    if (!LoadTree(iter, DB_VBK_BLOCK, BatchAdapter::vbktip(), pop.altTree->vbk(), state)) {
+    if (!LoadTree(iter, DB_VBK_BLOCK, BlockBatchAdaptor::vbktip(), pop.altTree->vbk(), state)) {
         return error("%s: failed to load VBK tree %s", __func__, state.toString());
     }
-    if (!LoadTree(iter, DB_ALT_BLOCK, BatchAdapter::alttip(), *pop.altTree, state)) {
+    if (!LoadTree(iter, DB_ALT_BLOCK, BlockBatchAdaptor::alttip(), *pop.altTree, state)) {
         return error("%s: failed to load ALT tree %s", __func__, state.toString());
     }
     return true;
-}
-
-void updatePopMempoolForReorg() EXCLUSIVE_LOCKS_REQUIRED(cs_main)
-{
-    auto& pop = GetPop();
-    for (const auto& popData : pop.disconnected_popdata) {
-        pop.mempool->submitAll(popData);
-    }
-    pop.disconnected_popdata.clear();
-}
-
-void addDisconnectedPopdata(const altintegration::PopData& popData) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
-{
-    GetPop().disconnected_popdata.push_back(popData);
 }
 
 void removePayloadsFromMempool(const altintegration::PopData& popData) EXCLUSIVE_LOCKS_REQUIRED(cs_main)

@@ -424,7 +424,7 @@ bool GetPayload(
     }
 
     // search in the alttree storage
-    const auto& containing = pop.altTree->getStorage().getContainingAltBlocks(pid.asVector());
+    const auto& containing = pop.altTree->getPayloadsIndex().getContainingAltBlocks(pid.asVector());
     if (containing.size() == 0) return false;
 
     // fill containing blocks

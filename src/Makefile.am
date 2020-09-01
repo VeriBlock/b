@@ -115,10 +115,8 @@ VBK_H = \
   vbk/p2p_sync.hpp \
   vbk/util.hpp \
   vbk/adaptors/univalue_json.hpp \
-  vbk/adaptors/batch_adapter.hpp \
-  vbk/adaptors/batch.hpp \
-  vbk/adaptors/repository.hpp \
-  vbk/adaptors/cursor.hpp
+  vbk/adaptors/block_batch_adaptor.hpp \
+  vbk/adaptors/payloads_provider.hpp
 
 ### VeriBlock section end
 
