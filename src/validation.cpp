@@ -3925,6 +3925,8 @@ bool TestBlockValidity(BlockValidationState& state, const CChainParams& chainpar
         altintegration::ValidationState _state;
         bool ret = tree.acceptBlockHeader(containing, _state);
         assert(ret && "alt tree can not accept alt block");
+
+        tree.acceptBlock(_hash, block.popData);
     }
 
     auto _f = altintegration::Finalizer([shouldRemove, _hash, &tree]() {

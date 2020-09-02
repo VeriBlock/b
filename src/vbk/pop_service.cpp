@@ -17,9 +17,9 @@
 #include <boost/thread/interruption.hpp>
 #endif //WIN32
 
+#include "pop_service.hpp"
 #include <vbk/p2p_sync.hpp>
 #include <vbk/pop_common.hpp>
-#include "pop_service.hpp"
 
 namespace VeriBlock {
 
@@ -95,26 +95,17 @@ bool addAllBlockPayloads(const CBlock& block, BlockValidationState& state) EXCLU
 {
     AssertLockHeld(cs_main);
 
-    // add payloads only from blocks with POP data
-    if (!(block.nVersion & POP_BLOCK_VERSION_BIT)) {
-        return true;
-    }
-
     altintegration::ValidationState instate;
 
     if (!checkPopDataSize(block.popData, instate) || !popdataStatelessValidation(block.popData, instate)) {
-        return error("[%s] block %s is not accepted by popData: %s", __func__, block.GetHash().ToString(),
+        return error("[%s] block %s is not accepted because popData is invalid: %s", __func__, block.GetHash().ToString(),
             instate.toString());
     }
 
     auto& provider = GetPayloadsProvider();
     provider.write(block.popData);
 
-    if (!GetPop().altTree->addPayloads(block.GetHash().asVector(), block.popData, instate)) {
-        state.Invalid(BlockValidationResult::BLOCK_CONSENSUS, instate.toString(), "");
-        return error("[%s] block %s failed stateful pop validation: %s", __func__, block.GetHash().ToString(),
-            instate.toString());
-    }
+    GetPop().altTree->acceptBlock(block.GetHash().asVector(), block.popData);
 
     return true;
 }
