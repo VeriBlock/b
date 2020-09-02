@@ -94,6 +94,14 @@ bool popdataStatelessValidation(const altintegration::PopData& popData, altinteg
 bool addAllBlockPayloads(const CBlock& block, BlockValidationState& state) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
+    auto bootstrapBlockHeight = GetPop().config->alt->getBootstrapBlock().height;
+    auto hash = block.GetHash();
+    auto* index = LookupBlockIndex(hash);
+
+    if (index->nHeight == bootstrapBlockHeight) {
+        // skip bootstrap block block
+        return true;
+    }
 
     altintegration::ValidationState instate;
 
