@@ -2675,7 +2675,6 @@ CBlockIndex* CChainState::FindBestChain()
 
 bool CChainState::TestBlockIndex(CBlockIndex* pindexTest)
 {
-    CBlockIndex* pindexTest = *it;
     CBlockIndex* testWalkBlock = pindexTest;
     bool fInvalidAncestor = false;
     while (testWalkBlock && !m_chain.Contains(testWalkBlock)) {
