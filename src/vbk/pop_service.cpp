@@ -168,19 +168,25 @@ altintegration::PopData getPopData() EXCLUSIVE_LOCKS_REQUIRED(cs_main)
     return GetPop().mempool->getPop();
 }
 
+// PoP rewards are calculated for the current tip but are paid in the next block
 PoPRewards getPopRewards(const CBlockIndex& pindexPrev, const Consensus::Params& consensusParams) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     const auto& pop = GetPop();
     AssertLockHeld(cs_main);
+
+    auto& cfg = *pop.config;
+    if (pindexPrev.nHeight < (int)cfg.alt->getEndorsementSettlementInterval()) {
+        return {};
+    }
+    if (pindexPrev.nHeight < (int)cfg.alt->getPopPayoutDelay()) {
+        return {};
+    }
+
     altintegration::ValidationState state;
     bool ret = pop.altTree->setState(pindexPrev.GetBlockHash().asVector(), state);
     (void)ret;
     assert(ret);
 
-    auto& cfg = *pop.config;
-    if ((pindexPrev.nHeight + 1) < (int)cfg.alt->getEndorsementSettlementInterval()) {
-        return {};
-    }
     auto blockHash = pindexPrev.GetBlockHash();
     auto rewards = pop.altTree->getPopPayout(blockHash.asVector());
     int halvings = (pindexPrev.nHeight + 1) / consensusParams.nSubsidyHalvingInterval;
