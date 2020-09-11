@@ -29,7 +29,7 @@ BOOST_FIXTURE_TEST_CASE(addPopPayoutsIntoCoinbaseTx_test, PopRewardsTestFixture)
     int rewardInterval = (int)VeriBlock::GetPop().config->alt->getEndorsementSettlementInterval();
     // do not add block with rewards
     // do not add block before block with rewards
-    for (int i = 0; i < (rewardInterval - 3); i++) {
+    for (int i = 0; i < (rewardInterval - 2); i++) {
         CBlock b = CreateAndProcessBlock({}, scriptPubKey);
         m_coinbase_txns.push_back(b.vtx[0]);
     }
