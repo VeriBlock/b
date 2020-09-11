@@ -43,10 +43,6 @@ PayloadsProvider& GetPayloadsProvider()
     return *payloads;
 }
 
-static std::string FormatBlock(const CBlockIndex* index){
-    return fmt::format("{}:{}", index->nHeight, index->GetBlockHash().GetHex());
-}
-
 CBlockIndex* compareTipToBlock(CBlockIndex* candidate)
 {
     AssertLockHeld(cs_main);
