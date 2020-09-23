@@ -12,7 +12,7 @@ jobs:
       VBK_FORK_COMMIT: 8830cb58abc888144a1edb9b2fba427716cc45d8
     steps:
       - uses: actions/checkout@v1
-      - name Configure GIT
+      - name: Configure GIT
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
