@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      VBK_FORK_COMMIT: 8830cb58abc888144a1edb9b2fba427716cc45d8
+      INITIAL_COMMIT: 8830cb58abc888144a1edb9b2fba427716cc45d8
     steps:
       - uses: actions/checkout@v1
       - name: Configure GIT
