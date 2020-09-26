@@ -12,7 +12,7 @@ Feature POP popdata max size test
 from test_framework.pop import mine_vbk_blocks
 from test_framework.test_framework import BitcoinTestFramework
 from test_framework.util import (
-    connect_nodes, disconnect_nodes,
+    connect_nodes,
 )
 
 class PopPayouts(BitcoinTestFramework):
