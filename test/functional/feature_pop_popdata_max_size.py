@@ -12,7 +12,7 @@ Feature POP popdata max size test
 from test_framework.pop import mine_vbk_blocks
 from test_framework.test_framework import BitcoinTestFramework
 from test_framework.util import (
-    connect_nodes,
+    connect_nodes, disconnect_nodes,
 )
 
 class PopPayouts(BitcoinTestFramework):
@@ -68,7 +68,6 @@ class PopPayouts(BitcoinTestFramework):
                 tx_id = self.nodes[node_id].sendrawtransaction(tx)
                 spend_tx = self.nodes[0].getrawtransaction(tx_id, True)
 
-
     def _test_case(self):
         self.log.warning("running _test_case()")
 
@@ -91,6 +90,9 @@ class PopPayouts(BitcoinTestFramework):
         assert len(containingblock['pop']['data']['vbkblocks']) < vbk_blocks
 
         self.log.info("sync nodes")
+        # Node 1 bans node 0 for the bad blocks. We should restore the
+        # connection first.
+        connect_nodes(self.nodes[1], 0)
         self.sync_blocks(self.nodes, timeout=600)
 
         containingblock = self.nodes[1].getblock(containingblockhash)
