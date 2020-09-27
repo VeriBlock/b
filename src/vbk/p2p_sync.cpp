@@ -148,8 +148,20 @@ bool processPopData(CNode* node, CDataStream& vRecv, altintegration::MemPool& po
 
     altintegration::ValidationState state;
     if (!pop_mempool.submit(std::make_shared<pop_t>(data), state, false)) {
+        auto statePath = state.GetPathParts();
+        VBK_ASSERT(statePath.size() > 0);
+        auto& rejectReason = statePath.front();
+        const std::string statelessSearchStr = "-stateless";
+        bool isRejectedStateless = false;
+        if (rejectReason.size() >= statelessSearchStr.size()) {
+            auto result = std::mismatch(statelessSearchStr.rbegin(), statelessSearchStr.rend(), rejectReason.rbegin());
+            isRejectedStateless = (result.first == statelessSearchStr.rend());
+        }
+        
         LogPrint(BCLog::NET, "peer %d sent invalid pop data: %s\n", node->GetId(), state.toString());
-        Misbehaving(node->GetId(), 20, strprintf("invalid pop data getdata, reason: %s", state.toString()));
+        if (isRejectedStateless) {
+            Misbehaving(node->GetId(), 20, strprintf("invalid pop data getdata, reason: %s", state.toString()));
+        }
         return false;
     }
 

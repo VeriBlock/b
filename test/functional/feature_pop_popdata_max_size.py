@@ -90,9 +90,6 @@ class PopPayouts(BitcoinTestFramework):
         assert len(containingblock['pop']['data']['vbkblocks']) < vbk_blocks
 
         self.log.info("sync nodes")
-        # Node 1 bans node 0 for the bad blocks. We should restore the
-        # connection first.
-        connect_nodes(self.nodes[1], 0)
         self.sync_blocks(self.nodes, timeout=600)
 
         containingblock = self.nodes[1].getblock(containingblockhash)
