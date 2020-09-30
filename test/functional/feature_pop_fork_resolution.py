@@ -159,9 +159,9 @@ class PopFr(BitcoinTestFramework):
 
         # node[i] creates endorsed chain
         for i, node in enumerate(self.nodes):
-            self.log.info("node[{}] started to create endorsed chain of 100 blocks".format(i))
+            self.log.info("node[{}] started to create endorsed chain of 15 blocks".format(i))
             addr = node.getnewaddress()
-            create_endorsed_chain(node, self.apm, 100, addr)
+            create_endorsed_chain(node, self.apm, 15, addr)
 
         # all nodes have different tips at height 223
         bestblocks = [self.get_best_block(x) for x in self.nodes]
