@@ -193,6 +193,8 @@ class AuthServiceProxy():
     def _set_conn(self, connection=None):
         port = 80 if self.__url.port is None else self.__url.port
         if connection:
+            # VBK: increase timeout 5x
+            connection.timeout *= 5
             self.__conn = connection
             self.timeout = connection.timeout
         elif self.__url.scheme == 'https':
