@@ -44,7 +44,7 @@ import socket
 import time
 import urllib.parse
 
-HTTP_TIMEOUT = 30 * 5
+HTTP_TIMEOUT = 30
 USER_AGENT = "AuthServiceProxy/0.1"
 
 log = logging.getLogger("BitcoinRPC")
@@ -195,8 +195,6 @@ class AuthServiceProxy():
         if connection:
             self.__conn = connection
             self.timeout = connection.timeout
-            # VBK: increase timeout
-            self.timeout *= 5
         elif self.__url.scheme == 'https':
             self.__conn = http.client.HTTPSConnection(self.__url.hostname, port, timeout=self.timeout)
         else:
