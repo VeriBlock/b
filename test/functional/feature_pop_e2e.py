@@ -52,7 +52,7 @@ class PopE2E(BitcoinTestFramework):
 
         assert len(vbk_blocks) == vbk_blocks_amount
 
-        vtbs_amount = 1000
+        vtbs_amount = 200
         self.log.info("generate vtbs on node0, amount {}".format(vtbs_amount))
         for i in range(vtbs_amount):
             self.apm.endorseVbkBlock(self.apm.vbkTip, self.apm.btcTip.getHash(), 1)
