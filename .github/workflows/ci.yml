@@ -42,7 +42,7 @@ jobs:
           restore-keys: |
             linux-ccache-
       - name: get version for veriblock-pop-cpp
-        run: echo "VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)"
+        run: echo "VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)" >> $GITHUB_ENV
       - name: veriblock-pop-cpp release version
         run: echo Using veriblock-pop-cpp version $VERIBLOCK_POP_CPP_VERSION
       - name: add bitcoin ppa
@@ -116,7 +116,7 @@ jobs:
         run: |
           echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
           echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
-          echo "echo COMMITS_AHEAD=$(git rev-list $(git describe --tags $(git rev-list --tags --max-count=1)).. --count)"
+          echo "echo COMMITS_AHEAD=$(git rev-list $(git describe --tags $(git rev-list --tags --max-count=1)).. --count)" >> $GITHUB_ENV
           echo "::set-output name=last_tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
       - name: Prepare ccache timestamp
         id: cache_timestamp
@@ -191,7 +191,7 @@ jobs:
         run: |
           echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
           echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
-          echo "COMMITS_AHEAD=$(git rev-list $(git describe --tags $(git rev-list --tags --max-count=1)).. --count)"
+          echo "COMMITS_AHEAD=$(git rev-list $(git describe --tags $(git rev-list --tags --max-count=1)).. --count)" >> $GITHUB_ENV
           echo "::set-output name=last_tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
       - name: Prepare ccache timestamp
         id: cache_timestamp
@@ -282,7 +282,7 @@ jobs:
           restore-keys: |
             macos-ccache-
       - name: get version for veriblock-pop-cpp
-        run: echo "VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)"
+        run: echo "VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)" >> $GITHUB_ENV
       - name: veriblock-pop-cpp release version
         run: echo Using veriblock-pop-cpp version ${VERIBLOCK_POP_CPP_VERSION}
       - name: install dependencies
@@ -344,7 +344,7 @@ jobs:
           restore-keys: |
             linux-asan-ccache-
       - name: get version for veriblock-pop-cpp
-        run: echo "VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)"
+        run: echo "VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)" >> $GITHUB_ENV
       - name: veriblock-pop-cpp release version
         run: echo Using veriblock-pop-cpp version ${VERIBLOCK_POP_CPP_VERSION}
       - name: run apt update
