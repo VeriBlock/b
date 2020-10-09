@@ -42,7 +42,7 @@ jobs:
         run: |
           echo "Successfully pushed the following tags:"
           echo "----"
-          echo "ubuntu-${BRANCH}-${GIT_HASH}-${{ matrix.build }}"
+          echo "ubuntu-${{ env.BRANCH }}-${{ env.GIT_HASH }}-${{ matrix.build }}"
           echo "----"
 
   alpine:
@@ -68,7 +68,7 @@ jobs:
           echo "Successfully pushed the following tags:"
           echo "----"
           echo "$(IFS=',' read -ra TAGS <<< "$(if [ "${{ github.event_name }}" == "push" ] && [ "${BRANCH}" == "master" ]; then echo "latest,${BRANCH}"; elif [ "${{ github.event_name }}" == "pull_request" ]; then echo ""; else echo "${BRANCH}"; fi)"; for i in "${TAGS[@]}"; do echo $i; done)"
-          echo "${BRANCH}-${GIT_HASH}"
+          echo "${{ env.BRANCH }}-${{ env.GIT_HASH }}"
           echo "${{ github.sha }}"
           echo "----"
 
@@ -94,5 +94,5 @@ jobs:
         run: |
           echo "Successfully pushed the following tags:"
           echo "----"
-          echo "${BRANCH}-${GIT_HASH}-debug"
+          echo "${{ env.BRANCH }}-${{ env.GIT_HASH }}-debug"
           echo "----"
