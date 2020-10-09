@@ -37,7 +37,7 @@ jobs:
           username: ${{ secrets.PUBLIC_DOCKERHUB_USERNAME }}
           password: ${{ secrets.PUBLIC_DOCKERHUB_PASSWORD }}
           dockerfile: ubuntu.Dockerfile
-          tags: "ubuntu-${BRANCH}-${GIT_HASH}-${{ matrix.build }}"
+          tags: "ubuntu-${{ env. BRANCH }}-${{ env.GIT_HASH }}-${{ matrix.build }}"
       - name: Show Tags
         run: |
           echo "Successfully pushed the following tags:"
@@ -62,7 +62,7 @@ jobs:
           name: veriblock/vbitcoin
           username: ${{ secrets.PUBLIC_DOCKERHUB_USERNAME }}
           password: ${{ secrets.PUBLIC_DOCKERHUB_PASSWORD }}
-          tags: "${BRANCH}-${GIT_HASH},${{ github.sha }}"
+          tags: "${{ env.BRANCH }}-${{ env.GIT_HASH }},${{ github.sha }}"
       - name: Show Tags
         run: |
           echo "Successfully pushed the following tags:"
@@ -89,7 +89,7 @@ jobs:
           name: veriblock/vbitcoin
           username: ${{ secrets.PUBLIC_DOCKERHUB_USERNAME }}
           password: ${{ secrets.PUBLIC_DOCKERHUB_PASSWORD }}
-          tags: "${BRANCH}-${GIT_HASH}-debug"
+          tags: "${{ env.BRANCH }}-${{ env.GIT_HASH }}-debug"
       - name: Show Tags
         run: |
           echo "Successfully pushed the following tags:"
