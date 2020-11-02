@@ -10,6 +10,7 @@
 #include <leveldb/cache.h>
 #include <leveldb/env.h>
 #include <leveldb/filter_policy.h>
+#include <vbk/adaptors/block_batch_adaptor.hpp>
 #include <memenv.h>
 #include <stdint.h>
 #include <algorithm>
@@ -237,6 +238,38 @@ CDBIterator::~CDBIterator() { delete piter; }
 bool CDBIterator::Valid() const { return piter->Valid(); }
 void CDBIterator::SeekToFirst() { piter->SeekToFirst(); }
 void CDBIterator::Next() { piter->Next(); }
+
+/*template <>
+bool CDBIterator::GetValue(altintegration::VbkBlock& value)
+{
+    leveldb::Slice slValue = piter->value();
+    try {
+        CDataStream ssValue(slValue.data(), slValue.data() + slValue.size(), SER_DISK, CLIENT_VERSION);
+        ssValue.Xor(dbwrapper_private::GetObfuscateKey(parent));
+        std::pair<char, altintegration::VbkBlock::hash_t> key;
+        if (!GetKey(key)) return false;
+        UnserializeWithHash(ssValue, value, key.second);
+    } catch (const std::exception&) {
+        return false;
+    }
+    return true;
+}*/
+
+/*template <>
+bool CDBIterator::GetValue(altintegration::BlockIndex<altintegration::VbkBlock>& value)
+{
+    leveldb::Slice slValue = piter->value();
+    try {
+        CDataStream ssValue(slValue.data(), slValue.data() + slValue.size(), SER_DISK, CLIENT_VERSION);
+        ssValue.Xor(dbwrapper_private::GetObfuscateKey(parent));
+        std::pair<char, altintegration::VbkBlock::hash_t> key;
+        if (!GetKey(key)) return false;
+        UnserializeWithHash(ssValue, value, key.second);
+    } catch (const std::exception&) {
+        return false;
+    }
+    return true;
+}*/
 
 namespace dbwrapper_private {
 

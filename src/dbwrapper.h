@@ -166,6 +166,22 @@ public:
         return true;
     }
 
+    template <>
+    bool GetValue(altintegration::BlockIndex<altintegration::VbkBlock>& value)
+    {
+        leveldb::Slice slValue = piter->value();
+        try {
+            CDataStream ssValue(slValue.data(), slValue.data() + slValue.size(), SER_DISK, CLIENT_VERSION);
+            ssValue.Xor(dbwrapper_private::GetObfuscateKey(parent));
+            std::pair<char, altintegration::VbkBlock::hash_t> key;
+            if (!GetKey(key)) return false;
+            UnserializeWithHash(ssValue, value, key.second);
+        } catch (const std::exception&) {
+            return false;
+        }
+        return true;
+    }
+
     unsigned int GetValueSize() {
         return piter->value().size();
     }
