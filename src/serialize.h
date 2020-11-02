@@ -697,15 +697,6 @@ template<typename Stream> inline void Unserialize(Stream& s, altintegration::Vbk
 }
 
 template <typename Stream>
-inline void UnserializeWithHash(Stream& s, altintegration::VbkBlock& block, const altintegration::VbkBlock::hash_t& precalculatedHash = altintegration::VbkBlock::hash_t())
-{
-    std::vector<uint8_t> bytes_data;
-    Unserialize(s, bytes_data);
-    altintegration::ReadStream stream(bytes_data);
-    block = altintegration::VbkBlock::fromRaw(stream, precalculatedHash);
-}
-
-template <typename Stream>
 inline void UnserializeWithHash(Stream& s, altintegration::BlockIndex<altintegration::VbkBlock>& block, const altintegration::VbkBlock::hash_t& precalculatedHash = altintegration::VbkBlock::hash_t())
 {
     std::vector<uint8_t> bytes_data;
