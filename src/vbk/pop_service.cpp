@@ -5,6 +5,7 @@
 
 #include <chain.h>
 #include <chainparams.h>
+#include <checkqueue.h>
 #include <consensus/validation.h>
 #include <dbwrapper.h>
 #include <shutdown.h>
@@ -25,6 +26,19 @@ namespace VeriBlock {
 
 static std::shared_ptr<PayloadsProvider> payloads = nullptr;
 static std::vector<altintegration::PopData> disconnected_popdata;
+
+class PopCheck
+{
+public:
+    PopCheck() {}
+    
+    bool operator()() {
+        return true;
+        //return VerifyScript();
+    }
+};
+
+static CCheckQueue<PopCheck> popcheckqueue(128);
 
 void SetPop(CDBWrapper& db)
 {
