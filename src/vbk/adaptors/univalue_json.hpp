@@ -20,6 +20,12 @@ inline UniValue ToJSON(const std::string& t)
     return UniValue(t);
 }
 
+template <>
+inline UniValue ToJSON(const int32_t& t)
+{
+    return UniValue(t);
+}
+
 namespace json {
 
 template <>
