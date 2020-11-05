@@ -107,6 +107,7 @@ VBK_H = \
   vbk/entity/context_info_container.hpp \
   vbk/pop_common.hpp \
   vbk/pop_service.hpp \
+  vbk/pop_stateless_validator.hpp \
   vbk/vbk.hpp \
   vbk/merkle.hpp \
   vbk/genesis.hpp \
@@ -335,6 +336,8 @@ libbitcoin_server_a_SOURCES = \
   vbk/rpc_register.cpp \
   vbk/p2p_sync.hpp \
   vbk/p2p_sync.cpp \
+  vbk/pop_stateless_validator.hpp \
+  vbk/pop_stateless_validator.cpp \
   rpc/blockchain.cpp \
   rpc/mining.cpp \
   rpc/misc.cpp \

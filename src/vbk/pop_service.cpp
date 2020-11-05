@@ -5,7 +5,6 @@
 
 #include <chain.h>
 #include <chainparams.h>
-#include <checkqueue.h>
 #include <consensus/validation.h>
 #include <dbwrapper.h>
 #include <shutdown.h>
@@ -21,24 +20,13 @@
 #include "pop_service.hpp"
 #include <vbk/p2p_sync.hpp>
 #include <vbk/pop_common.hpp>
+#include <vbk/pop_stateless_validator.hpp>
 
 namespace VeriBlock {
 
 static std::shared_ptr<PayloadsProvider> payloads = nullptr;
 static std::vector<altintegration::PopData> disconnected_popdata;
-
-class PopCheck
-{
-public:
-    PopCheck() {}
-    
-    bool operator()() {
-        return true;
-        //return VerifyScript();
-    }
-};
-
-static CCheckQueue<PopCheck> popcheckqueue(128);
+static std::shared_ptr<PopValidator> popValidator = nullptr;
 
 void SetPop(CDBWrapper& db)
 {
@@ -50,6 +38,8 @@ void SetPop(CDBWrapper& db)
     app.mempool->onAccepted<altintegration::ATV>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::ATV>);
     app.mempool->onAccepted<altintegration::VTB>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::VTB>);
     app.mempool->onAccepted<altintegration::VbkBlock>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::VbkBlock>);
+
+    popValidator = std::make_shared<PopValidator>();
 }
 
 PayloadsProvider& GetPayloadsProvider()
@@ -117,23 +107,33 @@ bool checkPopDataSize(const altintegration::PopData& popData, altintegration::Va
 bool popdataStatelessValidation(const altintegration::PopData& popData, altintegration::ValidationState& state)
 {
     auto& config = *GetPop().config;
+    auto& control = popValidator->getControl();
+    const auto popDataPtr = std::make_shared<altintegration::PopData>(popData);
+    std::atomic_bool stopFlag{false};
 
+    std::vector<PopCheck> popChecks;
+    size_t index = 0;
     for (const auto& b : popData.context) {
-        if (!altintegration::checkBlock(b, state, *config.vbk.params)) {
-            return state.Invalid("pop-vbkblock-statelessly-invalid");
-        }
+        auto& check = PopCheck(popDataPtr, state, stopFlag, index++, PopCheckType::POP_CHECK_CONTEXT);
+        popChecks.push_back(check);
     }
 
+    index = 0;
     for (const auto& vtb : popData.vtbs) {
-        if (!altintegration::checkVTB(vtb, state, *config.btc.params)) {
-            return state.Invalid("pop-vtb-statelessly-invalid");
-        }
+         auto& check = PopCheck(popDataPtr, state, stopFlag, index++, PopCheckType::POP_CHECK_VTB);
+         popChecks.push_back(check);
     }
 
+    index = 0;
     for (const auto& atv : popData.atvs) {
-        if (!altintegration::checkATV(atv, state, *config.alt)) {
-            return state.Invalid("pop-atv-statelessly-invalid");
-        }
+        auto& check = PopCheck(popDataPtr, state, stopFlag, index++, PopCheckType::POP_CHECK_ATV);
+        popChecks.push_back(check);
+    }
+
+    control.Add(popChecks);
+    if (!control.Wait()) {
+        LogPrintf("ERROR: %s: CheckQueue failed\n", __func__);
+        return state.Invalid("block-validation-failed");
     }
 
     return true;
