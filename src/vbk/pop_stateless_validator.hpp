@@ -35,9 +35,9 @@ public:
     {
         std::swap(popData_, check.popData_);
         std::swap(state_, check.state_);
+        std::swap(stop, check.stop);
         std::swap(checkIndex_, check.checkIndex_);
         std::swap(checkType_, check.checkType_);
-        std::swap(stop, check.stop);
     }
 
     const altintegration::ValidationState& getState() const { return state_; }
@@ -45,9 +45,9 @@ public:
 protected:
     std::shared_ptr<altintegration::PopData> popData_;
     altintegration::ValidationState state_;
+    volatile std::atomic_bool* stop;
     size_t checkIndex_;
     PopCheckType checkType_;
-    volatile std::atomic_bool* stop;
 };
 
 class PopValidator

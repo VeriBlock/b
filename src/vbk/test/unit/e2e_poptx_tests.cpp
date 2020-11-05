@@ -60,4 +60,25 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
     BOOST_CHECK(block.popData.atvs.size() == 0);
 }
 
+BOOST_FIXTURE_TEST_CASE(InvalidPopValidationCheck, E2eFixture)
+{
+    // altintegration and popminer configured to use BTC/VBK/ALT regtest.
+    auto tip = ChainActive().Tip();
+    BOOST_CHECK(tip != nullptr);
+
+    // endorse tip
+    CBlock block = endorseAltBlockAndMine(tip->GetBlockHash(), 10);
+    BOOST_CHECK(block.popData.atvs.size() != 0);
+    BOOST_CHECK(block.popData.vtbs.size() == 10);
+    auto lastVtb = block.popData.vtbs.back();
+    block.popData.vtbs.pop_back();
+    lastVtb.checked = false;
+    lastVtb.transaction.signature[0] = 0xDE;
+    lastVtb.transaction.signature[1] = 0xAD;
+    block.popData.vtbs.push_back(lastVtb);
+    
+    bool check = VeriBlock::popdataStatelessValidation(block.popData, state);
+    BOOST_CHECK(!check);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

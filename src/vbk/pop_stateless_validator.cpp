@@ -15,7 +15,9 @@ namespace VeriBlock {
 
 bool PopCheck::operator()()
 {
-    if (*stop) return false;
+    if (*stop) {
+        return false;
+    }
     bool ret = false;
     switch (checkType_) {
     case PopCheckType::POP_CHECK_CONTEXT: {
@@ -40,7 +42,7 @@ bool PopCheck::operator()()
     }
 
     if (ret) return true;
-    *stop = false;
+    *stop = true;
     return false;
 }
 

@@ -106,27 +106,24 @@ bool checkPopDataSize(const altintegration::PopData& popData, altintegration::Va
 
 bool popdataStatelessValidation(const altintegration::PopData& popData, altintegration::ValidationState& state)
 {
-    auto& config = *GetPop().config;
     auto& control = popValidator->getControl();
     const auto popDataPtr = std::make_shared<altintegration::PopData>(popData);
     std::atomic_bool stopFlag{false};
 
     std::vector<PopCheck> popChecks;
-    size_t index = 0;
-    for (const auto& b : popData.context) {
-        auto& check = PopCheck(popDataPtr, state, stopFlag, index++, PopCheckType::POP_CHECK_CONTEXT);
+    popChecks.reserve(popData.context.size() + popData.vtbs.size() + popData.atvs.size());
+    for (size_t index = 0; index < popData.context.size(); index++) {
+        const auto& check = PopCheck(popDataPtr, state, stopFlag, index, PopCheckType::POP_CHECK_CONTEXT);
         popChecks.push_back(check);
     }
 
-    index = 0;
-    for (const auto& vtb : popData.vtbs) {
-         auto& check = PopCheck(popDataPtr, state, stopFlag, index++, PopCheckType::POP_CHECK_VTB);
+    for (size_t index = 0; index < popData.vtbs.size(); index++) {
+         const auto& check = PopCheck(popDataPtr, state, stopFlag, index, PopCheckType::POP_CHECK_VTB);
          popChecks.push_back(check);
     }
 
-    index = 0;
-    for (const auto& atv : popData.atvs) {
-        auto& check = PopCheck(popDataPtr, state, stopFlag, index++, PopCheckType::POP_CHECK_ATV);
+    for (size_t index = 0; index < popData.atvs.size(); index++) {
+        const auto& check = PopCheck(popDataPtr, state, stopFlag, index, PopCheckType::POP_CHECK_ATV);
         popChecks.push_back(check);
     }
 
