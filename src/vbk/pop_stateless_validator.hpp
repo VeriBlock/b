@@ -23,48 +23,52 @@ class PopCheck
 public:
     PopCheck() = default;
     PopCheck(const std::shared_ptr<altintegration::PopData>& popData,
-        const altintegration::ValidationState& state,
-        std::atomic_bool& stopFlag,
+        const std::shared_ptr<altintegration::ValidationState>& state,
+        const std::shared_ptr<boost::mutex>& mutex,
         size_t checkIndex = 0,
         PopCheckType checkType = PopCheckType::POP_CHECK_CONTEXT) : popData_(popData),
-                                                                    state_(state), stop(&stopFlag), checkIndex_(checkIndex), checkType_(checkType) {}
+                                                                    state_(state), mutex_(mutex), checkIndex_(checkIndex), checkType_(checkType) {}
 
+    // worker executes here
     bool operator()();
 
     void swap(PopCheck& check)
     {
         std::swap(popData_, check.popData_);
         std::swap(state_, check.state_);
-        std::swap(stop, check.stop);
+        std::swap(mutex_, check.mutex_);
         std::swap(checkIndex_, check.checkIndex_);
         std::swap(checkType_, check.checkType_);
     }
 
-    const altintegration::ValidationState& getState() const { return state_; }
+    const altintegration::ValidationState& getState() const { return *state_; }
 
 protected:
-    std::shared_ptr<altintegration::PopData> popData_;
-    altintegration::ValidationState state_;
-    volatile std::atomic_bool* stop;
-    size_t checkIndex_;
-    PopCheckType checkType_;
+    std::shared_ptr<altintegration::PopData> popData_ = nullptr;
+    std::shared_ptr<altintegration::ValidationState> state_ = nullptr;
+    std::shared_ptr<boost::mutex> mutex_ = nullptr;
+    size_t checkIndex_ = 0;
+    PopCheckType checkType_ = PopCheckType::POP_CHECK_CONTEXT;
 };
 
-class PopValidator
+struct PopValidator
 {
-public:
     PopValidator() : popcheckqueue(128), control(&popcheckqueue)
     {
         init();
     }
 
-    CCheckQueueControl<PopCheck>& getControl();
+    ~PopValidator() {
+        // stop and join all threads
+        threadGroup.interrupt_all();
+        threadGroup.join_all();
+    }
 
-protected:
     CCheckQueue<PopCheck> popcheckqueue;
     CCheckQueueControl<PopCheck> control;
     boost::thread_group threadGroup;
 
+protected:
     void init();
     void threadPopCheck(int worker_num);
 };

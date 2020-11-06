@@ -15,35 +15,36 @@ namespace VeriBlock {
 
 bool PopCheck::operator()()
 {
-    if (*stop) {
-        return false;
-    }
     bool ret = false;
+    auto state = altintegration::ValidationState();
     switch (checkType_) {
     case PopCheckType::POP_CHECK_CONTEXT: {
         const auto& params = GetPop().config->getVbkParams();
         VBK_ASSERT_MSG(popData_->context.size() > checkIndex_, "Invalid context block index for validation");
-        ret = checkBlock(popData_->context.at(checkIndex_), state_, params);
+        ret = checkBlock(popData_->context.at(checkIndex_), state, params);
         break;
     }
     case PopCheckType::POP_CHECK_VTB: {
         const auto& params = GetPop().config->getBtcParams();
         VBK_ASSERT_MSG(popData_->vtbs.size() > checkIndex_, "Invalid VTB index for validation");
-        ret = checkVTB(popData_->vtbs.at(checkIndex_), state_, params);
+        ret = checkVTB(popData_->vtbs.at(checkIndex_), state, params);
         break;
     }
     case PopCheckType::POP_CHECK_ATV: {
         const auto& params = GetPop().config->getAltParams();
         VBK_ASSERT_MSG(popData_->atvs.size() > checkIndex_, "Invalid ATV index for validation");
-        ret = checkATV(popData_->atvs.at(checkIndex_), state_, params);
+        ret = checkATV(popData_->atvs.at(checkIndex_), state, params);
         break;
     }
     default: break;
     }
 
-    if (ret) return true;
-    *stop = true;
-    return false;
+    if (!ret) {
+        // pass error code to external state
+        boost::unique_lock<boost::mutex> lock(*mutex_);
+        *state_ = state;
+    }
+    return ret;
 }
 
 void PopValidator::threadPopCheck(int worker_num)
@@ -78,11 +79,6 @@ void PopValidator::init()
             threadGroup.create_thread([&]() { return this->threadPopCheck(i); });
         }
     }
-}
-
-CCheckQueueControl<PopCheck>& PopValidator::getControl()
-{
-    return control;
 }
 
 } // namespace VeriBlock

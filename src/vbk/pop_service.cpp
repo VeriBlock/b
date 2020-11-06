@@ -106,30 +106,35 @@ bool checkPopDataSize(const altintegration::PopData& popData, altintegration::Va
 
 bool popdataStatelessValidation(const altintegration::PopData& popData, altintegration::ValidationState& state)
 {
-    auto& control = popValidator->getControl();
+    auto& control = popValidator->control;
     const auto popDataPtr = std::make_shared<altintegration::PopData>(popData);
-    std::atomic_bool stopFlag{false};
+    const auto statePtr = std::make_shared<altintegration::ValidationState>();
+    const auto mutexPtr = std::make_shared<boost::mutex>();
 
     std::vector<PopCheck> popChecks;
     popChecks.reserve(popData.context.size() + popData.vtbs.size() + popData.atvs.size());
+
     for (size_t index = 0; index < popData.context.size(); index++) {
-        const auto& check = PopCheck(popDataPtr, state, stopFlag, index, PopCheckType::POP_CHECK_CONTEXT);
+        const auto& check = PopCheck(popDataPtr, statePtr, mutexPtr, index, PopCheckType::POP_CHECK_CONTEXT);
         popChecks.push_back(check);
     }
 
     for (size_t index = 0; index < popData.vtbs.size(); index++) {
-         const auto& check = PopCheck(popDataPtr, state, stopFlag, index, PopCheckType::POP_CHECK_VTB);
+        const auto& check = PopCheck(popDataPtr, statePtr, mutexPtr, index, PopCheckType::POP_CHECK_VTB);
          popChecks.push_back(check);
     }
 
     for (size_t index = 0; index < popData.atvs.size(); index++) {
-        const auto& check = PopCheck(popDataPtr, state, stopFlag, index, PopCheckType::POP_CHECK_ATV);
+        const auto& check = PopCheck(popDataPtr, statePtr, mutexPtr, index, PopCheckType::POP_CHECK_ATV);
         popChecks.push_back(check);
     }
 
     control.Add(popChecks);
-    if (!control.Wait()) {
-        LogPrintf("ERROR: %s: CheckQueue failed\n", __func__);
+    bool ret = control.Wait();
+
+    if (!ret) {
+        boost::unique_lock<boost::mutex> lock(*mutexPtr);
+        state = *statePtr;
         return state.Invalid("block-validation-failed");
     }
 
