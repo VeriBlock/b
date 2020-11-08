@@ -8,6 +8,7 @@
 
 #include <veriblock/storage/block_batch_adaptor.hpp>
 #include <vbk/adaptors/payloads_provider.hpp>
+#include <vbk/pop_stateless_validator.hpp>
 #include "pop_common.hpp"
 
 class BlockValidationState;
@@ -27,6 +28,7 @@ using BlockBytes = std::vector<uint8_t>;
 using PoPRewards = std::map<CScript, CAmount>;
 
 void SetPop(CDBWrapper& db);
+PopValidator& GetPopValidator();
 
 PayloadsProvider& GetPayloadsProvider();
 

@@ -51,25 +51,18 @@ protected:
     PopCheckType checkType_ = PopCheckType::POP_CHECK_CONTEXT;
 };
 
-struct PopValidator
-{
-    PopValidator() : popcheckqueue(128), control(&popcheckqueue)
-    {
-        init();
-    }
-
-    ~PopValidator() {
-        // stop and join all threads
-        threadGroup.interrupt_all();
-        threadGroup.join_all();
-    }
+struct PopValidator {
+    PopValidator() : popcheckqueue(128), control(&popcheckqueue) {}
+    ~PopValidator();
 
     CCheckQueue<PopCheck> popcheckqueue;
     CCheckQueueControl<PopCheck> control;
     boost::thread_group threadGroup;
 
+    void start();
+    void stop();
+
 protected:
-    void init();
     void threadPopCheck(int worker_num);
 };
 

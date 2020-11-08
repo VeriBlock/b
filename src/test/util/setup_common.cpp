@@ -30,6 +30,7 @@
 #include <util/validation.h>
 #include <validation.h>
 #include <validationinterface.h>
+#include <vbk/pop_stateless_validator.hpp>
 
 #include <bootstraps.h>
 
@@ -147,6 +148,7 @@ TestingSetup::~TestingSetup()
 {
     threadGroup.interrupt_all();
     threadGroup.join_all();
+    VeriBlock::GetPopValidator().stop();
     GetMainSignals().FlushBackgroundCallbacks();
     GetMainSignals().UnregisterBackgroundSignalScheduler();
     g_rpc_node = nullptr;

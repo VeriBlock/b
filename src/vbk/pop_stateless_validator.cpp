@@ -53,13 +53,10 @@ void PopValidator::threadPopCheck(int worker_num)
     popcheckqueue.Thread();
 }
 
-void PopValidator::init()
-{
+void PopValidator::start() {
     if (threadGroup.size() > 0) {
-        LogPrintf("POP validation is already initialized\n");
-        return;
+       return;
     }
-
     int script_threads = gArgs.GetArg("-par", DEFAULT_SCRIPTCHECK_THREADS);
     if (script_threads <= 0) {
         // -par=0 means autodetect (number of cores - 1 script threads)
@@ -79,6 +76,16 @@ void PopValidator::init()
             threadGroup.create_thread([&]() { return this->threadPopCheck(i); });
         }
     }
+}
+
+void PopValidator::stop() {
+    threadGroup.interrupt_all();
+    threadGroup.join_all();
+}
+
+PopValidator::~PopValidator()
+{
+    stop();
 }
 
 } // namespace VeriBlock

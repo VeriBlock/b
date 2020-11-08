@@ -26,7 +26,7 @@ namespace VeriBlock {
 
 static std::shared_ptr<PayloadsProvider> payloads = nullptr;
 static std::vector<altintegration::PopData> disconnected_popdata;
-static std::shared_ptr<PopValidator> popValidator = nullptr;
+static std::shared_ptr<PopValidator> popValidator = std::make_shared<PopValidator>();
 
 void SetPop(CDBWrapper& db)
 {
@@ -39,7 +39,11 @@ void SetPop(CDBWrapper& db)
     app.mempool->onAccepted<altintegration::VTB>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::VTB>);
     app.mempool->onAccepted<altintegration::VbkBlock>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::VbkBlock>);
 
-    popValidator = std::make_shared<PopValidator>();
+    popValidator->start();
+}
+
+PopValidator& GetPopValidator() {
+    return *popValidator;
 }
 
 PayloadsProvider& GetPayloadsProvider()
@@ -131,13 +135,11 @@ bool popdataStatelessValidation(const altintegration::PopData& popData, altinteg
 
     control.Add(popChecks);
     bool ret = control.Wait();
-
     if (!ret) {
         boost::unique_lock<boost::mutex> lock(*mutexPtr);
         state = *statePtr;
         return state.Invalid("block-validation-failed");
     }
-
     return true;
 }
 
