@@ -20,13 +20,12 @@
 #include "pop_service.hpp"
 #include <vbk/p2p_sync.hpp>
 #include <vbk/pop_common.hpp>
-#include <vbk/pop_stateless_validator.hpp>
 
 namespace VeriBlock {
 
 static std::shared_ptr<PayloadsProvider> payloads = nullptr;
 static std::vector<altintegration::PopData> disconnected_popdata;
-static std::shared_ptr<PopValidator> popValidator = std::make_shared<PopValidator>();
+static std::shared_ptr<PopValidator> popValidator = nullptr;
 
 void SetPop(CDBWrapper& db)
 {
@@ -39,10 +38,14 @@ void SetPop(CDBWrapper& db)
     app.mempool->onAccepted<altintegration::VTB>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::VTB>);
     app.mempool->onAccepted<altintegration::VbkBlock>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::VbkBlock>);
 
-    popValidator->start();
+    // start thread pool early
+    GetPopValidator();
 }
 
 PopValidator& GetPopValidator() {
+    if (popValidator == nullptr) {
+        popValidator = std::make_shared<PopValidator>();
+    }
     return *popValidator;
 }
 

@@ -52,14 +52,16 @@ protected:
 };
 
 struct PopValidator {
-    PopValidator() : popcheckqueue(128), control(&popcheckqueue) {}
-    ~PopValidator();
+    PopValidator() : popcheckqueue(128), control(&popcheckqueue) { start(); }
+    ~PopValidator() { stop(); };
 
     CCheckQueue<PopCheck> popcheckqueue;
     CCheckQueueControl<PopCheck> control;
     boost::thread_group threadGroup;
 
+    // start thread pool
     void start();
+    // stop thread pool
     void stop();
 
 protected:

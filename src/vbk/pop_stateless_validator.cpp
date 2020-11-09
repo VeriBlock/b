@@ -83,9 +83,4 @@ void PopValidator::stop() {
     threadGroup.join_all();
 }
 
-PopValidator::~PopValidator()
-{
-    stop();
-}
-
 } // namespace VeriBlock
