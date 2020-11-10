@@ -748,6 +748,7 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
     popData.pushKV("atvs", popDataAtvs);
     popData.pushKV("vtbs", popDataVtbs);
     popData.pushKV("vbkblocks", popDataVbks);
+    result.pushKV("pop_data", popData);
 
     // pop rewards
     UniValue popRewardsArray(UniValue::VARR);
