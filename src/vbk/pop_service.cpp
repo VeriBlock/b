@@ -113,7 +113,6 @@ bool checkPopDataSize(const altintegration::PopData& popData, altintegration::Va
 
 bool popdataStatelessValidation(const altintegration::PopData& popData, altintegration::ValidationState& state)
 {
-    auto& control = popValidator->control;
     const auto popDataPtr = std::make_shared<altintegration::PopData>(popData);
     const auto statePtr = std::make_shared<altintegration::ValidationState>();
     const auto mutexPtr = std::make_shared<boost::mutex>();
@@ -136,8 +135,7 @@ bool popdataStatelessValidation(const altintegration::PopData& popData, altinteg
         popChecks.push_back(check);
     }
 
-    control.Add(popChecks);
-    bool ret = control.Wait();
+    bool ret = popValidator->runChecks(popChecks);
     if (!ret) {
         boost::unique_lock<boost::mutex> lock(*mutexPtr);
         state = *statePtr;

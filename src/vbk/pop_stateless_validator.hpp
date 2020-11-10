@@ -51,13 +51,12 @@ protected:
     PopCheckType checkType_ = PopCheckType::POP_CHECK_CONTEXT;
 };
 
-struct PopValidator {
-    PopValidator() : popcheckqueue(128), control(&popcheckqueue) { start(); }
-    ~PopValidator() { stop(); };
+class PopValidator {
+public:
+    PopValidator() : threadGroup{}, popcheckqueue(128) { start(); }
+    ~PopValidator() { stop(); }
 
-    CCheckQueue<PopCheck> popcheckqueue;
-    CCheckQueueControl<PopCheck> control;
-    boost::thread_group threadGroup;
+    bool runChecks(std::vector<PopCheck>& checks);
 
     // start thread pool
     void start();
@@ -65,6 +64,9 @@ struct PopValidator {
     void stop();
 
 protected:
+    boost::thread_group threadGroup;
+    CCheckQueue<PopCheck> popcheckqueue;
+
     void threadPopCheck(int worker_num);
 };
 

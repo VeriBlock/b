@@ -53,6 +53,12 @@ void PopValidator::threadPopCheck(int worker_num)
     popcheckqueue.Thread();
 }
 
+bool PopValidator::runChecks(std::vector<PopCheck>& checks) {
+    CCheckQueueControl<PopCheck> control(&popcheckqueue);
+    control.Add(checks);
+    return control.Wait();
+}
+
 void PopValidator::start() {
     if (threadGroup.size() > 0) {
        return;
@@ -71,10 +77,8 @@ void PopValidator::start() {
     script_threads = std::min(script_threads, MAX_SCRIPTCHECK_THREADS);
 
     LogPrintf("POP validation uses %d additional threads\n", script_threads);
-    if (script_threads >= 1) {
-        for (int i = 0; i < script_threads; ++i) {
-            threadGroup.create_thread([&]() { return this->threadPopCheck(i); });
-        }
+    for (int i = 0; i < script_threads; ++i) {
+        threadGroup.create_thread([&]() { return this->threadPopCheck(i); });
     }
 }
 
