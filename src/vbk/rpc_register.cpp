@@ -216,18 +216,6 @@ UniValue submitpop(const JSONRPCRequest& request)
     }
 }
 
-UniValue debugpop(const JSONRPCRequest& request)
-{
-    if (request.fHelp) {
-        throw std::runtime_error(
-            "debugpop\n"
-            "\nPrints alt-cpp-lib state into log.\n");
-    }
-    auto& pop = VeriBlock::GetPop();
-    LogPrint(BCLog::POP, "%s", VeriBlock::toPrettyString(pop));
-    return UniValue();
-}
-
 using VbkTree = altintegration::VbkBlockTree;
 using BtcTree = altintegration::VbkBlockTree::BtcTree;
 
@@ -673,13 +661,50 @@ UniValue getrawvbkblock(const JSONRPCRequest& req)
 
 } // namespace
 
+UniValue getpopparams(const JSONRPCRequest& req)
+{
+    std::string cmdname = "getpopparams";
+    // clang-format off
+    RPCHelpMan{
+        cmdname,
+        "\nReturns POP-related parameters set for this altchain.\n",
+        {},
+        RPCResult{"TODO"},
+        RPCExamples{
+            HelpExampleCli(cmdname, "") +
+            HelpExampleRpc(cmdname, "")},
+    }
+        .Check(req);
+    // clang-format on
+
+    auto ret = altintegration::ToJSON<UniValue>(*VeriBlock::GetPop().config->alt);
+
+    auto* vbkfirst = vbk().getBestChain().first();
+    auto* btcfirst = btc().getBestChain().first();
+    assert(vbkfirst);
+    assert(btcfirst);
+
+    auto _vbk = UniValue(UniValue::VOBJ);
+    _vbk.pushKV("hash", vbkfirst->getHash().toHex());
+    _vbk.pushKV("height", vbkfirst->getHeight());
+
+    auto _btc = UniValue(UniValue::VOBJ);
+    _btc.pushKV("hash", btcfirst->getHash().toHex());
+    _btc.pushKV("height", btcfirst->getHeight());
+
+    ret.pushKV("vbkBootstrapBlock", _vbk);
+    ret.pushKV("btcBootstrapBlock", _btc);
+
+    return ret;
+}
+
 const CRPCCommand commands[] = {
+    {"pop_mining", "getpopparams", &getpopparams, {}},
     {"pop_mining", "submitpop", &submitpop, {"vbkblocks", "vtbs", "atvs"}},
     {"pop_mining", "submitpopatv", &submitpopatv, {"atv"}},
     {"pop_mining", "submitpopvtb", &submitpopvtb, {"vtb"}},
     {"pop_mining", "submitpopvbkblock", &submitpopvbkblock, {"vbkblock"}},
     {"pop_mining", "getpopdata", &getpopdata, {"blockheight"}},
-    {"pop_mining", "debugpop", &debugpop, {}},
     {"pop_mining", "getvbkblock", &getvbkblock, {"hash"}},
     {"pop_mining", "getbtcblock", &getbtcblock, {"hash"}},
     {"pop_mining", "getvbkbestblockhash", &getvbkbestblockhash, {}},
