@@ -1592,6 +1592,7 @@ static void TestOtherThread(fs::path dirname, std::string lockname, bool *result
     *result = LockDirectory(dirname, lockname);
 }
 
+#if 0
 #ifndef WIN32 // Cannot do this test on WIN32 due to lack of fork()
 static constexpr char LockCommand = 'L';
 static constexpr char UnlockCommand = 'U';
@@ -1624,11 +1625,13 @@ static void TestOtherProcess(fs::path dirname, std::string lockname, int fd)
     }
 }
 #endif
+#endif
 
 BOOST_AUTO_TEST_CASE(test_LockDirectory)
 {
     fs::path dirname = GetDataDir() / "lock_dir";
     const std::string lockname = ".lock";
+#if 0
 #ifndef WIN32
 
     // Revert SIGCHLD to default, otherwise boost.test will catch and fail on
@@ -1647,6 +1650,7 @@ BOOST_AUTO_TEST_CASE(test_LockDirectory)
         TestOtherProcess(dirname, lockname, fd[0]);
     }
     BOOST_CHECK_EQUAL(close(fd[0]), 0); // Parent: close child end
+#endif
 #endif
     // Lock on non-existent directory should fail
     BOOST_CHECK_EQUAL(LockDirectory(dirname, lockname), false);
@@ -1667,6 +1671,7 @@ BOOST_AUTO_TEST_CASE(test_LockDirectory)
     std::thread thr(TestOtherThread, dirname, lockname, &threadresult);
     thr.join();
     BOOST_CHECK_EQUAL(threadresult, true);
+#if 0
 #ifndef WIN32
     // Try to acquire lock in child process while we're holding it, this should fail.
     char ch;
@@ -1708,6 +1713,7 @@ BOOST_AUTO_TEST_CASE(test_LockDirectory)
     // Restore SIGCHLD
     signal(SIGCHLD, old_handler);
     BOOST_CHECK_EQUAL(close(fd[1]), 0); // Close our side of the socketpair
+#endif
 #endif
     // Clean up
     ReleaseDirectoryLocks();
