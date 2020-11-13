@@ -36,13 +36,6 @@ void SetPop(CDBWrapper& db)
     app.mempool->onAccepted<altintegration::ATV>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::ATV>);
     app.mempool->onAccepted<altintegration::VTB>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::VTB>);
     app.mempool->onAccepted<altintegration::VbkBlock>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::VbkBlock>);
-
-    app.popValidator->start();
-}
-
-void StopPop() {
-    auto& app = GetPop();
-    app.popValidator->stop();
 }
 
 PayloadsProvider& GetPayloadsProvider()
