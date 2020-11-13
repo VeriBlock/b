@@ -27,6 +27,7 @@ using BlockBytes = std::vector<uint8_t>;
 using PoPRewards = std::map<CScript, CAmount>;
 
 void SetPop(CDBWrapper& db);
+void StopPop();
 
 PayloadsProvider& GetPayloadsProvider();
 
