@@ -18,7 +18,7 @@ altintegration::PopContext& GetPop()
 
 void StopPop() {
     if (app == nullptr) return;
-    app->popValidator->stop();
+    app->stop();
 }
 
 void SetPopConfig(const altintegration::Config& newConfig)
