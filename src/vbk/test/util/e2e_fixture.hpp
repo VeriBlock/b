@@ -47,6 +47,15 @@ struct E2eFixture : public TestChain100Setup {
     {
         altintegration::SetLogger<TestLogger>();
         altintegration::GetLogger().level = altintegration::LogLevel::warn;
+
+        // create N blocks necessary to start POP fork resolution
+        CScript scriptPubKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;   
+        while (!Params().isPopEnabled(ChainActive().Tip()->nHeight))
+        {
+            CBlock b = CreateAndProcessBlock({}, scriptPubKey);
+            m_coinbase_txns.push_back(b.vtx[0]);
+        }
+
         pop = &VeriBlock::GetPop();
     }
 

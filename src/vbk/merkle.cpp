@@ -87,6 +87,10 @@ KeystoneArray getKeystoneHashesForTheNextBlock(const CBlockIndex* pindexPrev)
 
 uint256 TopLevelMerkleRoot(const CBlockIndex* prevIndex, const CBlock& block, bool* mutated)
 {
+    if (prevIndex == nullptr || !Params().isPopEnabled(prevIndex->nHeight + 1)) {
+        return BlockMerkleRoot(block);
+    }
+
     if (prevIndex == nullptr) {
         // special case: this is genesis block
         KeystoneArray keystones;
@@ -97,7 +101,7 @@ uint256 TopLevelMerkleRoot(const CBlockIndex* prevIndex, const CBlock& block, bo
     return makeTopLevelRoot(prevIndex->nHeight + 1, keystones, BlockMerkleRoot(block, mutated));
 }
 
-bool VerifyTopLevelMerkleRoot(const CBlock& block, BlockValidationState& state, const CBlockIndex* pprevIndex)
+bool VerifyTopLevelMerkleRoot(const CBlock& block, const CBlockIndex* pprevIndex, BlockValidationState& state)
 {
     bool mutated = false;
     uint256 hashMerkleRoot2 = VeriBlock::TopLevelMerkleRoot(pprevIndex, block, &mutated);
@@ -112,6 +116,10 @@ bool VerifyTopLevelMerkleRoot(const CBlock& block, BlockValidationState& state, 
     // while still invalidating it.
     if (mutated) {
         return state.Invalid(BlockValidationResult::BLOCK_MUTATED, "bad-txns-duplicate", "duplicate transaction");
+    }
+
+    if (pprevIndex == nullptr || !Params().isPopEnabled(pprevIndex->nHeight + 1)) {
+        return true;
     }
 
     // Add PopMerkleRoot commitment validation

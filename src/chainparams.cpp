@@ -31,11 +31,8 @@
 /**
  * Main network
  */
-class CMainParams : public CChainParams
+CMainParams::CMainParams()
 {
-public:
-    CMainParams()
-    {
         strNetworkID = CBaseChainParams::MAIN;
         consensus.nSubsidyHalvingInterval = 210000;
         consensus.BIP16Exception = uint256S("0x00000000000002dc756eebf4f49723ed8d30cc28a5f108eb94b1ba88ac4f9c22");
@@ -62,6 +59,10 @@ public:
 
         // By default assume that the signatures in ancestors of this block are valid.
         consensus.defaultAssumeValid = uint256S("0x00000000000000000005f8920febd3925f8272a6a71237563d78c2edfdd09ddf"); // 597379
+
+        // VeriBlock
+        // TODO: set an VeriBlock pop security fork height
+        consensus.VeriBlockPopSecurityHeight = -1;
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -115,17 +116,13 @@ public:
             /* nTxCount */ 460596047,
             /* dTxRate  */ 3.77848885073875,
         };
-    }
-};
+ }
 
 /**
  * Testnet (v3)
  */
-class CTestNetParams : public CChainParams
-{
-public:
-    CTestNetParams()
-    {
+ CTestNetParams::CTestNetParams()
+ {
         strNetworkID = CBaseChainParams::TESTNET;
         consensus.nSubsidyHalvingInterval = 210000;
         consensus.BIP16Exception = uint256S("0x00000000dd30457c001f4095d208cc1296b0eed002427aa599874af7a432b105");
@@ -152,6 +149,10 @@ public:
 
         // By default assume that the signatures in ancestors of this block are valid.
         consensus.defaultAssumeValid = uint256S("0x00000000000000b7ab6ce61eb6d571003fbe5fe892da4c9b740c49a07542462d"); // 1580000
+
+        // VeriBlock
+        // TODO: set an VeriBlock pop security fork height
+        consensus.VeriBlockPopSecurityHeight = -1;
 
         pchMessageStart[0] = 2;
         pchMessageStart[1] = 2;
@@ -203,17 +204,13 @@ public:
             /* nTxCount */ 0,
             /* dTxRate  */ 0,
         };
-    }
-};
+}
 
 /**
  * Regression test
  */
-class CRegTestParams : public CChainParams
+CRegTestParams::CRegTestParams(const ArgsManager& args)
 {
-public:
-    explicit CRegTestParams(const ArgsManager& args)
-    {
         strNetworkID = CBaseChainParams::REGTEST;
         consensus.nSubsidyHalvingInterval = 150;
         consensus.BIP16Exception = uint256();
@@ -240,6 +237,10 @@ public:
 
         // By default assume that the signatures in ancestors of this block are valid.
         consensus.defaultAssumeValid = uint256S("0x00");
+
+        // VeriBlock
+        // TODO: set an VeriBlock pop security fork height
+        consensus.VeriBlockPopSecurityHeight = 200;
 
         pchMessageStart[0] = 3;
         pchMessageStart[1] = 3;
@@ -282,18 +283,16 @@ public:
         base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x35, 0x83, 0x94};
 
         bech32_hrp = "bcrt";
-    }
+}
 
-    /**
-     * Allows modifying the Version Bits regtest parameters.
-     */
-    void UpdateVersionBitsParameters(Consensus::DeploymentPos d, int64_t nStartTime, int64_t nTimeout)
-    {
-        consensus.vDeployments[d].nStartTime = nStartTime;
-        consensus.vDeployments[d].nTimeout = nTimeout;
-    }
-    void UpdateActivationParametersFromArgs(const ArgsManager& args);
-};
+/**
+ * Allows modifying the Version Bits regtest parameters.
+ */
+void CRegTestParams::UpdateVersionBitsParameters(Consensus::DeploymentPos d, int64_t nStartTime, int64_t nTimeout)
+{
+    consensus.vDeployments[d].nStartTime = nStartTime;
+    consensus.vDeployments[d].nTimeout = nTimeout;
+}
 
 void CRegTestParams::UpdateActivationParametersFromArgs(const ArgsManager& args)
 {
