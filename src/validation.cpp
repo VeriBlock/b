@@ -2656,7 +2656,7 @@ CBlockIndex* CChainState::FindBestChain()
         }
         else
         {
-            popComparisonResult = CBlockIndexWorkComparator()(bestCandidate, pindexNew) == true ? -1 : 1;
+            popComparisonResult = CBlockIndexWorkComparator()(bestCandidate, pindexNew) ? -1 : 1;
         }
 
         // even if next candidate is pop equal to current pindexNew, it is likely to have higher work
