@@ -142,13 +142,17 @@ struct E2eFixture : public TestChain100Setup {
         for (const auto& atv : atvs) {
             pop_mempool.submit(atv, state);
         }
+        BOOST_CHECK(state.IsValid());
 
         for (const auto& vtb : vtbs) {
             pop_mempool.submit(vtb, state);
         }
+        BOOST_CHECK(state.IsValid());
 
         bool isValid = false;
-        return CreateAndProcessBlock({}, prevBlock, cbKey, &isValid);
+        const auto& block = CreateAndProcessBlock({}, prevBlock, cbKey, &isValid);
+        BOOST_CHECK(isValid);
+        return block;
     }
 
     CBlock endorseAltBlockAndMine(uint256 hash, uint256 prevBlock, const std::vector<uint8_t>& payoutInfo, size_t generateVtbs = 0)

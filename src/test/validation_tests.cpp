@@ -57,9 +57,10 @@ BOOST_AUTO_TEST_CASE(block_subsidy_test)
 
 BOOST_AUTO_TEST_CASE(subsidy_limit_test)
 {
-    const auto chainParams = CreateChainParams(CBaseChainParams::MAIN);
+    const auto chainParams = CreateChainParams(CBaseChainParams::REGTEST);
     CAmount nSum = 0;
-    for (int nHeight = 0; nHeight < 14000000; nHeight += 1000) {
+    // skip first 1000 blocks to make sure POP security is ON
+    for (int nHeight = 1000; nHeight < 14000000; nHeight += 1000) {
         CAmount nSubsidy = GetBlockSubsidy(nHeight, *chainParams);
         BOOST_CHECK(nSubsidy <= 50 * COIN);
         nSum += nSubsidy * 1000;
@@ -67,8 +68,8 @@ BOOST_AUTO_TEST_CASE(subsidy_limit_test)
     }
     // with 50 vBTC payout:
 //    BOOST_CHECK_EQUAL(nSum, CAmount{2099999997690000});
-    // with 50*60% vBTC payout:
-    BOOST_CHECK_EQUAL(nSum, CAmount{1259999997480000});
+    // with 50*60% vBTC payout and RegTest
+    BOOST_CHECK_EQUAL(nSum, CAmount{47244115000});
 }
 
 static bool ReturnFalse() { return false; }
