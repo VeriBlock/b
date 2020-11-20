@@ -2650,7 +2650,7 @@ CBlockIndex* CChainState::FindBestChain()
 
         int popComparisonResult = 0;
 
-        if (Params().isPopEnabled(bestCandidate->nHeight))
+        if (Params().isPopActive(bestCandidate->nHeight))
         {
             popComparisonResult = VeriBlock::compareForks(*bestCandidate, *pindexNew);
         }
@@ -3567,7 +3567,7 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidatio
             strprintf("rejected nVersion=0x%08x block", block.nVersion));
 
     // VeriBlock validation
-    if ((block.nVersion & VeriBlock::POP_BLOCK_VERSION_BIT) && !params.isPopEnabled(nHeight)) {
+    if ((block.nVersion & VeriBlock::POP_BLOCK_VERSION_BIT) && !params.isPopActive(nHeight)) {
         return state.Invalid(
             BlockValidationResult::BLOCK_INVALID_HEADER,
             strprintf("bad-pop-version(0x%08x)", block.nVersion),

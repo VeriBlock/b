@@ -50,7 +50,7 @@ struct E2eFixture : public TestChain100Setup {
 
         // create N blocks necessary to start POP fork resolution
         CScript scriptPubKey = CScript() << ToByteVector(coinbaseKey.GetPubKey()) << OP_CHECKSIG;   
-        while (!Params().isPopEnabled(ChainActive().Tip()->nHeight))
+        while (!Params().isPopActive(ChainActive().Tip()->nHeight))
         {
             CBlock b = CreateAndProcessBlock({}, scriptPubKey);
             m_coinbase_txns.push_back(b.vtx[0]);
@@ -141,13 +141,13 @@ struct E2eFixture : public TestChain100Setup {
         altintegration::ValidationState state;
         for (const auto& atv : atvs) {
             pop_mempool.submit(atv, state);
+            BOOST_CHECK(state.IsValid());
         }
-        BOOST_CHECK(state.IsValid());
 
         for (const auto& vtb : vtbs) {
             pop_mempool.submit(vtb, state);
+            BOOST_CHECK(state.IsValid());
         }
-        BOOST_CHECK(state.IsValid());
 
         bool isValid = false;
         const auto& block = CreateAndProcessBlock({}, prevBlock, cbKey, &isValid);

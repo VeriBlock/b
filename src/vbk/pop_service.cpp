@@ -62,7 +62,7 @@ CBlockIndex* compareTipToBlock(CBlockIndex* candidate)
     }
 
    int result = 0;
-    if (Params().isPopEnabled(tip->nHeight)) {
+    if (Params().isPopActive(tip->nHeight)) {
         result = compareForks(*tip, *candidate);
     } else {
         result = CBlockIndexWorkComparator()(tip, candidate) ? -1 : 1;
@@ -176,7 +176,7 @@ PoPRewards getPopRewards(const CBlockIndex& pindexPrev, const CChainParams& para
     AssertLockHeld(cs_main);
     const auto& pop = GetPop();
 
-    if (!params.isPopEnabled(pindexPrev.nHeight)) {
+    if (!params.isPopActive(pindexPrev.nHeight)) {
         return {};
     }
 
@@ -419,7 +419,7 @@ int compareForks(const CBlockIndex& leftForkTip, const CBlockIndex& rightForkTip
 
 CAmount getCoinbaseSubsidy(const CAmount& subsidy, int32_t height, const CChainParams& params)
 {
-    if (!params.isPopEnabled(height)) {
+    if (!params.isPopActive(height)) {
         return subsidy;
     }
 
