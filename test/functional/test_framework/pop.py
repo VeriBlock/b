@@ -231,3 +231,6 @@ def sync_pop_mempools(rpc_connections, *, wait=1, timeout=60, flush_scheduler=Tr
         "".join("\n  {!r}".format(m) for m in vtbs),
         "".join("\n  {!r}".format(m) for m in vbkblocks)
     ))
+
+def mine_until_pop_enabled(node):
+    node.generate(nblocks=200)
