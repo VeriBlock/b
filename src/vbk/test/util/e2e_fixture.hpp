@@ -141,12 +141,12 @@ struct E2eFixture : public TestChain100Setup {
         altintegration::ValidationState state;
         for (const auto& atv : atvs) {
             pop_mempool.submit(atv, state);
-            BOOST_CHECK(state.IsValid());
+            // do not check the submit result - expect statefully invalid data for testing purposes
         }
 
         for (const auto& vtb : vtbs) {
             pop_mempool.submit(vtb, state);
-            BOOST_CHECK(state.IsValid());
+            // do not check the submit result - expect statefully invalid data for testing purposes
         }
 
         bool isValid = false;
