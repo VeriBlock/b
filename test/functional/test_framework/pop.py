@@ -233,4 +233,8 @@ def sync_pop_mempools(rpc_connections, *, wait=1, timeout=60, flush_scheduler=Tr
     ))
 
 def mine_until_pop_enabled(node):
-    node.generate(nblocks=200)
+    existing = node.getblockcount()
+    activate = node.getblockchaininfo()['softforks']['pop_security']['height']
+    assert activate > 0
+    if existing < activate:
+        node.generate(nblocks=(activate - existing))
