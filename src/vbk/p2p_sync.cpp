@@ -92,6 +92,7 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
 
     // do not process 'offers' during initial block download
     if (::ChainstateActive().IsInitialBlockDownload()) {
+        // TODO: may want to keep a list of offered payloads, then filter all existing (on-chain) payloadsm and 'GET' others
         return true;
     }
 
