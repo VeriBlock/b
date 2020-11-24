@@ -61,6 +61,7 @@ class PopE2E(BitcoinTestFramework):
             self.apm.endorseVbkBlock(self.apm.vbkTip, self.apm.btcTip.getHash(), 1)
 
         self.nodes[0].generate(nblocks=10)
+        lastblock = self.nodes[0].getblockcount()
 
         assert lastblock >= 5
         self.log.info("endorse {} alt block".format(lastblock - 5))
