@@ -87,7 +87,11 @@ KeystoneArray getKeystoneHashesForTheNextBlock(const CBlockIndex* pindexPrev)
 
 uint256 TopLevelMerkleRoot(const CBlockIndex* prevIndex, const CBlock& block, bool* mutated)
 {
-    if (prevIndex == nullptr || !Params().isPopActive(prevIndex->nHeight + 1)) {
+    int currentHeight = 0;
+    if (prevIndex != nullptr) {
+        currentHeight = prevIndex->nHeight + 1;
+    }
+    if (!Params().isPopActive(currentHeight)) {
         return BlockMerkleRoot(block);
     }
 
@@ -118,7 +122,12 @@ bool VerifyTopLevelMerkleRoot(const CBlock& block, const CBlockIndex* pprevIndex
         return state.Invalid(BlockValidationResult::BLOCK_MUTATED, "bad-txns-duplicate", "duplicate transaction");
     }
 
-    if (pprevIndex == nullptr || !Params().isPopActive(pprevIndex->nHeight + 1)) {
+    int currentHeight = 0;
+    if (pprevIndex != nullptr) {
+        currentHeight = pprevIndex->nHeight + 1;
+    }
+
+    if (!Params().isPopActive(currentHeight)) {
         return true;
     }
 

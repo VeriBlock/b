@@ -91,6 +91,7 @@ class PopFr(BitcoinTestFramework):
 
         # mine 10 more blocks to fork A
         self.nodes[0].generate(nblocks=10)
+        self.sync_all(self.nodes[0:2])
         self.log.info("nodes[0,1] are in sync and are at fork A (%d...%d blocks)", lastblock + 103, lastblock + 113)
 
         # fork B is at 400

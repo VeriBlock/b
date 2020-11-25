@@ -46,8 +46,9 @@ class PopActivate(BitcoinTestFramework):
 
         # node0 start with 100 blocks
         self.nodes[0].generate(nblocks=100)
-        self.log.info("node0 mined 100 blocks")
+        self.nodes[0].waitforblockheight(100)
         assert self.get_best_block(self.nodes[0])['height'] == 100
+        self.log.info("node0 mined 100 blocks")
 
         # endorse block 100 (fork A tip)
         addr0 = self.nodes[0].getnewaddress()
