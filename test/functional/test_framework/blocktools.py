@@ -125,12 +125,8 @@ def create_coinbase(height, pubkey=None):
         coinbaseoutput.scriptPubKey = CScript([pubkey, OP_CHECKSIG])
     else:
         coinbaseoutput.scriptPubKey = CScript([OP_TRUE])
-    popout = CTxOut()
-    popout.nValue = 0
-    popout.scriptPubKey = CScript([OP_RETURN, b'\x3a\xe6\xca' + b'\x00' * 32])
-    assert len(popout.scriptPubKey) == 37, "len(script)={}\nscript:{}".format(len(popout.scriptPubKey), popout.scriptPubKey.hex())
     # popMerkleRoot is assumed to be 32 zeroes (no pop txes in a block)
-    coinbase.vout = [coinbaseoutput, popout]
+    coinbase.vout = [coinbaseoutput]
     coinbase.calc_sha256()
     return coinbase
 

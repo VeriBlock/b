@@ -267,18 +267,6 @@ bool checkCoinbaseTxWithPopRewards(const CTransaction& tx, const CAmount& nFees,
     return true;
 }
 
-std::vector<BlockBytes> getLastKnownVBKBlocks(size_t blocks)
-{
-    LOCK(cs_main);
-    return altintegration::getLastKnownBlocks(GetPop().altTree->vbk(), blocks);
-}
-
-std::vector<BlockBytes> getLastKnownBTCBlocks(size_t blocks)
-{
-    LOCK(cs_main);
-    return altintegration::getLastKnownBlocks(GetPop().altTree->btc(), blocks);
-}
-
 bool hasPopData(CBlockTreeDB& db)
 {
     return db.Exists(BlockBatchAdaptor::btctip()) && db.Exists(BlockBatchAdaptor::vbktip()) && db.Exists(BlockBatchAdaptor::alttip());

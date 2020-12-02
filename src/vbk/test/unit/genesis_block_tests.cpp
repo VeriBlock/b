@@ -80,21 +80,21 @@ BOOST_FIXTURE_TEST_CASE(test, GenesisBlockFixture)
 
 BOOST_FIXTURE_TEST_CASE(regtest, GenesisBlockFixture)
 {
-    //    // Do the actual block mining
-    //    {
-    //        init("regtest");
-    //
-    //        CBlock block = VeriBlock::MineGenesisBlock(
-    //            1337,
-    //            pszTimestamp,
-    //            initialPubkey,
-    //            0x207fffff,
-    //            1, // version
-    //            0, // starting nonce
-    //            50 * COIN);
-    //
-    //        printf("BLOCK:\n%s\n", block.ToString().c_str());
-    //    }
+//        // Do the actual block mining
+//        {
+//            init("regtest");
+//
+//            CBlock block = VeriBlock::MineGenesisBlock(
+//                1337,
+//                pszTimestamp,
+//                initialPubkey,
+//                0x207fffff,
+//                1, // version
+//                0, // starting nonce
+//                50 * COIN);
+//
+//            printf("BLOCK:\n%s\n", block.ToString().c_str());
+//        }
 
     check("regtest");
 }

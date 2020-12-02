@@ -9,7 +9,6 @@
 #include <rpc/util.h>
 #include <util/validation.h>
 #include <validation.h>
-#include <vbk/entity/context_info_container.hpp>
 #include <vbk/p2p_sync.hpp>
 #include <wallet/rpcwallet.h>
 #include <wallet/wallet.h> // for CWallet
@@ -66,13 +65,8 @@ UniValue getpopdata(const JSONRPCRequest& request)
             "\nResult:\n"
             "{\n"
             "    \"block_header\" : \"block_header_hex\",  (string) Hex-encoded block header\n"
-            "    \"raw_contextinfocontainer\" : \"contextinfocontainer\",  (string) Hex-encoded raw authenticated ContextInfoContainer structure\n"
-            "    \"last_known_veriblock_blocks\" : [ (array) last known VeriBlock blocks at the given Bitcoin block\n"
-            "        \"blockhash\",                (string) VeriBlock block hash\n"
-            "       ... ]\n"
-            "    \"last_known_bitcoin_blocks\" : [ (array) last known Bitcoin blocks at the given Bitcoin block\n"
-            "        \"blockhash\",                (string) Bitcoin block hash\n"
-            "       ... ]\n"
+            "    \"last_vbk_block\" : \"...\" (hexstr) last known VeriBlock block\n"
+            "    \"last_btc_block\" : \"...\" (hexstr) last known Bitcoin block\n"
             "}\n"
             "\nExamples:\n" +
             HelpExampleCli("getpopdata", "1000") + HelpExampleRpc("getpopdata", "1000"));
@@ -87,16 +81,12 @@ UniValue getpopdata(const JSONRPCRequest& request)
     wallet->BlockUntilSyncedToCurrentChain();
 
     int height = request.params[0].get_int();
-
     LOCK2(cs_main, wallet->cs_wallet);
-
     uint256 blockhash = GetBlockHashByHeight(height);
-
     UniValue result(UniValue::VOBJ);
 
-    //get the block and its header
+    // get the block and its header
     const CBlockIndex* pBlockIndex = LookupBlockIndex(blockhash);
-
     if (!pBlockIndex) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
     }
@@ -106,28 +96,9 @@ UniValue getpopdata(const JSONRPCRequest& request)
     result.pushKV("block_header", HexStr(ssBlock));
 
     auto block = GetBlockChecked(pBlockIndex);
-
-    //context info
-    uint256 txRoot = BlockMerkleRoot(block);
-    auto keystones = VeriBlock::getKeystoneHashesForTheNextBlock(pBlockIndex->pprev);
-    auto contextInfo = VeriBlock::ContextInfoContainer(pBlockIndex->nHeight, keystones, txRoot);
-    auto authedContext = contextInfo.getAuthenticated();
-    result.pushKV("raw_contextinfocontainer", HexStr(authedContext.begin(), authedContext.end()));
-
-    auto lastVBKBlocks = VeriBlock::getLastKnownVBKBlocks(16);
-
-    UniValue univalueLastVBKBlocks(UniValue::VARR);
-    for (const auto& b : lastVBKBlocks) {
-        univalueLastVBKBlocks.push_back(HexStr(b));
-    }
-    result.pushKV("last_known_veriblock_blocks", univalueLastVBKBlocks);
-
-    auto lastBTCBlocks = VeriBlock::getLastKnownBTCBlocks(16);
-    UniValue univalueLastBTCBlocks(UniValue::VARR);
-    for (const auto& b : lastBTCBlocks) {
-        univalueLastBTCBlocks.push_back(HexStr(b));
-    }
-    result.pushKV("last_known_bitcoin_blocks", univalueLastBTCBlocks);
+    auto& alttree = *VeriBlock::GetPop().altTree;
+    result.pushKV("last_vbk_block", HexStr(alttree.vbk().getBestChain().tip()->getHash().asVector()));
+    result.pushKV("last_btc_block", HexStr(alttree.btc().getBestChain().tip()->getHash().asVector()));
 
     return result;
 }

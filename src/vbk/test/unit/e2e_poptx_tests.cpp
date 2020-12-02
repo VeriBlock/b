@@ -22,6 +22,8 @@ BOOST_AUTO_TEST_SUITE(e2e_poptx_tests)
 
 BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
 {
+    auto& pop = VeriBlock::GetPop();
+
     // altintegration and popminer configured to use BTC/VBK/ALT regtest.
     auto tip = ChainActive().Tip();
     BOOST_CHECK(tip != nullptr);
@@ -32,9 +34,9 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
     BOOST_CHECK(block.popData.vtbs.size() == 10);
     {
         BOOST_REQUIRE(ChainActive().Tip()->GetBlockHash() == block.GetHash());
-        auto btc = VeriBlock::getLastKnownBTCBlocks(1)[0];
+        auto btc = pop.altTree->btc().getBestChain().tip()->getHash();
         BOOST_REQUIRE(btc == popminer.btc().getBestChain().tip()->getHash());
-        auto vbk = VeriBlock::getLastKnownVBKBlocks(1)[0];
+        auto vbk = pop.altTree->vbk().getBestChain().tip()->getHash();
         BOOST_REQUIRE(vbk == popminer.vbk().getBestChain().tip()->getHash());
     }
 
@@ -44,9 +46,9 @@ BOOST_FIXTURE_TEST_CASE(ValidBlockIsAccepted, E2eFixture)
     auto lastHash = ChainActive().Tip()->GetBlockHash();
     {
         BOOST_REQUIRE(lastHash == block.GetHash());
-        auto btc = VeriBlock::getLastKnownBTCBlocks(1)[0];
+        auto btc = pop.altTree->btc().getBestChain().tip()->getHash();
         BOOST_REQUIRE(btc == popminer.btc().getBestChain().tip()->getHash());
-        auto vbk = VeriBlock::getLastKnownVBKBlocks(1)[0];
+        auto vbk = pop.altTree->vbk().getBestChain().tip()->getHash();
         BOOST_REQUIRE(vbk == popminer.vbk().getBestChain().tip()->getHash());
     }
 

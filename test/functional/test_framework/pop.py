@@ -29,7 +29,7 @@ def getPreviousKeystoneHeight(height):
 
 
 def getKeystones(node, height):
-    zero = '00' * 32
+    zero = ''
     if height == 0:
         return [zero, zero]
 
@@ -79,8 +79,8 @@ def endorse_block(node, apm, height: int, addr: str, vtbs: Optional[int] = None)
     payoutInfo = script.hex()
 
     popdata = node.getpopdata(height)
-    last_btc = popdata['last_known_bitcoin_blocks'][0]
-    last_vbk = popdata['last_known_veriblock_blocks'][0]
+    last_btc = popdata['last_btc_block']
+    last_vbk = popdata['last_vbk_block']
     header = popdata['block_header']
     pub = PublicationData()
     pub.header = header

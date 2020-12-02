@@ -3495,8 +3495,6 @@ std::vector<unsigned char> GenerateCoinbaseCommitment(CBlock& block, const CBloc
             commitment = std::vector<unsigned char>(out.scriptPubKey.begin(), out.scriptPubKey.end());
             CMutableTransaction tx(*block.vtx[0]);
             tx.vout.push_back(out);
-            CTxOut popOut = VeriBlock::addPopDataRootIntoCoinbaseCommitment(block);
-            tx.vout.push_back(popOut);
             block.vtx[0] = MakeTransactionRef(std::move(tx));
         }
     }
@@ -4775,7 +4773,7 @@ bool CChainState::LoadGenesisBlock(const CChainParams& chainparams)
         CBlockIndex* pindex = m_blockman.AddToBlockIndex(block);
         BlockValidationState state;
         if (!VeriBlock::acceptBlock(*pindex, state)) {
-            return false;
+            return error("%s: accepting block to AltTree failed %s", __func__, state.ToString());
         }
         ReceivedBlockTransactions(block, pindex, blockPos, chainparams.GetConsensus());
     } catch (const std::runtime_error& e) {

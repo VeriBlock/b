@@ -48,39 +48,4 @@ BOOST_FIXTURE_TEST_CASE(TestChain100Setup_has_valid_merkle_roots, MerkleFixture)
     }
 }
 
-BOOST_FIXTURE_TEST_CASE(addPopTransactionRootIntoCoinbaseCommitment_test, MerkleFixture)
-{
-
-    // TODO add PopData into the mempool
-
-    CScript scriptPubKey = CScript() << ToByteVector(blockchain.coinbaseKey.GetPubKey()) << OP_CHECKSIG;
-
-    CBlock block = blockchain.CreateAndProcessBlock({}, scriptPubKey);
-    CBlockIndex* index = ChainActive().Tip();
-
-    BlockValidationState state;
-    BOOST_CHECK(VeriBlock::VerifyTopLevelMerkleRoot(block, index->pprev, state));
-
-    // change pop merkle root
-    int commitpos = VeriBlock::GetPopMerkleRootCommitmentIndex(block);
-    BOOST_CHECK(commitpos != -1);
-    CMutableTransaction tx(*block.vtx[0]);
-    tx.vout[0].scriptPubKey[4] = 0xff;
-    tx.vout[0].scriptPubKey[5] = 0xff;
-    tx.vout[0].scriptPubKey[6] = 0xff;
-    tx.vout[0].scriptPubKey[7] = 0xff;
-    tx.vout[0].scriptPubKey[8] = 0xff;
-    tx.vout[0].scriptPubKey[9] = 0xff;
-    tx.vout[0].scriptPubKey[10] = 0xff;
-    block.vtx[0] = MakeTransactionRef(tx);
-
-    BOOST_CHECK(!VeriBlock::VerifyTopLevelMerkleRoot(block, index->pprev, state));
-
-    // erase commitment
-    tx.vout.erase(tx.vout.begin() + commitpos);
-    block.vtx[0] = MakeTransactionRef(tx);
-
-    BOOST_CHECK(!VeriBlock::VerifyTopLevelMerkleRoot(block, index->pprev, state));
-}
-
 BOOST_AUTO_TEST_SUITE_END()

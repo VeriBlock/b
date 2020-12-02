@@ -399,10 +399,10 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
             "  \"height\" : n                      (numeric) The height of the next block\n"
             "  \"default_witness_commitment\" : \"xxxx\" (string) coinbase witness commitment \n"
             "  \"pop_keystone_hashes\" : [ \"keystone_hash1\" ...]  (array of strings) keystone hashes for the block.\n"
-            "  \"pop_output\" : \"xxxx\"   (string) Script with Merkle root of POP data for new block.\n"
-            "  \"pop_data\" : { \"atvs\": [], \"vtbs\": [], \"vbkblocks\": [] }   (object) Valid POP data that must be included in next block in order they appear here (vbkblocks, vtbs, atvs).\n"
+            "  \"pop_contextinfohash\" : \"xxxx\"   (string) Hash of ContextInfoContainer.\n"
+            "  \"pop_data\" : { \"atvs\": [], \"vtbs\": [], \"vbkblocks\": [], \"version\": 1 }   (object) Valid POP data that must be included in next block in order they appear here (vbkblocks, vtbs, atvs).\n"
             "  \"pop_payout\" : [                 (array) List of POP payouts that must be addedd to next coinbase in order they appear in array.\n"
-                  "\"payout_info\": \"...\",\n"
+                  "\"payout_script\": \"...\",\n"
                   "\"amount\": xxx\n"
             "   ]\n"
             "}\n"
@@ -718,44 +718,23 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
         result.pushKV("default_witness_commitment", HexStr(pblocktemplate->vchCoinbaseCommitment.begin(), pblocktemplate->vchCoinbaseCommitment.end()));
     }
 
-    //VeriBlock Data
-    UniValue keystoneArray(UniValue::VARR);
-    VeriBlock::KeystoneArray keystones = VeriBlock::getKeystoneHashesForTheNextBlock(pindexPrev);
-    for (const auto& keystone : keystones) {
-        keystoneArray.push_back(keystone.GetHex());
-    }
-    result.pushKV("pop_keystone_hashes", keystoneArray);
-
-    auto& popctx = VeriBlock::GetPop();
-    pblock->popData = popctx.mempool->getPop();
-    CTxOut popOutput = VeriBlock::addPopDataRootIntoCoinbaseCommitment(*pblock);
-    result.pushKV("pop_output", HexStr(popOutput.scriptPubKey.begin(), popOutput.scriptPubKey.end()));
+    // POP-related section:
+    altintegration::KeystoneContainer keystones = VeriBlock::GetKeystones(pindexPrev);
+    result.pushKV("pop_keystones", altintegration::ToJSON<UniValue>(keystones));
 
     // add pop data
-    UniValue popData(UniValue::VOBJ);
-    UniValue popDataAtvs(UniValue::VARR);
-    for(auto& atv : pblock->popData.atvs) {
-        popDataAtvs.push_back(atv.getId().toHex());
-    }
-    UniValue popDataVtbs(UniValue::VARR);
-    for(auto& vtb : pblock->popData.vtbs) {
-        popDataVtbs.push_back(vtb.getId().toHex());
-    }
-    UniValue popDataVbks(UniValue::VARR);
-    for(auto& vbk : pblock->popData.context) {
-        popDataVbks.push_back(vbk.getId().toHex());
-    }
-    popData.pushKV("atvs", popDataAtvs);
-    popData.pushKV("vtbs", popDataVtbs);
-    popData.pushKV("vbkblocks", popDataVbks);
-    result.pushKV("pop_data", popData);
+    auto& popctx = VeriBlock::GetPop();
+    pblock->popData = popctx.mempool->getPop();
+    result.pushKV("pop_data", altintegration::ToJSON<UniValue>(pblock->popData, false));
+    auto contextInfoHash = VeriBlock::CalculateContextInfoContainerHash(pindexPrev, pblock->popData);
+    result.pushKV("pop_contextinfohash", HexStr(contextInfoHash));
 
     // pop rewards
     UniValue popRewardsArray(UniValue::VARR);
     VeriBlock::PoPRewards popRewards = VeriBlock::getPopRewards(*pindexPrev, Params());
     for (const auto& itr : popRewards) {
         UniValue popRewardValue(UniValue::VOBJ);
-        popRewardValue.pushKV("payout_info", HexStr(itr.first.begin(), itr.first.end()));
+        popRewardValue.pushKV("payout_script", HexStr(itr.first.begin(), itr.first.end()));
         popRewardValue.pushKV("amount", itr.second);
         popRewardsArray.push_back(popRewardValue);
     }

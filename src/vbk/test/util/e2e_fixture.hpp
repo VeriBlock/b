@@ -80,16 +80,12 @@ struct E2eFixture : public TestChain100Setup {
 
     BtcBlock::hash_t getLastKnownBTCblock()
     {
-        auto blocks = VeriBlock::getLastKnownBTCBlocks(1);
-        BOOST_CHECK(blocks.size() == 1);
-        return blocks[0];
+        return VeriBlock::GetPop().altTree->btc().getBestChain().tip()->getHash();
     }
 
     VbkBlock::hash_t getLastKnownVBKblock()
     {
-        auto blocks = VeriBlock::getLastKnownVBKBlocks(1);
-        BOOST_CHECK(blocks.size() == 1);
-        return blocks[0];
+        return VeriBlock::GetPop().altTree->vbk().getBestChain().tip()->getHash();
     }
 
     ATV endorseAltBlock(uint256 hash, const std::vector<VTB>& vtbs, const std::vector<uint8_t>& payoutInfo)
