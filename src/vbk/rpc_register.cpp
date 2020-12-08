@@ -14,6 +14,7 @@
 #include <wallet/rpcwallet.h>
 #include <wallet/wallet.h> // for CWallet
 
+#include <algorithm>
 #include <fstream>
 #include <set>
 
@@ -25,6 +26,14 @@
 namespace VeriBlock {
 
 namespace {
+
+void ToLower(std::string& str)
+{
+    std::locale loc;
+    std::transform(str.begin(), str.end(), str.begin(), [&loc](char a) {
+        return std::tolower(a, loc);
+    });
+}
 
 uint256 GetBlockHashByHeight(const int height)
 {
@@ -231,8 +240,10 @@ static BtcTree& btc()
 
 // submitpop
 namespace {
-void check_submitpop(const JSONRPCRequest& request, const std::string& popdata)
+void check_submitpop(const JSONRPCRequest& request, std::string popdata)
 {
+    ToLower(popdata);
+
     auto cmdname = strprintf("submitpop%s", popdata);
     RPCHelpMan{
         cmdname,
@@ -277,7 +288,7 @@ UniValue submitpopvtb(const JSONRPCRequest& request)
 {
     return submitpopIt<altintegration::VTB>(request);
 }
-UniValue submitpopvbkblock(const JSONRPCRequest& request)
+UniValue submitpopvbk(const JSONRPCRequest& request)
 {
     return submitpopIt<altintegration::VbkBlock>(request);
 }
@@ -345,7 +356,7 @@ UniValue getbtcblock(const JSONRPCRequest& req)
 namespace {
 void check_getbestblockhash(const JSONRPCRequest& request, const std::string& chain)
 {
-    auto cmdname = strprintf("get%bestblockhash", chain);
+    auto cmdname = strprintf("get%sbestblockhash", chain);
     RPCHelpMan{
         cmdname,
         "\nReturns the hash of the best (tip) block in the most-work fully-validated chain.\n",
@@ -661,11 +672,114 @@ UniValue getrawvbkblock(const JSONRPCRequest& req)
 
 } // namespace
 
+// get{vbk,btc}chaintips
+namespace {
+void check_getchaintips(const JSONRPCRequest& request, std::string chain)
+{
+    ToLower(chain);
+    auto cmdname = strprintf("get%schaintips", chain);
+    RPCHelpMan{
+        cmdname,
+        "Return information about all known tips in the " + chain + " block tree,"
+                                                                    " including the main chain as well as orphaned branches.\n",
+        {},
+        RPCResult{
+            "[\n"
+            "  {\n"
+            "    \"height\": xxxx,         (numeric) height of the chain tip\n"
+            "    \"hash\": \"xxxx\",         (string) block hash of the tip\n"
+            "    \"branchlen\": 0          (numeric) zero for main chain\n"
+            "    \"statusflags\": 0          (numeric) BlockIndex::getStatus() value\n"
+            "    \"status\": \"active\"      (string) \"active\" for the main chain\n"
+            "  },\n"
+            "  {\n"
+            "    \"height\": xxxx,\n"
+            "    \"hash\": \"xxxx\",\n"
+            "    \"branchlen\": 1          (numeric) length of branch connecting the tip to the main chain\n"
+            "    \"statusflags\": 0          (numeric) BlockIndex::getStatus() value\n"
+            "    \"status\": \"xxxx\"        (string) status of the chain (active, valid-fork, valid-headers, headers-only, invalid)\n"
+            "  }\n"
+            "]\n"
+            "Possible values for status:\n"
+            "1.  \"invalid\"               This branch contains at least one invalid block\n"
+            "2.  \"headers-only\"          Not all blocks for this branch are available, but the headers are valid\n"
+            "3.  \"valid-headers\"         All blocks are available for this branch, but they were never fully validated\n"
+            "4.  \"valid-fork\"            This branch is not part of the active chain, but is fully validated\n"
+            "5.  \"active\"                This is the tip of the active main chain, which is certainly valid\n"},
+        RPCExamples{
+            HelpExampleCli(cmdname, "") + HelpExampleRpc(cmdname, "")},
+    }
+        .Check(request);
+}
+
+template <typename BlockTreeT>
+UniValue getchaintips(const JSONRPCRequest& req, const std::string& chainname, BlockTreeT& tree)
+{
+    check_getchaintips(req, chainname);
+    LOCK(cs_main);
+    const auto& tips = tree.getTips();
+
+    using index_t = typename BlockTreeT::index_t;
+
+    UniValue res(UniValue::VARR);
+    for (const index_t* block : tips) {
+        UniValue obj(UniValue::VOBJ);
+        obj.pushKV("height", block->getHeight());
+        obj.pushKV("hash", block->getHash().toHex());
+        obj.pushKV("statusflags", (uint64_t)block->getStatus());
+
+        auto* forkBlock = tree.getBestChain().findFork(block);
+        assert(forkBlock && "should have found this fork! state corruption.");
+        const int branchLen = block->getHeight() - forkBlock->getHeight();
+        obj.pushKV("branchlen", branchLen);
+
+        std::string status;
+        if (tree.getBestChain().contains(block)) {
+            // This block is part of the currently active chain.
+            status = "active";
+        } else if (block->hasFlags(altintegration::BLOCK_FAILED_MASK)) {
+            // This block or one of its ancestors is invalid.
+            status = "invalid";
+        } else if (!block->isConnected()) {
+            // This block cannot be connected because full block data for it or one of its parents is missing.
+            status = "headers-only";
+        } else if (block->isValid(altintegration::BLOCK_CAN_BE_APPLIED)) {
+            // This block is fully validated, but no longer part of the active chain. It was probably the active block once, but was reorganized.
+            status = "valid-fork";
+        } else if (block->isConnected()) {
+            // The headers for this block are valid, but it has not been validated. It was probably never part of the best chain.
+            status = "valid-headers";
+        } else {
+            // No clue.
+            status = "unknown";
+        }
+        obj.pushKV("status", status);
+
+        res.push_back(obj);
+    }
+
+    return res;
+}
+
+UniValue getbtcchaintips(const JSONRPCRequest& req)
+{
+    return getchaintips(req, "btc", btc());
+}
+
+UniValue getvbkchaintips(const JSONRPCRequest& req)
+{
+    return getchaintips(req, "vbk", vbk());
+}
+
+} // namespace
+
 const CRPCCommand commands[] = {
     {"pop_mining", "submitpop", &submitpop, {"vbkblocks", "vtbs", "atvs"}},
     {"pop_mining", "submitpopatv", &submitpopatv, {"atv"}},
     {"pop_mining", "submitpopvtb", &submitpopvtb, {"vtb"}},
-    {"pop_mining", "submitpopvbkblock", &submitpopvbkblock, {"vbkblock"}},
+    {"pop_mining", "submitpopvbk", &submitpopvbk, {"vbkblock"}},
+    {"pop_mining", "getvbkchaintips", &getvbkchaintips, {}},
+    {"pop_mining", "getbtcchaintips", &getbtcchaintips, {}},
     {"pop_mining", "getpopdata", &getpopdata, {"blockheight"}},
     {"pop_mining", "getvbkblock", &getvbkblock, {"hash"}},
     {"pop_mining", "getbtcblock", &getbtcblock, {"hash"}},
