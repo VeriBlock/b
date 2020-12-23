@@ -117,6 +117,10 @@ CMainParams::CMainParams()
 
     // VeriBlock
     consensus.VeriBlockPopSecurityHeight = -1;
+    consensus.nZawyLwmaAveragingWindow = 45;
+    consensus.nZawyLwmaAdjustedWeight = 13772;
+    consensus.nZawyLwmaMinDenominator = 10;
+    consensus.bZawyLwmaSolvetimeLimitation = true;
 
     base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 0);
     base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 5);
@@ -192,6 +196,10 @@ CMainParams::CMainParams()
 
      // VeriBlock
      consensus.VeriBlockPopSecurityHeight = -1;
+     consensus.nZawyLwmaAveragingWindow = 45;
+     consensus.nZawyLwmaAdjustedWeight = 13772;
+     consensus.nZawyLwmaMinDenominator = 10;
+     consensus.bZawyLwmaSolvetimeLimitation = false;
 
      base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 111);
      base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 196);
@@ -280,6 +288,10 @@ CRegTestParams::CRegTestParams(const ArgsManager& args)
 
     // VeriBlock
     consensus.VeriBlockPopSecurityHeight = 200;
+    consensus.nZawyLwmaAveragingWindow = 45;
+    consensus.nZawyLwmaAdjustedWeight = 13772;
+    consensus.nZawyLwmaMinDenominator = 10;
+    consensus.bZawyLwmaSolvetimeLimitation = true;
 
     base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 111);
     base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 196);

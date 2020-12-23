@@ -8,6 +8,7 @@
 #ifndef BITCOIN_MINER_H
 #define BITCOIN_MINER_H
 
+#include <chainparams.h>
 #include <optional.h>
 #include <primitives/block.h>
 #include <txmempool.h>
@@ -205,6 +206,6 @@ protected:
 
 /** Modify the extranonce in a block */
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce);
-int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev);
+int64_t UpdateTime(CBlockHeader* pblock, const CChainParams& params, const CBlockIndex* pindexPrev);
 
 #endif // BITCOIN_MINER_H
