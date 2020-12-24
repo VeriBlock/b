@@ -316,7 +316,7 @@ typename Tree::index_t* GetBlockIndex(Tree& tree, std::string hex)
 }
 
 template <>
-typename Tree::index_t* GetBlockIndex(altintegration::VbkBlockTree& tree, std::string hex)
+typename altintegration::VbkBlockTree::index_t* GetBlockIndex(altintegration::VbkBlockTree& tree, std::string hex)
 {
     auto data = ParseHex(hex);
     using block_t = altintegration::VbkBlock;
@@ -325,7 +325,7 @@ typename Tree::index_t* GetBlockIndex(altintegration::VbkBlockTree& tree, std::s
     if (data.size() == hash_t::size()) {
         // it is a full hash
         hash_t h = data;
-        return tree.getBlockIndex(data);
+        return tree.getBlockIndex(h);
     }
     if (data.size() == prev_hash_t::size()) {
         // it is an id
