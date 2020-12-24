@@ -7,22 +7,27 @@
 
 #include <arith_uint256.h>
 #include <chain.h>
+#include <chainparams.h>
 #include <primitives/block.h>
 #include <uint256.h>
 
-unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const CChainParams& params)
+unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock,
+                                 const Consensus::Params& params)
 {
     assert(pindexLast != nullptr);
-    if (params.isPopActive(pindexLast->nHeight + 1)) {
-        auto lwma = LwmaGetNextWorkRequired(pindexLast, pblock, params.GetConsensus());
-        LogPrint(BCLog::NET, "Block %s - version: %s: found next work required using LWMA: [%s]\n",
-            pindexLast->nHeight + 1, pblock->nVersion, lwma);
-        return lwma;
+    int nHeight = pindexLast->nHeight + 1;
+
+    if (nHeight < params.ZawyLWMAHeight) {
+        auto btc = BitcoinGetNextWorkRequired(pindexLast, pblock, params);
+        LogPrint(BCLog::NET, "Block %s - version: %s: found next work required using BTC: [%s]\n",
+            nHeight, pblock->nVersion, btc);
+        return btc;
     }
-    auto btc = BitcoinGetNextWorkRequired(pindexLast, pblock, params.GetConsensus());
-    LogPrint(BCLog::NET, "Block %s - version: %s: found next work required using BTC: [%s]\n",
-        pindexLast->nHeight + 1, pblock->nVersion, btc);
-    return btc;
+
+    auto lwma = LwmaGetNextWorkRequired(pindexLast, pblock, params);
+    LogPrint(BCLog::NET, "Block %s - version: %s: found next work required using LWMA: [%s]\n",
+        nHeight, pblock->nVersion, lwma);
+    return lwma;
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params& params)

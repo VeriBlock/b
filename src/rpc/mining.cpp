@@ -58,11 +58,10 @@ static UniValue GetNetworkHashPS(int lookup, int height) {
 
     // If lookup is -1, then use blocks since last difficulty change.
     if (lookup <= 0) {
-        if (Params().isPopActive(pb->nHeight)) {
-            lookup = Params().GetConsensus().nZawyLwmaAveragingWindow;
-        }
-        else {
+        if (pb->nHeight < Params().GetConsensus().ZawyLWMAHeight) {
             lookup = pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;
+        } else {
+            lookup = Params().GetConsensus().nZawyLwmaAveragingWindow;
         }
     }
 
@@ -577,13 +576,13 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
     }
     CHECK_NONFATAL(pindexPrev);
     CBlock* pblock = &pblocktemplate->block; // pointer for convenience
+    const Consensus::Params& consensusParams = Params().GetConsensus();
 
     // Update nTime
-    UpdateTime(pblock, Params(), pindexPrev);
+    UpdateTime(pblock, consensusParams, pindexPrev);
     pblock->nNonce = 0;
 
     // NOTE: If at some point we support pre-segwit miners post-segwit-activation, this needs to take segwit support into consideration
-    const Consensus::Params& consensusParams = Params().GetConsensus();
     const bool fPreSegWit = (pindexPrev->nHeight + 1 < consensusParams.SegwitHeight);
 
     UniValue aCaps(UniValue::VARR); aCaps.push_back("proposal");

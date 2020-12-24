@@ -117,6 +117,7 @@ CMainParams::CMainParams()
 
     // VeriBlock
     consensus.VeriBlockPopSecurityHeight = -1;
+    consensus.ZawyLWMAHeight = -1;
     consensus.nZawyLwmaAveragingWindow = 45;
     consensus.nZawyLwmaAdjustedWeight = 13772;
     consensus.nZawyLwmaMinDenominator = 10;
@@ -196,6 +197,7 @@ CMainParams::CMainParams()
 
      // VeriBlock
      consensus.VeriBlockPopSecurityHeight = -1;
+     consensus.ZawyLWMAHeight = -1;
      consensus.nZawyLwmaAveragingWindow = 45;
      consensus.nZawyLwmaAdjustedWeight = 13772;
      consensus.nZawyLwmaMinDenominator = 10;
@@ -288,6 +290,7 @@ CRegTestParams::CRegTestParams(const ArgsManager& args)
 
     // VeriBlock
     consensus.VeriBlockPopSecurityHeight = 200;
+    consensus.ZawyLWMAHeight = 200;
     consensus.nZawyLwmaAveragingWindow = 45;
     consensus.nZawyLwmaAdjustedWeight = 13772;
     consensus.nZawyLwmaMinDenominator = 10;

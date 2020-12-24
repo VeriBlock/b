@@ -7,7 +7,6 @@
 #define BITCOIN_POW_H
 
 #include <consensus/params.h>
-#include <chainparams.h>
 
 #include <stdint.h>
 
@@ -15,7 +14,7 @@ class CBlockHeader;
 class CBlockIndex;
 class uint256;
 
-unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const CChainParams& params);
+unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params&);
 
 /** Zawy's LWMA - next generation algorithm for testnet currently */
 unsigned int LwmaGetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params&);
