@@ -8,12 +8,12 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include <bootstraps.h>
 #include <chain.h>
 #include <chainparams.h>
 #include <consensus/validation.h>
 #include <test/util/setup_common.h>
 #include <validation.h>
+#include <vbk/bootstraps.h>
 #include <vbk/log.hpp>
 #include <vbk/util.hpp>
 #include <veriblock/alt-util.hpp>

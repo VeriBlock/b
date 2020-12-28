@@ -1,23 +1,18 @@
 // Copyright (c) 2019-2020 Xenios SEZC
 // https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef __BOOTSTRAPS_BTC_VBK
-#define __BOOTSTRAPS_BTC_VBK
-
-#include <string>
-#include <vector>
+#ifndef INTEGRATION_REFERENCE_BTC_VBTC_PARAMS_HPP
+#define INTEGRATION_REFERENCE_BTC_VBTC_PARAMS_HPP
 
 #include <primitives/block.h>
-#include <util/system.h> // for gArgs
+#include <veriblock/blockchain/alt_chain_params.hpp>
 #include <veriblock/config.hpp>
 
-extern const int testnetVBKstartHeight;
-extern const std::vector<std::string> testnetVBKblocks;
+class ArgsManager;
 
-extern const int testnetBTCstartHeight;
-extern const std::vector<std::string> testnetBTCblocks;
+namespace VeriBlock {
 
 struct AltChainParamsVBTC : public altintegration::AltChainParams {
     ~AltChainParamsVBTC() override = default;
@@ -26,7 +21,7 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
     {
         auto hash = genesis.GetHash();
         bootstrap.hash = std::vector<uint8_t>{hash.begin(), hash.end()};
-        bootstrap.previousBlock = std::vector<uint8_t>(altintegration::MIN_ALT_HASH_SIZE, 0);
+        // intentionally leave prevHash empty
         bootstrap.height = 0;
         bootstrap.timestamp = genesis.GetBlockTime();
     }
@@ -41,7 +36,15 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
         return 0x3ae6ca;
     }
 
-    std::vector<uint8_t> getHash(const std::vector<uint8_t>& bytes) const noexcept override;
+    std::vector<uint8_t> getHash(const std::vector<uint8_t>& bytes) const override;
+
+    // we should verify:
+    // - check that 'bytes' can be deserialized to a CBlockHeader
+    // - check that this CBlockHeader is valid (time, pow, version...)
+    // - check that 'root' is equal to Merkle Root in CBlockHeader
+    bool checkBlockHeader(
+        const std::vector<uint8_t>& bytes,
+        const std::vector<uint8_t>& root) const override;
 
     altintegration::AltBlock bootstrap;
 };
@@ -57,4 +60,6 @@ void selectPopConfig(
     int vbkstart = 0,
     const std::string& vbkblocks = {});
 
-#endif //__BOOTSTRAPS_BTC_VBK
+} // namespace VeriBlock
+
+#endif //INTEGRATION_REFERENCE_BTC_VBTC_PARAMS_HPP

@@ -21,7 +21,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
-#include "bootstraps.h"
+#include "vbk/bootstraps.h"
 #include <veriblock/blockchain/alt_chain_params.hpp>
 
 #define VBK_GAMMA  0xb1
