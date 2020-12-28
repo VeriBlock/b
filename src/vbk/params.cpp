@@ -8,13 +8,10 @@
 #include <boost/algorithm/string.hpp>
 #include <chainparams.h>
 #include <pow.h>
-#include <primitives/block.h>
 #include <util/strencodings.h>
 #include <util/system.h>
 #include <vbk/bootstraps.h>
-#include <vbk/params.hpp>
 #include <vbk/pop_common.hpp>
-#include <vbk/util.hpp>
 #include <veriblock/bootstraps.hpp>
 
 
@@ -25,12 +22,15 @@ bool AltChainParamsVBTC::checkBlockHeader(const std::vector<uint8_t>& bytes, con
     const CChainParams& params = Params();
 
     try {
+        // this throws
         auto header = VeriBlock::headerFromBytes(bytes);
         if (!CheckProofOfWork(header.GetHash(), header.nBits, params.GetConsensus()))
             return false;
 
+        std::cout << strprintf("root=%s, expected=%s\n", HexStr(root), HexStr(header.hashMerkleRoot));
         // TODO: ensure hash endianness is correct!
-        return header.hashMerkleRoot.asVector() == root;
+        auto rootReversed = std::vector<uint8_t>{root.rbegin(), root.rend()};
+        return header.hashMerkleRoot.asVector() == rootReversed;
     } catch (...) {
         return false;
     }

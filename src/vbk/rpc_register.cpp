@@ -9,7 +9,6 @@
 #include <rpc/util.h>
 #include <util/validation.h>
 #include <validation.h>
-#include <vbk/entity/context_info_container.hpp>
 #include <vbk/p2p_sync.hpp>
 #include <wallet/rpcwallet.h>
 #include <wallet/wallet.h> // for CWallet
@@ -64,15 +63,7 @@ UniValue getpopdata(const JSONRPCRequest& request)
             "\nArguments:\n"
             "1. block_height         (numeric, required) The height index\n"
             "\nResult:\n"
-            "{\n"
-            "    \"block_header\" : \"block_header_hex\",  (string) Hex-encoded block header\n"
-            "    \"raw_contextinfocontainer\" : \"contextinfocontainer\",  (string) Hex-encoded raw authenticated ContextInfoContainer structure\n"
-            "    \"last_known_veriblock_blocks\" : [ (array) last known VeriBlock blocks at the given Bitcoin block\n"
-            "        \"blockhash\",                (string) VeriBlock block hash\n"
-            "       ... ]\n"
-            "    \"last_known_bitcoin_blocks\" : [ (array) last known Bitcoin blocks at the given Bitcoin block\n"
-            "        \"blockhash\",                (string) Bitcoin block hash\n"
-            "       ... ]\n"
+            "TODO: write docs\n"
             "}\n"
             "\nExamples:\n" +
             HelpExampleCli("getpopdata", "1000") + HelpExampleRpc("getpopdata", "1000"));
@@ -107,12 +98,13 @@ UniValue getpopdata(const JSONRPCRequest& request)
 
     auto block = GetBlockChecked(pBlockIndex);
 
-    //context info
     uint256 txRoot = BlockMerkleRoot(block);
-    auto keystones = VeriBlock::getKeystoneHashesForTheNextBlock(pBlockIndex->pprev);
-    auto contextInfo = VeriBlock::ContextInfoContainer(pBlockIndex->nHeight, keystones, txRoot);
-    auto authedContext = contextInfo.getAuthenticated();
-    result.pushKV("raw_contextinfocontainer", HexStr(authedContext.begin(), authedContext.end()));
+    auto authctx = altintegration::AuthenticatedContextInfoContainer::createFromPrevious(
+        txRoot.asVector(),
+        block.popData.getMerkleRoot(),
+        VeriBlock::GetAltBlockIndex(pBlockIndex),
+        VeriBlock::GetPop().config->getAltParams());
+    result.pushKV("authenticated_context", altintegration::ToJSON<UniValue>(authctx));
 
     auto lastVBKBlocks = VeriBlock::getLastKnownVBKBlocks(16);
 

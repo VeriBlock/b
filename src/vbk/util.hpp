@@ -44,6 +44,9 @@ inline CBlockHeader headerFromBytes(const std::vector<uint8_t>& v)
     CDataStream stream(v, SER_NETWORK, PROTOCOL_VERSION);
     CBlockHeader header;
     stream >> header;
+    if(!stream.eof()) {
+        throw std::runtime_error("stream is not empty");
+    }
     return header;
 }
 
