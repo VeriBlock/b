@@ -25,12 +25,12 @@ namespace VeriBlock {
 
 namespace {
 
-uint256 GetBlockHashByHeight(const int height)
+CBlockIndex* GetBlockByHeight(const int height)
 {
     if (height < 0 || height > ChainActive().Height())
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
 
-    return ChainActive()[height]->GetBlockHash();
+    return ChainActive()[height];
 }
 
 CBlock GetBlockChecked(const CBlockIndex* pblockindex)
@@ -79,30 +79,27 @@ UniValue getpopdata(const JSONRPCRequest& request)
 
     int height = request.params[0].get_int();
 
-    LOCK2(cs_main, wallet->cs_wallet);
+    LOCK(cs_main);
 
-    uint256 blockhash = GetBlockHashByHeight(height);
-
-    UniValue result(UniValue::VOBJ);
-
-    //get the block and its header
-    const CBlockIndex* pBlockIndex = LookupBlockIndex(blockhash);
-
-    if (!pBlockIndex) {
+    auto* index = GetBlockByHeight(height);
+    if (!index) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
     }
 
+    UniValue result(UniValue::VOBJ);
+
     CDataStream ssBlock(SER_NETWORK, PROTOCOL_VERSION);
-    ssBlock << pBlockIndex->GetBlockHeader();
+    ssBlock << index->GetBlockHeader();
     result.pushKV("block_header", HexStr(ssBlock));
 
-    auto block = GetBlockChecked(pBlockIndex);
+    auto block = GetBlockChecked(index);
 
-    uint256 txRoot = BlockMerkleRoot(block);
-    auto authctx = altintegration::AuthenticatedContextInfoContainer::createFromPrevious(
-        txRoot.asVector(),
+    auto txRoot = BlockMerkleRoot(block).asVector();
+    using altintegration::AuthenticatedContextInfoContainer;
+    auto authctx = AuthenticatedContextInfoContainer::createFromPrevious(
+        txRoot,
         block.popData.getMerkleRoot(),
-        VeriBlock::GetAltBlockIndex(pBlockIndex),
+        VeriBlock::GetAltBlockIndex(index->pprev),
         VeriBlock::GetPop().config->getAltParams());
     result.pushKV("authenticated_context", altintegration::ToJSON<UniValue>(authctx));
 

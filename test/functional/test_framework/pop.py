@@ -8,12 +8,11 @@ import struct
 import time
 from typing import Optional
 
-from .messages import ser_uint256, hash256, uint256_from_str
+from .messages import ser_uint256, hash256, uint256_from_str, CBlockHeader
 from .pop_const import KEYSTONE_INTERVAL, NETWORK_ID
 from .script import hash160, CScript, OP_DUP, OP_HASH160, OP_EQUALVERIFY, OP_CHECKSIG
 from .test_node import TestNode
 from .util import hex_str_to_bytes
-
 
 
 def isKeystone(height):
@@ -79,13 +78,15 @@ def endorse_block(node, apm, height: int, addr: str, vtbs: Optional[int] = None)
     payoutInfo = script.hex()
 
     popdata = node.getpopdata(height)
-    last_btc = popdata['last_known_bitcoin_blocks'][0]
-    last_vbk = popdata['last_known_veriblock_blocks'][0]
+    authctx = popdata['authenticated_context']['serialized']
+    last_btc = popdata['last_known_bitcoin_blocks'][-1]
+    last_vbk = popdata['last_known_veriblock_blocks'][-1]
     header = popdata['block_header']
     pub = PublicationData()
     pub.header = header
     pub.payoutInfo = payoutInfo
     pub.identifier = NETWORK_ID
+    pub.contextInfo = authctx
 
     if vtbs:
         apm.endorseVbkBlock(last_vbk, last_btc, vtbs)
@@ -189,6 +190,7 @@ def sync_pop_tips(rpc_connections, *, wait=1, timeout=10, flush_scheduler=True):
         "".join("\n  {!r}".format(m) for m in vbk),
     ))
 
+
 def assert_pop_state_equal(nodes):
     def is_same(func, msg):
         s = [func(x) for x in nodes]
@@ -232,11 +234,13 @@ def sync_pop_mempools(rpc_connections, *, wait=1, timeout=60, flush_scheduler=Tr
         "".join("\n  {!r}".format(m) for m in vbkblocks)
     ))
 
+
 def mine_until_pop_enabled(node):
     existing = node.getblockcount()
     activate = node.getblockchaininfo()['softforks']['pop_security']['height']
     assert activate >= 0, "POP security should be able to activate"
     if existing < activate:
-        assert activate - existing < 1000, "POP security activates on height {}. Will take too long to activate".format(activate)
+        assert activate - existing < 1000, "POP security activates on height {}. Will take too long to activate".format(
+            activate)
         node.generate(nblocks=(activate - existing))
         node.waitforblockheight(activate)
