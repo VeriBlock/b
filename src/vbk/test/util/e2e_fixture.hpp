@@ -198,7 +198,6 @@ struct E2eFixture : public TestChain100Setup {
 
     PublicationData createPublicationData(CBlockIndex* endorsed, const std::vector<uint8_t>& payoutInfo)
     {
-        PublicationData p;
         assert(endorsed);
 
         auto hash = endorsed->GetBlockHash();
@@ -211,13 +210,13 @@ struct E2eFixture : public TestChain100Setup {
         std::vector<uint8_t> header{stream.begin(), stream.end()};
 
         auto txRoot = BlockMerkleRoot(block, nullptr).asVector();
-
+        std::cout << "ALT: txroot=" << HexStr(txRoot) << "\n";
         auto* libendorsed = VeriBlock::GetPop().altTree->getBlockIndex(hash.asVector());
         assert(libendorsed && "expected to have endorsed header in library");
         return altintegration::GeneratePublicationData(
             header,
             *libendorsed,
-            std::vector<uint8_t>{txRoot.rbegin(), txRoot.rend()},
+            txRoot,
             block.popData,
             payoutInfo,
             *VeriBlock::GetPop().config->alt);

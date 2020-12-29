@@ -36,7 +36,7 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
         return 0x3ae6ca;
     }
 
-    std::vector<uint8_t> getHash(const std::vector<uint8_t>& bytes) const override;
+    std::vector<uint8_t> getHash(const std::vector<uint8_t>& bytes) const noexcept override;
 
     // we should verify:
     // - check that 'bytes' can be deserialized to a CBlockHeader
@@ -44,7 +44,7 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
     // - check that 'root' is equal to Merkle Root in CBlockHeader
     bool checkBlockHeader(
         const std::vector<uint8_t>& bytes,
-        const std::vector<uint8_t>& root) const override;
+        const std::vector<uint8_t>& root) const noexcept override;
 
     altintegration::AltBlock bootstrap;
 };

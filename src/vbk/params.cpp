@@ -17,27 +17,25 @@
 
 namespace VeriBlock {
 
-bool AltChainParamsVBTC::checkBlockHeader(const std::vector<uint8_t>& bytes, const std::vector<uint8_t>& root) const
+bool AltChainParamsVBTC::checkBlockHeader(const std::vector<uint8_t>& bytes, const std::vector<uint8_t>& root) const noexcept
 {
     const CChainParams& params = Params();
 
     try {
         // this throws
         auto header = VeriBlock::headerFromBytes(bytes);
-        if (!CheckProofOfWork(header.GetHash(), header.nBits, params.GetConsensus()))
-            return false;
-
-        std::cout << strprintf("root=%s, expected=%s\n", HexStr(root), HexStr(header.hashMerkleRoot));
-        // TODO: ensure hash endianness is correct!
-        auto rootReversed = std::vector<uint8_t>{root.rbegin(), root.rend()};
-        return header.hashMerkleRoot.asVector() == rootReversed;
+        return
+            /* top level merkle `root` calculated by library is same as in endorsed header */
+            header.hashMerkleRoot.asVector() == root &&
+            /* and POW of endorsed header is valid */
+            CheckProofOfWork(header.GetHash(), header.nBits, params.GetConsensus());
     } catch (...) {
         return false;
     }
 }
 
 
-std::vector<uint8_t> AltChainParamsVBTC::getHash(const std::vector<uint8_t>& bytes) const
+std::vector<uint8_t> AltChainParamsVBTC::getHash(const std::vector<uint8_t>& bytes) const noexcept
 {
     try {
         return VeriBlock::headerFromBytes(bytes).GetHash().asVector();
