@@ -19,8 +19,7 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
 
     AltChainParamsVBTC(const CBlock& genesis)
     {
-        auto hash = genesis.GetHash();
-        bootstrap.hash = std::vector<uint8_t>{hash.begin(), hash.end()};
+        bootstrap.hash = genesis.GetHash().asVector();
         // intentionally leave prevHash empty
         bootstrap.height = 0;
         bootstrap.timestamp = genesis.GetBlockTime();

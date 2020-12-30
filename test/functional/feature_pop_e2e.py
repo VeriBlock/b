@@ -65,7 +65,7 @@ class PopE2E(BitcoinTestFramework):
 
         assert lastblock >= 5
         self.log.info("endorse {} alt block".format(lastblock - 5))
-        popdata = self.nodes[0].getpopdata(lastblock - 5)
+        popdata = self.nodes[0].getpopdatabyheight(lastblock - 5)
         p = PublicationData()
         p.identifier = NETWORK_ID
         p.header = popdata['block_header']
@@ -93,7 +93,7 @@ class PopE2E(BitcoinTestFramework):
         self.log.info("endorse {} alt block".format(lastblock - 6))
         p = PublicationData()
         p.identifier = NETWORK_ID
-        p.header = self.nodes[0].getpopdata(lastblock - 6)['block_header']
+        p.header = self.nodes[0].getpopdatabyheight(lastblock - 6)['block_header']
         p.payoutInfo = "0014aaddff"
 
         pop_data = self.apm.endorseAltBlock(p, vbk_blocks[0].getHash())

@@ -69,7 +69,5 @@ class PoPMempoolSync(BitcoinTestFramework):
         assert atvid in rawpopmempool1['atvs']
 
 
-
-
 if __name__ == '__main__':
     PoPMempoolSync().main()

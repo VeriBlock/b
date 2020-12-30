@@ -25,14 +25,6 @@ namespace VeriBlock {
 
 namespace {
 
-CBlockIndex* GetBlockByHeight(const int height)
-{
-    if (height < 0 || height > ChainActive().Height())
-        throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
-
-    return ChainActive()[height];
-}
-
 CBlock GetBlockChecked(const CBlockIndex* pblockindex)
 {
     CBlock block;
@@ -54,34 +46,11 @@ CBlock GetBlockChecked(const CBlockIndex* pblockindex)
 
 } // namespace
 
-UniValue getpopdata(const JSONRPCRequest& request)
+// getpopdata
+namespace {
+
+UniValue getpopdata(const CBlockIndex* index)
 {
-    if (request.fHelp || request.params.size() != 1)
-        throw std::runtime_error(
-            "getpopdata block_height\n"
-            "\nFetches the data relevant to PoP-mining the given block.\n"
-            "\nArguments:\n"
-            "1. block_height         (numeric, required) The height index\n"
-            "\nResult:\n"
-            "TODO: write docs\n"
-            "}\n"
-            "\nExamples:\n" +
-            HelpExampleCli("getpopdata", "1000") + HelpExampleRpc("getpopdata", "1000"));
-
-    auto wallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(wallet.get(), request.fHelp)) {
-        return NullUniValue;
-    }
-
-    // Make sure the results are valid at least up to the most recent block
-    // the user could have gotten from another RPC command prior to now
-    wallet->BlockUntilSyncedToCurrentChain();
-
-    int height = request.params[0].get_int();
-
-    LOCK(cs_main);
-
-    auto* index = GetBlockByHeight(height);
     if (!index) {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
     }
@@ -99,12 +68,12 @@ UniValue getpopdata(const JSONRPCRequest& request)
     auto authctx = AuthenticatedContextInfoContainer::createFromPrevious(
         txRoot,
         block.popData.getMerkleRoot(),
+        // we build authctx based on previous block
         VeriBlock::GetAltBlockIndex(index->pprev),
         VeriBlock::GetPop().config->getAltParams());
     result.pushKV("authenticated_context", altintegration::ToJSON<UniValue>(authctx));
 
     auto lastVBKBlocks = VeriBlock::getLastKnownVBKBlocks(16);
-
     UniValue univalueLastVBKBlocks(UniValue::VARR);
     for (const auto& b : lastVBKBlocks) {
         univalueLastVBKBlocks.push_back(HexStr(b));
@@ -120,6 +89,67 @@ UniValue getpopdata(const JSONRPCRequest& request)
 
     return result;
 }
+
+UniValue getpopdatabyheight(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "getpopdatabyheight block_height\n"
+            "\nFetches the data relevant to PoP-mining the given block.\n"
+            "\nArguments:\n"
+            "1. block_height         (numeric, required) Endorsed block height from active chain\n"
+            "\nResult:\n"
+            "TODO: write docs\n"
+            "}\n"
+            "\nExamples:\n" +
+            HelpExampleCli("getpopdatabyheight", "1000") + HelpExampleRpc("getpopdatabyheight", "1000"));
+
+    auto wallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(wallet.get(), request.fHelp)) {
+        return NullUniValue;
+    }
+
+    // Make sure the results are valid at least up to the most recent block
+    // the user could have gotten from another RPC command prior to now
+    wallet->BlockUntilSyncedToCurrentChain();
+
+    int height = request.params[0].get_int();
+
+    LOCK(cs_main);
+    return getpopdata(ChainActive()[height]);
+}
+
+UniValue getpopdatabyhash(const JSONRPCRequest& request)
+{
+    if (request.fHelp || request.params.size() != 1)
+        throw std::runtime_error(
+            "getpopdatabyhash block_height\n"
+            "\nFetches the data relevant to PoP-mining the given block.\n"
+            "\nArguments:\n"
+            "1. hash         (string, required) Endorsed block hash.\n"
+            "\nResult:\n"
+            "TODO: write docs\n"
+            "}\n"
+            "\nExamples:\n" +
+            HelpExampleCli("getpopdatabyhash", "xxx") + HelpExampleRpc("getpopdatabyhash", "xxx"));
+
+    auto wallet = GetWalletForJSONRPCRequest(request);
+    if (!EnsureWalletIsAvailable(wallet.get(), request.fHelp)) {
+        return NullUniValue;
+    }
+
+    // Make sure the results are valid at least up to the most recent block
+    // the user could have gotten from another RPC command prior to now
+    wallet->BlockUntilSyncedToCurrentChain();
+
+    std::string hex = request.params[0].get_str();
+    LOCK(cs_main);
+
+    const auto hash = uint256S(hex);
+    return getpopdata(LookupBlockIndex(hash));
+}
+
+} // namespace
 
 template <typename pop_t>
 bool parsePayloads(const UniValue& array, std::vector<pop_t>& out, altintegration::ValidationState& state)
@@ -710,6 +740,10 @@ UniValue getpopparams(const JSONRPCRequest& req)
     ret.pushKV("vbkBootstrapBlock", _vbk);
     ret.pushKV("btcBootstrapBlock", _btc);
 
+    ret.pushKV("popActivationHeight", Params().GetConsensus().VeriBlockPopSecurityHeight);
+    ret.pushKV("popRewardPercentage", (int64_t)Params().PopRewardPercentage());
+    ret.pushKV("popRewardCoefficient", Params().PopRewardCoefficient());
+
     return ret;
 }
 
@@ -719,7 +753,8 @@ const CRPCCommand commands[] = {
     {"pop_mining", "submitpopatv", &submitpopatv, {"atv"}},
     {"pop_mining", "submitpopvtb", &submitpopvtb, {"vtb"}},
     {"pop_mining", "submitpopvbkblock", &submitpopvbkblock, {"vbkblock"}},
-    {"pop_mining", "getpopdata", &getpopdata, {"blockheight"}},
+    {"pop_mining", "getpopdatabyheight", &getpopdatabyheight, {"blockheight"}},
+    {"pop_mining", "getpopdatabyhash", &getpopdatabyhash, {"hash"}},
     {"pop_mining", "getvbkblock", &getvbkblock, {"hash"}},
     {"pop_mining", "getbtcblock", &getbtcblock, {"hash"}},
     {"pop_mining", "getvbkbestblockhash", &getvbkbestblockhash, {}},

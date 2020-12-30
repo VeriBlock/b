@@ -290,11 +290,14 @@ CRegTestParams::CRegTestParams(const ArgsManager& args)
 
     // VeriBlock
     consensus.VeriBlockPopSecurityHeight = 200;
-    consensus.ZawyLWMAHeight = 200;
-    consensus.nZawyLwmaAveragingWindow = 45;
-    consensus.nZawyLwmaAdjustedWeight = 13772;
-    consensus.nZawyLwmaMinDenominator = 10;
-    consensus.bZawyLwmaSolvetimeLimitation = true;
+    // do not activate LWMA on regtest
+    {
+        consensus.ZawyLWMAHeight = std::numeric_limits<int>::max();
+        consensus.nZawyLwmaAveragingWindow = 45;
+        consensus.nZawyLwmaAdjustedWeight = 13772;
+        consensus.nZawyLwmaMinDenominator = 10;
+        consensus.bZawyLwmaSolvetimeLimitation = true;
+    }
 
     base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1, 111);
     base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1, 196);
