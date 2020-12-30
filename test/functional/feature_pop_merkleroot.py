@@ -72,7 +72,7 @@ class PoPMerkleRootTest(BitcoinTestFramework):
         block_message = msg_block(block)
         # Send message is used to send a P2P message to the node over our P2PInterface
         self.nodes[0].p2p.send_message(block_message)
-        self.nodes[0].waitforblockheight(lastblock + 2, timeout=30)
+        self.nodes[0].waitforblockheight(lastblock + 2)
         newbest = self.nodes[0].getbestblockhash()
         assert newbest == block.hash, "bad tip. \n\tExpected : {}\n\tGot      : {}".format(block, newbest)
 

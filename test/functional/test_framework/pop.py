@@ -180,10 +180,15 @@ def mine_until_pop_enabled(node):
 
 
 class BlockIndex:
+    __slots__ = ("height", "hash", "prev")
+
     def __init__(self, height: int, hash: str, prev: str):
         self.height = height
         self.hash = hash
         self.prev = prev
+
+    def __repr__(self):
+        return "BlockIndex(height={} hash={} prev={})".format(self.height, self.hash, self.prev)
 
 
 def write_single_byte_len_value(val):
@@ -209,6 +214,12 @@ class ContextInfoContainer:
         k2 = b'' if len(self.keystone2) == 0 else bytes.fromhex(self.keystone2)
         data += write_single_byte_len_value(k2)
         return hash256(data)
+
+    def __str__(self):
+        return "ContextInfo(height={} ks1={} ks2={})".format(self.height, self.keystone1, self.keystone2)
+
+    def __repr__(self):
+        return str(self)
 
 
 class PopMiningContext:
@@ -302,10 +313,12 @@ class PopMiningContext:
 
             ks1 = self._get_ancestor(prevHash, ks1height)
             if ks1:
-                c.keystone1 = ks1.hash
+                # TODO: remove hash reversal here when ALT-363 is implemented
+                c.keystone1 = bytes.fromhex(ks1.hash)[::-1].hex()
                 ks2 = self._get_ancestor(ks1.hash, ks2height)
                 if ks2:
-                    c.keystone2 = ks2.hash
+                    # TODO: remove hash reversal here when ALT-363 is implemented
+                    c.keystone2 = bytes.fromhex(ks2.hash)[::-1].hex()
         except:
             c.height = self.bootstrap.height
 

@@ -15,17 +15,9 @@
 
 namespace VeriBlock {
 
-uint256 BlockPopDataMerkleRoot(const CBlock& block);
-
-const CBlockIndex* getPreviousKeystone(const CBlockIndex& block);
-
-KeystoneArray getKeystoneHashesForTheNextBlock(const CBlockIndex* pindexPrev);
-
 uint256 TopLevelMerkleRoot(const CBlockIndex* prevIndex, const CBlock& block, bool* mutated = nullptr);
 
 bool VerifyTopLevelMerkleRoot(const CBlock& block, const CBlockIndex* pprevIndex, BlockValidationState& state);
-
-bool isKeystone(const CBlockIndex& block);
 
 } // namespace VeriBlock
 

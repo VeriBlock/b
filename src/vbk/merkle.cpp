@@ -10,38 +10,6 @@
 
 namespace VeriBlock {
 
-const CBlockIndex* getPreviousKeystone(const CBlockIndex& block)
-{
-    const CBlockIndex* pblockWalk = &block;
-    do {
-        pblockWalk = pblockWalk->pprev;
-    } while (pblockWalk != nullptr && !isKeystone(*pblockWalk));
-
-    return pblockWalk;
-}
-
-KeystoneArray getKeystoneHashesForTheNextBlock(const CBlockIndex* pindexPrev)
-{
-    const CBlockIndex* pwalk = pindexPrev;
-
-    KeystoneArray keystones;
-    auto it = keystones.begin();
-    auto end = keystones.end();
-    while (it != end) {
-        if (pwalk == nullptr) {
-            break;
-        }
-
-        if (isKeystone(*pwalk)) {
-            *it = pwalk->GetBlockHash();
-            ++it;
-        }
-
-        pwalk = getPreviousKeystone(*pwalk);
-    }
-    return keystones;
-}
-
 uint256 TopLevelMerkleRoot(const CBlockIndex* prevIndex, const CBlock& block, bool* mutated)
 {
     using altintegration::CalculateTopLevelMerkleRoot;
