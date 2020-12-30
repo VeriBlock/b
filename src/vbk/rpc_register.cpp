@@ -25,6 +25,19 @@ namespace VeriBlock {
 
 namespace {
 
+void EnsurePopEnabled()
+{
+    auto tipheight = ChainActive().Height();
+    if (!Params().isPopActive(tipheight)) {
+        throw JSONRPCError(RPC_MISC_ERROR,
+            strprintf("POP protocol is not active. Current=%d, activation height=%d",
+                tipheight,
+                Params().GetConsensus().VeriBlockPopSecurityHeight)
+
+        );
+    }
+}
+
 CBlock GetBlockChecked(const CBlockIndex* pblockindex)
 {
     CBlock block;
@@ -199,6 +212,8 @@ UniValue submitpop(const JSONRPCRequest& request)
 
     RPCTypeCheck(request.params, {UniValue::VARR, UniValue::VARR, UniValue::VARR});
 
+    EnsurePopEnabled();
+
     altintegration::PopData popData;
     altintegration::ValidationState state;
     bool ret = true;
@@ -272,6 +287,8 @@ template <typename Pop>
 UniValue submitpopIt(const JSONRPCRequest& request)
 {
     check_submitpop(request, Pop::name());
+
+    EnsurePopEnabled();
 
     auto payloads_bytes = ParseHexV(request.params[0].get_str(), Pop::name());
 
