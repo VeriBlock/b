@@ -86,17 +86,19 @@ def endorse_block(node, apm, height: int, addr: str, vtbs: Optional[int] = None)
         apm.endorseVbkBlock(last_vbk, last_btc, vtbs)
 
     payloads = apm.endorseAltBlock(pub, last_vbk)
-    node.submitpop(*payloads.prepare())
+    [node.submitpopvbkblock(b.toVbkEncodingHex()) for b in payloads.context]
+    [node.submitpopvtb(b.toVbkEncodingHex()) for b in payloads.vtbs]
+    node.submitpopatv(payloads.atv.toVbkEncodingHex())
+
     return payloads.atv.getId()
 
 
-def mine_vbk_blocks(node, apm, amount: int) -> str:
+def mine_vbk_blocks(node, apm, amount: int):
     vbks = []
     for i in range(amount):
         vbks.append(apm.mineVbkBlocks(1))
 
-    result = node.submitpop([b.toVbkEncodingHex() for b in vbks], [], [])
-    return result['vbkblocks']
+    return [node[0].submitpopvbkblock(b.toVbkEncodingHex()) for b in vbks]
 
 
 def sync_pop_tips(rpc_connections, *, wait=1, timeout=10, flush_scheduler=True):
