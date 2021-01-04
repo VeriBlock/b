@@ -86,8 +86,9 @@ def endorse_block(node, apm, height: int, addr: str, vtbs: Optional[int] = None)
         apm.endorseVbkBlock(last_vbk, last_btc, vtbs)
 
     payloads = apm.endorseAltBlock(pub, last_vbk)
-    [node.submitpopvbkblock(b.toVbkEncodingHex()) for b in payloads.context]
-    [node.submitpopvtb(b.toVbkEncodingHex()) for b in payloads.vtbs]
+    vbkblocks, vtbs, atv = payloads.prepare()
+    [node.submitpopvbkblock(b) for b in vbkblocks]
+    [node.submitpopvtb(b) for b in vtbs]
     node.submitpopatv(payloads.atv.toVbkEncodingHex())
 
     return payloads.atv.getId()
