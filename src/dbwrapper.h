@@ -13,6 +13,7 @@
 #include <util/strencodings.h>
 
 #include <leveldb/db.h>
+#include <veriblock/crypto/progpow.hpp>
 #include <leveldb/write_batch.h>
 
 static const size_t DBWRAPPER_PREALLOC_KEY_SIZE = 64;
@@ -180,7 +181,15 @@ inline bool CDBIterator::GetValue(altintegration::BlockIndex<altintegration::Vbk
         ssValue.Xor(dbwrapper_private::GetObfuscateKey(parent));
         std::pair<char, altintegration::VbkBlock::hash_t> key;
         if (!GetKey(key)) return false;
-        UnserializeWithHash(ssValue, value, key.second);
+
+        {
+            // warmup Progpow header cache
+            auto serializedHeader = altintegration::SerializeToRaw(value.getHeader());
+            auto& headerProgpowhash = key.second;
+            altintegration::progpow::insertHeaderCacheEntry(serializedHeader, headerProgpowhash);
+        }
+
+        Unserialize(ssValue, value);
     } catch (const std::exception&) {
         return false;
     }
