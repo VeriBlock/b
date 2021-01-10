@@ -99,7 +99,7 @@ def mine_vbk_blocks(node, apm, amount: int):
     for i in range(amount):
         vbks.append(apm.mineVbkBlocks(1))
 
-    return [node[0].submitpopvbk(b.toVbkEncodingHex()) for b in vbks]
+    return [node.submitpopvbk(b.toVbkEncodingHex()) for b in vbks]
 
 
 def sync_pop_tips(rpc_connections, *, wait=1, timeout=10, flush_scheduler=True):
