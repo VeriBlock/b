@@ -1385,10 +1385,6 @@ void static InvalidChainFound(CBlockIndex* pindexNew) EXCLUSIVE_LOCKS_REQUIRED(c
         tip->GetBlockHash().ToString(), ::ChainActive().Height(), log(tip->nChainWork.getdouble()) / log(2.0),
         FormatISO8601DateTime(tip->GetBlockTime()));
     CheckForkWarningConditions();
-
-    VeriBlock::GetPop()
-        .altTree
-        ->invalidateSubtree(pindexNew->GetBlockHash().asVector(), altintegration::BLOCK_FAILED_BLOCK);
 }
 
 void CChainState::InvalidBlockFound(CBlockIndex* pindex, const BlockValidationState& state)
