@@ -51,6 +51,7 @@
 #include <warnings.h>
 
 #include <vbk/pop_service.hpp>
+#include <vbk/pop_common.hpp>
 #include <vbk/util.hpp>
 
 #include <string>
@@ -1384,6 +1385,10 @@ void static InvalidChainFound(CBlockIndex* pindexNew) EXCLUSIVE_LOCKS_REQUIRED(c
         tip->GetBlockHash().ToString(), ::ChainActive().Height(), log(tip->nChainWork.getdouble()) / log(2.0),
         FormatISO8601DateTime(tip->GetBlockTime()));
     CheckForkWarningConditions();
+
+    VeriBlock::GetPop()
+        .altTree
+        ->invalidateSubtree(pindexNew->GetBlockHash().asVector(), altintegration::BLOCK_FAILED_BLOCK);
 }
 
 void CChainState::InvalidBlockFound(CBlockIndex* pindex, const BlockValidationState& state)
@@ -3164,7 +3169,7 @@ void CChainState::ResetBlockFailureFlags(CBlockIndex* pindex)
 
     int nHeight = pindex->nHeight;
     auto blockHash = pindex->GetBlockHash().asVector();
-    VeriBlock::GetPop().altTree->revalidateSubtree(blockHash, altintegration::BLOCK_FAILED_BLOCK, true);
+    VeriBlock::GetPop().altTree->revalidateSubtree(blockHash, altintegration::BLOCK_FAILED_BLOCK, false);
 
     // Remove the invalidity flag from this block and all its descendants.
     BlockMap::iterator it = m_blockman.m_block_index.begin();

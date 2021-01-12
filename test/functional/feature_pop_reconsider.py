@@ -46,66 +46,83 @@ class PopReconsider(BitcoinTestFramework):
         hash = node.getbestblockhash()
         return node.getblock(hash)
 
+    def assert_tip(self, hash):
+        tip = self.nodes[0].getbestblockhash()
+        assert_equal(tip, hash)
+
     def _invalidate_works(self):
         self.log.warning("starting _invalidate_works()")
         self.lastblock = self.nodes[0].getblockcount()
 
         # start with lastblock + 100 blocks
-        self.nodes[0].generate(nblocks=100)
+        self.chainAtiphash = self.nodes[0].generate(nblocks=100)[-1]
         self.log.info("node mined 100 blocks")
+
+        self.assert_tip(self.chainAtiphash)
 
         # endorse block 300 (fork A tip)
         addr0 = self.nodes[0].getnewaddress()
         txid = endorse_block(self.nodes[0], self.apm, self.lastblock + 100, addr0)
         self.log.info("node endorsed block %d (fork A tip)", self.lastblock + 100)
         # mine pop tx on node0
-        containinghash = self.nodes[0].generate(nblocks=1)
-        self.log.info("node mines 1 more block")
-        containingblock = self.nodes[0].getblock(containinghash[0])
+        self.chainAtiphash = self.nodes[0].generate(nblocks=1)[-1]
+        self.assert_tip(self.chainAtiphash)
+
+        containingblock = self.nodes[0].getblock(self.chainAtiphash)
 
         tip = self.get_best_block(self.nodes[0])
         assert txid in containingblock['pop']['data']['atvs'], "pop tx is not in containing block"
         self.log.info("node tip is {}".format(tip['height']))
 
-        self.nodes[0].generate(nblocks=19)
-        self.log.info("node mines 19 more blocks")
+        self.chainAtiphash = self.nodes[0].generate(nblocks=19)[-1]
+        self.chainAtipheight = self.nodes[0].getblock(self.chainAtiphash)['height']
+        self.forkheight = self.lastblock + 50
+        self.forkhash = self.nodes[0].getblockhash(self.forkheight)
 
-        forkheight = self.lastblock + 101
-        self.forkhash = self.nodes[0].getblockhash(forkheight)
-        self.log.info("Invalidating block %s at height %d" % (self.forkhash, forkheight))
-        self.nodes[0].invalidateblock(self.forkhash)
+        self.log.info("tip={}:{}, fork={}:{}".format(self.chainAtipheight, self.chainAtiphash, self.forkheight, self.forkhash))
+
+        self.invalidatedheight = self.forkheight + 1
+        self.invalidated = self.nodes[0].getblockhash(self.invalidatedheight)
+        self.log.info("invalidating block next to fork block {}:{}".format(self.invalidatedheight, self.invalidated))
+        self.nodes[0].invalidateblock(self.invalidated)
 
         tip = self.get_best_block(self.nodes[0])
-        assert tip['height'] == self.lastblock + 100, "block was not invalidated properly"
+        assert tip['height'] == self.forkheight
+        assert tip['hash'] == self.forkhash
 
-        blockstatus = self.nodes[0].getblock(tip['hash'])
-        assert not blockstatus['pop']['state']['endorsedBy'], "block should not be endorsed after invalidation"
+        tip = self.nodes[0].getblock(tip['hash'])
+        assert not tip['pop']['state']['endorsedBy'], "block should not be endorsed after invalidation"
 
         # rewrite invalid block with generatetoaddress
         # otherwise next block will be a duplicate
         addr1 = self.nodes[0].getnewaddress()
-        self.nodes[0].generatetoaddress(nblocks=1, address=addr1)
-        self.log.info("node mined 1 block to rewrite invalid block")
+        self.chainBtiphash = self.nodes[0].generatetoaddress(nblocks=1, address=addr1)[-1]
 
     def _reconsider_works(self):
         self.log.warning("starting _reconsider_works()")
 
+        self.assert_tip(self.chainBtiphash)
+
         # start with lastblock + 1 + 199 blocks
-        self.nodes[0].generate(nblocks=199)
+        self.chainBtiphash = self.nodes[0].generate(nblocks=199)[-1]
         self.log.info("node mined 199 blocks")
 
         tip = self.get_best_block(self.nodes[0])
         self.log.info("node tip is {}".format(tip['height']))
+        self.assert_tip(tip['hash'])
 
-        # Reconsider block 301
-        forkheight = self.lastblock + 101
-        self.log.info("Reconsider block %s at height %d" % (self.forkhash, forkheight))
-        self.nodes[0].reconsiderblock(self.forkhash)
+        # Reconsider invalidated block
+        self.log.info("reconsider block {}:{}".format(self.invalidatedheight, self.invalidated))
+        self.nodes[0].reconsiderblock(self.invalidated)
 
-        tip = self.get_best_block(self.nodes[0])
-        self.log.info("node tip is {}".format(tip['height']))
+        def is_best_block_hash(node, hash):
+            tip = node.getbestblockhash()
+            return tip == hash
 
-        wait_until(lambda: self.nodes[0].getblockcount() == self.lastblock + 120, timeout = 30)
+        wait_until(
+            predicate=lambda: is_best_block_hash(self.nodes[0], self.chainAtiphash),
+            timeout=10
+        )
 
     def run_test(self):
         """Main test logic"""
