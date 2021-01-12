@@ -6,9 +6,9 @@
 #ifndef BITCOIN_SRC_VBK_POP_SERVICE_HPP
 #define BITCOIN_SRC_VBK_POP_SERVICE_HPP
 
-#include <veriblock/storage/block_batch_adaptor.hpp>
-#include <vbk/adaptors/payloads_provider.hpp>
 #include "pop_common.hpp"
+#include <vbk/adaptors/payloads_provider.hpp>
+#include <veriblock/storage/block_batch_adaptor.hpp>
 
 class BlockValidationState;
 class CBlock;
@@ -49,8 +49,7 @@ std::vector<BlockBytes> getLastKnownBTCBlocks(size_t blocks);
 bool hasPopData(CBlockTreeDB& db);
 altintegration::PopData getPopData();
 void saveTrees(altintegration::BlockBatchAdaptor& batch);
-bool loadTrees(CDBIterator& iter, CDBWrapper& db);
-bool loadTrees(CDBIterator& iter);
+bool loadTrees(CDBWrapper& db);
 
 void removePayloadsFromMempool(const altintegration::PopData& popData);
 

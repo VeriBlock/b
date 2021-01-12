@@ -19,7 +19,6 @@
 
 #include "pop_service.hpp"
 #include <utility>
-#include <vbk/adaptors/block_hash_iterator.hpp>
 #include <vbk/adaptors/block_provider.hpp>
 #include <vbk/p2p_sync.hpp>
 #include <vbk/pop_common.hpp>
@@ -274,7 +273,7 @@ std::vector<BlockBytes> getLastKnownBTCBlocks(size_t blocks)
 
 bool hasPopData(CBlockTreeDB& db)
 {
-    return db.Exists(BlockBatchAdaptor::btctip()) && db.Exists(BlockBatchAdaptor::vbktip()) && db.Exists(BlockBatchAdaptor::alttip());
+    return db.Exists(tip_key<altintegration::BtcBlock>()) && db.Exists(tip_key<altintegration::VbkBlock>()) && db.Exists(tip_key<altintegration::AltBlock>());
 }
 
 void saveTrees(altintegration::BlockBatchAdaptor& batch)
@@ -282,139 +281,20 @@ void saveTrees(altintegration::BlockBatchAdaptor& batch)
     AssertLockHeld(cs_main);
     altintegration::SaveAllTrees(*GetPop().altTree, batch);
 }
-
-template <typename T>
-using onBlockCallback_t = std::function<void(
-    typename T::hash_t,
-    // Note: contains a ptr to temporary object. Do NOT save this pointer.
-    const typename T::index_t*)>;
-
-template <typename BlockTree>
-bool LoadTree(
-    CDBIterator& iter,
-    char blocktype,
-    std::pair<char, std::string> tiptype,
-    BlockTree& out,
-    altintegration::ValidationState& state,
-    // default = do nothing
-    const onBlockCallback_t<BlockTree>& onBlock = {})
-{
-    using index_t = typename BlockTree::index_t;
-    using block_t = typename index_t::block_t;
-    using hash_t = typename BlockTree::hash_t;
-
-    // Load tip
-    hash_t tiphash;
-    std::pair<char, std::string> ckey;
-
-    iter.Seek(tiptype);
-    if (!iter.Valid()) {
-        // no valid tip is stored = no need to load anything
-        return state.Invalid("bad-iter", strprintf("%s: failed to load %s tip", block_t::name()));
-    }
-    if (!iter.GetKey(ckey)) {
-        return state.Invalid("bad-key", strprintf("%s: failed to find key %c:%s in %s", __func__,
-                                            tiptype.first, tiptype.second, block_t::name()));
-    }
-    if (ckey != tiptype) {
-        return state.Invalid("bad-key-type", strprintf("%s: bad key for tip %c:%s in %s", __func__, tiptype.first,
-                                                 tiptype.second, block_t::name()));
-    }
-    if (!iter.GetValue(tiphash)) {
-        return state.Invalid("bad-value", strprintf("%s: failed to read tip value in %s", __func__,
-                                              block_t::name()));
-    }
-
-    std::vector<index_t> blocks;
-
-    // Load blocks
-    iter.Seek(std::make_pair(blocktype, hash_t()));
-    while (iter.Valid()) {
-#if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
-        boost::this_thread::interruption_point();
-#endif
-        if (ShutdownRequested()) return false;
-        std::pair<char, hash_t> key;
-        if (iter.GetKey(key) && key.first == blocktype) {
-            index_t diskindex;
-            if (iter.GetValue(diskindex)) {
-                if (onBlock) {
-                    // if function is set, execute a callback
-                    onBlock(key.second, &diskindex);
-                }
-                blocks.push_back(diskindex);
-                iter.Next();
-            } else {
-                return state.Invalid("bad-block", strprintf("%s: failed to read %s block", __func__,
-                                                      block_t::name()));
-            }
-        } else {
-            break;
-        }
-    }
-
-    // sort blocks by height
-    std::sort(blocks.begin(), blocks.end(),
-        [](const index_t& a, const index_t& b) {
-            return a.getHeight() < b.getHeight();
-        });
-    if (!altintegration::LoadTree(out, blocks, tiphash, state)) {
-        return state.Invalid("bad-tree");
-    }
-
-    auto* tip = out.getBestChain().tip();
-    assert(tip);
-    LogPrintf("Loaded %d blocks in %s tree with tip %s\n",
-        out.getBlocks().size(), block_t::name(),
-        tip->toShortPrettyString());
-
-    return true;
-}
-
-bool loadTrees(CDBIterator& iter, CDBWrapper& db)
+bool loadTrees(CDBWrapper& db)
 {
     auto& pop = GetPop();
 
-    BlockHashIterator<altintegration::BtcBlock, DB_BTC_BLOCK> btc_it(iter);
-    BlockHashIterator<altintegration::VbkBlock, DB_VBK_BLOCK> vbk_it(iter);
-    BlockHashIterator<altintegration::AltBlock, DB_ALT_BLOCK> alt_it(iter);
-    BlockProvider block_provider(db);
+    BlockProvider<altintegration::BtcBlock> btc_provider(db);
+    BlockProvider<altintegration::VbkBlock> vbk_provider(db);
+    BlockProvider<altintegration::AltBlock> alt_provider(db);
+
     altintegration::ValidationState state;
 
-    if (!altintegration::LoadAllTrees(*pop.altTree, btc_it, vbk_it, alt_it, block_provider, state)) {
+    if (!altintegration::LoadAllTrees(*pop.altTree, btc_provider, vbk_provider, alt_provider, state)) {
         return error("%s: failed to load trees %s", __func__, state.toString());
     }
 
-    return true;
-}
-
-bool loadTrees(CDBIterator& iter)
-{
-    auto& pop = GetPop();
-    altintegration::ValidationState state;
-    if (!LoadTree(iter, DB_BTC_BLOCK, BlockBatchAdaptor::btctip(), pop.altTree->btc(), state)) {
-        return error("%s: failed to load BTC tree %s", __func__, state.toString());
-    }
-
-    using vbkHash = altintegration::VbkBlockTree::hash_t;
-    using vbkIndex = altintegration::VbkBlockTree::index_t;
-    if (!LoadTree(
-            iter,
-            DB_VBK_BLOCK,
-            BlockBatchAdaptor::vbktip(),
-            pop.altTree->vbk(),
-            state,
-            // on every block, take its hash and warmup progpow header cache
-            [](vbkHash hash, const vbkIndex* index) {
-                auto serializedHeader = altintegration::SerializeToRaw(index->getHeader());
-                altintegration::progpow::insertHeaderCacheEntry(serializedHeader, std::move(hash));
-            })) {
-        return error("%s: failed to load VBK tree %s", __func__, state.toString());
-    }
-
-    if (!LoadTree(iter, DB_ALT_BLOCK, BlockBatchAdaptor::alttip(), *pop.altTree, state)) {
-        return error("%s: failed to load ALT tree %s", __func__, state.toString());
-    }
     return true;
 }
 

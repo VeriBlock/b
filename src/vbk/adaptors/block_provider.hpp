@@ -8,56 +8,34 @@
 
 #include <dbwrapper.h>
 #include <vbk/adaptors/block_batch_adaptor.hpp>
+#include <vbk/adaptors/block_iterator.hpp>
 
 #include "veriblock/storage/block_provider.hpp"
 
 namespace VeriBlock {
 
-struct BlockProvider : public altintegration::BlockProvider {
+template <typename BlockT>
+struct BlockProvider : public altintegration::BlockProvider<BlockT> {
+    using hash_t = typename BlockT::hash_t;
+
     ~BlockProvider() override = default;
 
     BlockProvider(CDBWrapper& db) : db_(db) {}
 
-    bool getTip(altintegration::BlockIndex<altintegration::BtcBlock>& out) const override
+    bool getTipHash(hash_t& out) const override
     {
-        typename altintegration::BtcBlock::hash_t hash;
-        if(!db_.Read(BlockBatchAdaptor::btctip(), hash)) {
-            return false;
-        }
-        return db_.Read(std::make_pair(DB_BTC_BLOCK, hash), out);
+        return db_.Read(tip_key<BlockT>(), out);
     }
 
-    bool getTip(altintegration::BlockIndex<altintegration::VbkBlock>& out) const override
+    bool getBlock(const hash_t& hash, altintegration::BlockIndex<BlockT>& out) const override
     {
-        typename altintegration::VbkBlock::hash_t hash;
-        if(!db_.Read(BlockBatchAdaptor::vbktip(), hash)) {
-            return false;
-        }
-        return db_.Read(std::make_pair(DB_VBK_BLOCK, hash), out);
+        return db_.Read(block_key<BlockT>(hash), out);
     }
 
-    bool getTip(altintegration::BlockIndex<altintegration::AltBlock>& out) const override
+    std::shared_ptr<altintegration::BlockIterator<BlockT>> getBlockIterator() const override
     {
-        typename altintegration::AltBlock::hash_t hash;
-        if(!db_.Read(BlockBatchAdaptor::alttip(), hash)) {
-            return false;
-        }
-        return db_.Read(std::make_pair(DB_ALT_BLOCK, hash), out);
-    }
-
-    bool getBlock(const typename altintegration::BtcBlock::hash_t& hash, altintegration::BlockIndex<altintegration::BtcBlock>& out) const override
-    {
-        return db_.Read(std::make_pair(DB_BTC_BLOCK, hash), out);
-    }
-
-    bool getBlock(const typename altintegration::VbkBlock::hash_t& hash, altintegration::BlockIndex<altintegration::VbkBlock>& out) const override
-    {
-        return db_.Read(std::make_pair(DB_VBK_BLOCK, hash), out);
-    }
-
-    bool getBlock(const typename altintegration::AltBlock::hash_t& hash, altintegration::BlockIndex<altintegration::AltBlock>& out) const override
-    {
-        return db_.Read(std::make_pair(DB_ALT_BLOCK, hash), out);
+        std::shared_ptr<CDBIterator> it(db_.NewIterator());
+        return std::make_shared<BlockIterator<BlockT>>(it);
     }
 
 private:
