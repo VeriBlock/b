@@ -19,6 +19,8 @@
 
 #include "pop_service.hpp"
 #include <utility>
+#include <vbk/adaptors/block_hash_iterator.hpp>
+#include <vbk/adaptors/block_provider.hpp>
 #include <vbk/p2p_sync.hpp>
 #include <vbk/pop_common.hpp>
 #include <veriblock/crypto/progpow.hpp>
@@ -336,7 +338,7 @@ bool LoadTree(
         if (iter.GetKey(key) && key.first == blocktype) {
             index_t diskindex;
             if (iter.GetValue(diskindex)) {
-                if(onBlock) {
+                if (onBlock) {
                     // if function is set, execute a callback
                     onBlock(key.second, &diskindex);
                 }
@@ -365,6 +367,23 @@ bool LoadTree(
     LogPrintf("Loaded %d blocks in %s tree with tip %s\n",
         out.getBlocks().size(), block_t::name(),
         tip->toShortPrettyString());
+
+    return true;
+}
+
+bool loadTrees(CDBIterator& iter, CDBWrapper& db)
+{
+    auto& pop = GetPop();
+
+    BlockHashIterator<altintegration::BtcBlock, DB_BTC_BLOCK> btc_it(iter);
+    BlockHashIterator<altintegration::VbkBlock, DB_VBK_BLOCK> vbk_it(iter);
+    BlockHashIterator<altintegration::AltBlock, DB_ALT_BLOCK> alt_it(iter);
+    BlockProvider block_provider(db);
+    altintegration::ValidationState state;
+
+    if (!altintegration::LoadAllTrees(*pop.altTree, btc_it, vbk_it, alt_it, block_provider, state)) {
+        return error("%s: failed to load trees %s", __func__, state.toString());
+    }
 
     return true;
 }

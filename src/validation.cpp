@@ -4236,9 +4236,12 @@ bool BlockManager::LoadBlockIndex(
 
         // load blocks
         std::unique_ptr<CDBIterator> pcursor(blocktree.NewIterator());
-        if (!VeriBlock::loadTrees(*pcursor)) {
+        if(!VeriBlock::loadTrees(*pcursor, blocktree)) {
             return false;
         }
+        // if (!VeriBlock::loadTrees(*pcursor)) {
+        //     return false;
+        // }
 
         // ALT tree tip should be set - this is our last best tip
         auto* tip = VeriBlock::GetPop().altTree->getBestChain().tip();
