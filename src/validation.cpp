@@ -4239,9 +4239,6 @@ bool BlockManager::LoadBlockIndex(
         if(!VeriBlock::loadTrees(*pcursor, blocktree)) {
             return false;
         }
-        // if (!VeriBlock::loadTrees(*pcursor)) {
-        //     return false;
-        // }
 
         // ALT tree tip should be set - this is our last best tip
         auto* tip = VeriBlock::GetPop().altTree->getBestChain().tip();
