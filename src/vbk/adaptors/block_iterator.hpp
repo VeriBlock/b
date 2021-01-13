@@ -25,18 +25,19 @@ struct BlockIterator : public altintegration::BlockIterator<BlockT> {
         iter_->Next();
     }
 
-    altintegration::BlockIndex<BlockT> value() const override
+    bool value(altintegration::BlockIndex<BlockT>& out) const override
     {
-        altintegration::BlockIndex<BlockT> value;
-        iter_->GetValue(value);
-        return value;
+        return iter_->GetValue(out);
     }
 
-    hash_t key() const override
+    bool key(hash_t& out) const override
     {
         std::pair<char, hash_t> key;
-        iter_->GetKey(key);
-        return key.second;
+        if (!iter_->GetKey(key)) {
+            return false;
+        }
+        out = key.second;
+        return true;
     }
 
     bool valid() const override
@@ -47,10 +48,9 @@ struct BlockIterator : public altintegration::BlockIterator<BlockT> {
         return iter_->Valid() && iter_->GetKey(key) && key.first == prefix;
     }
 
-    bool seek_start() override
+    void seek_start() override
     {
         iter_->Seek(block_key<BlockT>(hash_t()));
-        return true;
     }
 
 private:
