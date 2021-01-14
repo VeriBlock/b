@@ -14,13 +14,15 @@
 
 namespace VeriBlock {
 
+namespace details {
+
 template <typename BlockT>
-struct BlockProvider : public altintegration::BlockProvider<BlockT> {
+struct GenericBlockProvider : public altintegration::details::GenericBlockProvider<BlockT> {
     using hash_t = typename BlockT::hash_t;
 
-    ~BlockProvider() override = default;
+    ~GenericBlockProvider() override = default;
 
-    BlockProvider(CDBWrapper& db) : db_(db) {}
+    GenericBlockProvider(CDBWrapper& db) : db_(db) {}
 
     bool getTipHash(hash_t& out) const override
     {
@@ -37,6 +39,36 @@ struct BlockProvider : public altintegration::BlockProvider<BlockT> {
         std::shared_ptr<CDBIterator> it(db_.NewIterator());
         return std::make_shared<BlockIterator<BlockT>>(it);
     }
+
+private:
+    CDBWrapper& db_;
+};
+
+} // namespace details
+
+struct BlockProvider : public altintegration::BlockProvider {
+    ~BlockProvider() override = default;
+
+    BlockProvider(CDBWrapper& db) : db_(db) {}
+
+    std::shared_ptr<altintegration::details::GenericBlockProvider<altintegration::AltBlock>>
+    getAltBlockProvider() const override
+    {
+        return std::make_shared<details::GenericBlockProvider<altintegration::AltBlock>>(db_);
+    }
+
+    std::shared_ptr<altintegration::details::GenericBlockProvider<altintegration::VbkBlock>>
+    getVbkBlockProvider() const override
+    {
+        return std::make_shared<details::GenericBlockProvider<altintegration::VbkBlock>>(db_);
+    }
+
+    std::shared_ptr<altintegration::details::GenericBlockProvider<altintegration::BtcBlock>>
+    getBtcBlockProvider() const override
+    {
+        return std::make_shared<details::GenericBlockProvider<altintegration::BtcBlock>>(db_);
+    }
+
 
 private:
     CDBWrapper& db_;

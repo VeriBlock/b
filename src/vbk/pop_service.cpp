@@ -26,13 +26,16 @@
 
 namespace VeriBlock {
 
-static std::shared_ptr<PayloadsProvider> payloads = nullptr;
+static std::shared_ptr<PayloadsProvider> payloads_provider = nullptr;
+static std::shared_ptr<BlockProvider> block_provider = nullptr;
 
 void SetPop(CDBWrapper& db)
 {
-    payloads = std::make_shared<PayloadsProvider>(db);
-    std::shared_ptr<altintegration::PayloadsProvider> dbrepo = payloads;
-    SetPop(dbrepo);
+    payloads_provider = std::make_shared<PayloadsProvider>(db);
+    block_provider = std::make_shared<BlockProvider>(db);
+
+    SetPop(std::shared_ptr<altintegration::PayloadsProvider>(payloads_provider),
+        std::shared_ptr<altintegration::BlockProvider>(block_provider));
 
     auto& app = GetPop();
     app.mempool->onAccepted<altintegration::ATV>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::ATV>);
@@ -42,7 +45,7 @@ void SetPop(CDBWrapper& db)
 
 PayloadsProvider& GetPayloadsProvider()
 {
-    return *payloads;
+    return *payloads_provider;
 }
 
 CBlockIndex* compareTipToBlock(CBlockIndex* candidate)
@@ -284,14 +287,9 @@ void saveTrees(altintegration::BlockBatchAdaptor& batch)
 bool loadTrees(CDBWrapper& db)
 {
     auto& pop = GetPop();
-
-    BlockProvider<altintegration::BtcBlock> btc_provider(db);
-    BlockProvider<altintegration::VbkBlock> vbk_provider(db);
-    BlockProvider<altintegration::AltBlock> alt_provider(db);
-
     altintegration::ValidationState state;
 
-    if (!altintegration::LoadAllTrees(*pop.altTree, btc_provider, vbk_provider, alt_provider, state)) {
+    if (!altintegration::LoadAllTrees(pop, state)) {
         return error("%s: failed to load trees %s", __func__, state.toString());
     }
 
