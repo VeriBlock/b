@@ -73,7 +73,7 @@ class PopPayouts(BitcoinTestFramework):
         assert atv_id in block['pop']['data']['atvs']
 
         # target height is lastblock - 5 + POP_PAYOUT_DELAY + 1
-        n = lastblock - 5 + POP_PAYOUT_DELAY + 1 - block['height']
+        n = lastblock - 5 + POP_PAYOUT_DELAY - block['height']
         payoutblockhash = self.nodes[1].generate(nblocks=n)[-1]
         self.sync_blocks(self.nodes)
         self.log.info("pop rewards paid")
