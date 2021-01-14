@@ -8,8 +8,6 @@
 
 #include <dbwrapper.h>
 
-#include "veriblock/storage/block_hash_iterator.hpp"
-
 namespace VeriBlock {
 
 template <typename BlockT>
