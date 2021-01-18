@@ -43,11 +43,6 @@ void SetPop(CDBWrapper& db)
     app.mempool->onAccepted<altintegration::VbkBlock>(VeriBlock::p2p::offerPopDataToAllNodes<altintegration::VbkBlock>);
 }
 
-PayloadsProvider& GetPayloadsProvider()
-{
-    return *payloads_provider;
-}
-
 CBlockIndex* compareTipToBlock(CBlockIndex* candidate)
 {
     AssertLockHeld(cs_main);
@@ -125,9 +120,6 @@ bool addAllBlockPayloads(const CBlock& block, BlockValidationState& state) EXCLU
         return error("[%s] block %s is not accepted because popData is invalid: %s", __func__, block.GetHash().ToString(),
             instate.toString());
     }
-
-    auto& provider = GetPayloadsProvider();
-    provider.write(block.popData);
 
     GetPop().altTree->acceptBlock(block.GetHash().asVector(), block.popData);
 
