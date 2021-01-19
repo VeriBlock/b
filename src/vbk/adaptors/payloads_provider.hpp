@@ -90,44 +90,19 @@ struct PayloadsProvider : public altintegration::PayloadsProvider,
         return true;
     }
 
-    template <typename pop_t>
-    bool getPayloads(char dbPrefix, const std::vector<typename pop_t::id_t>& ids, std::vector<pop_t>& out, altintegration::ValidationState& state)
-    {
-        out.reserve(ids.size());
-        for (size_t i = 0; i < ids.size(); i++) {
-            pop_t value;
-            if (!getPayloads(dbPrefix, ids[i], value, state)) {
-                return state.Invalid("bad-data", i);
-            }
-            out.push_back(value);
-        }
-        return true;
-    }
-
-    bool getATVs(const std::vector<altintegration::ATV::id_t>& ids,
-        std::vector<altintegration::ATV>& out,
-        altintegration::ValidationState& state) override
-    {
-        return getPayloads(DB_ATV_PREFIX, ids, out, state);
-    }
-
-    bool getVTBs(const std::vector<altintegration::VTB::id_t>& ids,
-        std::vector<altintegration::VTB>& out,
-        altintegration::ValidationState& state) override
-    {
-        return getPayloads(DB_VTB_PREFIX, ids, out, state);
-    }
-
-    bool getVBKs(const std::vector<altintegration::VbkBlock::id_t>& ids,
-        std::vector<altintegration::VbkBlock>& out,
-        altintegration::ValidationState& state) override
-    {
-        return getPayloads(DB_VBK_PREFIX, ids, out, state);
-    }
-
     bool getATV(const altintegration::ATV::id_t& id, altintegration::ATV& out, altintegration::ValidationState& state) override
     {
         return getPayloads(DB_ATV_PREFIX, id, out, state);
+    }
+
+    bool getVTB(const altintegration::VTB::id_t& id, altintegration::VTB& out, altintegration::ValidationState& state) override
+    {
+        return getPayloads(DB_VTB_PREFIX, id, out, state);
+    }
+
+    bool getVBK(const altintegration::VbkBlock::id_t& id, altintegration::VbkBlock& out, altintegration::ValidationState& state) override
+    {
+        return getPayloads(DB_VBK_PREFIX, id, out, state);
     }
 
 private:
