@@ -60,12 +60,11 @@ jobs:
           wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
-          python setup.py install
           mkdir build;
           cd build;
           cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF -DWITH_PYPOPTOOLS=ON;
           make -j2;
-          sudo make install
+          sudo make install install_pypoptools
           )
       - name: autogen
         run: ./autogen.sh
@@ -277,6 +276,8 @@ jobs:
           key: ${{ secrets.MIRROR_ARTIFACTS_KEY }}
           source: vBitcoin-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-macos-qt.zip
           target: "artifacts/vbtc"
+
+
   macos-native:
     runs-on: macos-latest
     steps:
@@ -315,12 +316,11 @@ jobs:
           wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
-          python setup.py install
           mkdir build;
           cd build;
           cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF;
           make -j2;
-          sudo make install
+          sudo make install install_pypoptools
           )
       - name: autogen
         run: ./autogen.sh
@@ -381,12 +381,11 @@ jobs:
           wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
-          python setup.py install
           mkdir build;
           cd build;
           cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF -DASAN=ON -DWITH_PYPOPTOOLS=ON;
           make -j2;
-          sudo make install
+          sudo make install install_pypoptools
           )
       - name: fix sanitizer suppressions file
         run: sed -i '/^implicit-/d' "${{ github.workspace }}/test/sanitizer_suppressions/ubsan"
