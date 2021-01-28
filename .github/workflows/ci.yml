@@ -58,11 +58,12 @@ jobs:
           BUILD_TYPE: Release
         run: |
           (
+          sudo su;
           cd /opt;
           wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
-          python3 setup.py install --user
+          python3 setup.py install
           rm -rf build
           mkdir build;
           cd build;
@@ -399,6 +400,7 @@ jobs:
           BUILD_TYPE: Debug
         run: |
           (
+          sudo su;
           cd /opt;
           wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
@@ -407,7 +409,7 @@ jobs:
           rm -rf build
           mkdir build;
           cd build;
-          cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF -DASAN=ON -DWITH_PYPOPTOOLS=ON;
+          cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF -DASAN=ON;
           make -j2;
           sudo make install
           )
