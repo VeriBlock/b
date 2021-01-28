@@ -21,6 +21,10 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
       - name: Extract branch name & commit
         id: extract_branch
         run: |
@@ -48,7 +52,7 @@ jobs:
       - name: run apt update
         run: sudo apt-get update
       - name: install build requirements
-        run: sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 ccache
+        run: sudo apt-get install build-essential libtool autotools-dev automake pkg-config bsdmainutils ccache
       - name: install dependencies
         run: sudo apt-get install libevent-dev python3-zmq python3-dev libboost-python-dev libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libminiupnpc-dev libzmq3-dev libdb4.8-dev libdb4.8++-dev
       - name: install veriblock-pop-cpp
@@ -118,6 +122,10 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
       - name: Extract branch name & commit
         id: extract_branch
         run: |
@@ -194,11 +202,17 @@ jobs:
           key: ${{ secrets.MIRROR_ARTIFACTS_KEY }}
           source: vBitcoin-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-win64-qt.zip
           target: "artifacts/vbtc"
+
+
   x86_64-apple-darwin16:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
       - name: Extract branch name & commit
         id: extract_branch
         run: |
@@ -283,6 +297,10 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
       - name: Extract branch name & commit
         id: extract_branch
         run: |
@@ -342,6 +360,10 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
       - name: Extract branch name & commit
         id: extract_branch
         run: |
