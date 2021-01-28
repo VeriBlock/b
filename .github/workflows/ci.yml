@@ -61,11 +61,12 @@ jobs:
           wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
+          sudo python3 setup.py install
           mkdir build;
           cd build;
           cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF -DWITH_PYPOPTOOLS=ON;
           make -j2;
-          sudo make install install_pypoptools
+          sudo make install
           )
       - name: autogen
         run: ./autogen.sh
@@ -335,7 +336,7 @@ jobs:
           cd build;
           cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF;
           make -j2;
-          sudo make install install_pypoptools
+          sudo make install
           )
       - name: autogen
         run: ./autogen.sh
@@ -400,11 +401,12 @@ jobs:
           wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
+          sudo python3 setup.py install
           mkdir build;
           cd build;
           cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF -DASAN=ON -DWITH_PYPOPTOOLS=ON;
           make -j2;
-          sudo make install install_pypoptools
+          sudo make install
           )
       - name: fix sanitizer suppressions file
         run: sed -i '/^implicit-/d' "${{ github.workspace }}/test/sanitizer_suppressions/ubsan"
