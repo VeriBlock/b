@@ -58,6 +58,7 @@ jobs:
           BUILD_TYPE: Release
         run: |
           (
+          pip3 install wheel
           sudo su;
           cd /opt;
           wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
@@ -400,6 +401,7 @@ jobs:
           BUILD_TYPE: Debug
         run: |
           (
+          pip3 install wheel
           sudo su;
           cd /opt;
           wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
