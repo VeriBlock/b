@@ -62,7 +62,7 @@ jobs:
           wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
-          python3 setup.py install
+          python3 setup.py install --user
           rm -rf build
           mkdir build;
           cd build;
@@ -403,7 +403,7 @@ jobs:
           wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
           cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
-          python3 setup.py install
+          python3 setup.py install --user
           rm -rf build
           mkdir build;
           cd build;
