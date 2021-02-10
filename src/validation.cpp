@@ -4182,13 +4182,6 @@ bool BlockManager::LoadBlockIndex(
     if (!blocktree.LoadBlockIndexGuts(consensus_params, [this](const uint256& hash) EXCLUSIVE_LOCKS_REQUIRED(cs_main) { return this->InsertBlockIndex(hash); }))
         return false;
 
-    bool hasPopData = VeriBlock::hasPopData(blocktree);
-
-    if (!hasPopData) {
-        LogPrintf("BTC/VBK/ALT tips not found... skipping block index loading\n");
-        return true;
-    }
-
     // Calculate nChainWork
     std::vector<std::pair<int, CBlockIndex*>> vSortedByHeight;
     vSortedByHeight.reserve(m_block_index.size());

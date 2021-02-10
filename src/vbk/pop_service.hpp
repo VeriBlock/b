@@ -43,7 +43,6 @@ std::vector<BlockBytes> getLastKnownVBKBlocks(size_t blocks);
 std::vector<BlockBytes> getLastKnownBTCBlocks(size_t blocks);
 
 //! returns true if all tips are stored in database, false otherwise
-bool hasPopData(CBlockTreeDB& db);
 altintegration::PopData getPopData();
 void saveTrees(CDBBatch* batch);
 bool loadTrees(CDBWrapper& db);

@@ -259,13 +259,6 @@ std::vector<BlockBytes> getLastKnownBTCBlocks(size_t blocks)
     return altintegration::getLastKnownBlocks(GetPop().altTree->btc(), blocks);
 }
 
-bool hasPopData(CBlockTreeDB& db)
-{
-    return db.Exists(tip_key<altintegration::BtcBlock>()) &&
-           db.Exists(tip_key<altintegration::VbkBlock>()) &&
-           db.Exists(tip_key<altintegration::AltBlock>());
-}
-
 void saveTrees(CDBBatch* batch)
 {
     AssertLockHeld(cs_main);
