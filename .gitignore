@@ -158,3 +158,4 @@ configure.lineno
 vbitcoin*
 !test/integration/vbitcoind_node.py
 configure~
+.cache
