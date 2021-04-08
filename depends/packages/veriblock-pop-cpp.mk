@@ -18,8 +18,8 @@ ifeq ($(strip $(HOST)),)
   endef
 else ifeq ($(HOST), x86_64-apple-darwin16)
   define $(package)_config_cmds
-    cmake -DCMAKE_C_COMPILER=$(darwin_CC) -DCMAKE_CXX_COMPILER=$(darwin_CXX) \
-    -DCMAKE_INSTALL_PREFIX=$(host_prefix) -DCMAKE_BUILD_TYPE=$(package)_build_type \
+    env CC="$(darwin_CC)" CXX="$(darwin_CXX)" \
+    cmake -DCMAKE_INSTALL_PREFIX=$(host_prefix) -DCMAKE_BUILD_TYPE=$(package)_build_type \
     -DCMAKE_OSX_ARCHITECTURES=x86_64 -DCMAKE_SYSTEM_NAME=Darwin -DCMAKE_SYSTEM_PROCESSOR=x86_64 \
     -DCMAKE_C_COMPILER_TARGET=$(HOST) -DCMAKE_CXX_COMPILER_TARGET=$(HOST) \
     -DCMAKE_OSX_SYSROOT=$(OSX_SDK) -DTESTING=OFF \
