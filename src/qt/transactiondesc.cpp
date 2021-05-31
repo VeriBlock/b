@@ -182,10 +182,11 @@ QString TransactionDesc::FormatBFIStatus(TransactionRecord *rec)
                 vbkMessage = tr("Alternate Chain Detected, wait for Bitcoin Finality");
             }
             else {
-                if( spFinality > 0 ) { 
-                    vbkMessage = tr("%1 blocks of Bitcoin Finality") ;
-                } else if( spFinality <= 0 ) { 
-                    vbkMessage = tr("%1 blocks until Bitcoin Finality") ;
+                if( spFinality >= 0 ) { 
+                    vbkMessage = tr("%1 blocks of Bitcoin Finality");
+                } else { 
+                    vbkMessage = tr("%1 blocks until Bitcoin Finality");
+                    spFinality = -spFinality;
                 }
                 vbkMessage = vbkMessage.arg(QString::number(spFinality));
             }
