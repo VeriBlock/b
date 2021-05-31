@@ -6,8 +6,6 @@
 #include "pop_common.hpp"
 #include <chain.h>
 
-#include <utility>
-
 namespace VeriBlock {
 
 static std::shared_ptr<altintegration::PopContext> app = nullptr;
@@ -24,8 +22,6 @@ void StopPop()
     if (app) {
         app->shutdown();
     }
-
-    app = nullptr;
 }
 
 void SetPopConfig(const altintegration::Config& newConfig)
@@ -36,17 +32,17 @@ void SetPopConfig(const altintegration::Config& newConfig)
 void SetPop(std::shared_ptr<altintegration::PayloadsStorage> db)
 {
     assert(config && "Config is not initialized. Invoke SetPopConfig.");
-    app = altintegration::PopContext::create(config, std::move(db));
+    app = altintegration::PopContext::create(config, db);
 }
 
 std::string toPrettyString(const altintegration::PopContext& pop)
 {
-    return pop.getAltBlockTree().toPrettyString();
+    return pop.altTree->toPrettyString();
 }
 
 altintegration::BlockIndex<altintegration::AltBlock>* GetAltBlockIndex(const uint256& hash)
 {
-    return GetPop().getAltBlockTree().getBlockIndex(hash.asVector());
+    return GetPop().altTree->getBlockIndex(hash.asVector());
 }
 
 altintegration::BlockIndex<altintegration::AltBlock>* GetAltBlockIndex(const CBlockIndex* index)

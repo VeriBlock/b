@@ -733,12 +733,13 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
     }
 
     //VeriBlock Data
-    pblock->popData = VeriBlock::getPopData(*pindexPrev);
+    auto& popctx = VeriBlock::GetPop();
+    pblock->popData = popctx.mempool->getPop();
     const auto popDataRoot = pblock->popData.getMerkleRoot();
     result.pushKV("pop_data_root", HexStr(popDataRoot.begin(), popDataRoot.end()));
     result.pushKV("pop_data", altintegration::ToJSON<UniValue>(pblock->popData, /*verbose=*/true));
     using altintegration::ContextInfoContainer;
-    auto ctx = ContextInfoContainer::createFromPrevious(VeriBlock::GetAltBlockIndex(pindexPrev), VeriBlock::GetPop().getConfig().getAltParams());
+    auto ctx = ContextInfoContainer::createFromPrevious(VeriBlock::GetAltBlockIndex(pindexPrev), VeriBlock::GetPop().config->getAltParams());
     result.pushKV("pop_first_previous_keystone", HexStr(ctx.keystones.firstPreviousKeystone));
     result.pushKV("pop_second_previous_keystone", HexStr(ctx.keystones.secondPreviousKeystone));
 

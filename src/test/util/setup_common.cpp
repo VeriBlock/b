@@ -181,7 +181,7 @@ TestChain100Setup::TestChain100Setup(): RegTestingSetup()
     assert(ChainActive().Tip()->nHeight == 100);
     assert(BlockIndex().size() == 101);
 
-    auto& tree = VeriBlock::GetPop().getAltBlockTree();
+    auto& tree = *VeriBlock::GetPop().altTree;
     assert(tree.getBestChain().tip()->getHeight() == ChainActive().Tip()->nHeight);
 }
 

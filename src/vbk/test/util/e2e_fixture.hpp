@@ -137,7 +137,7 @@ struct E2eFixture : public TestChain100Setup {
             return endorseAltBlock(hash, payoutInfo);
         });
 
-        auto& pop_mempool = VeriBlock::GetPop().getMemPool();
+        auto& pop_mempool = *pop->mempool;
         altintegration::ValidationState state;
         for (const auto& atv : atvs) {
             pop_mempool.submit(atv, state);
@@ -203,7 +203,7 @@ struct E2eFixture : public TestChain100Setup {
         std::vector<uint8_t> header{stream.begin(), stream.end()};
 
         auto txRoot = BlockMerkleRoot(block, nullptr).asVector();
-        auto* libendorsed = VeriBlock::GetPop().getAltBlockTree().getBlockIndex(hash.asVector());
+        auto* libendorsed = VeriBlock::GetPop().altTree->getBlockIndex(hash.asVector());
         assert(libendorsed && "expected to have endorsed header in library");
         return altintegration::GeneratePublicationData(
             header,
@@ -211,7 +211,7 @@ struct E2eFixture : public TestChain100Setup {
             txRoot,
             block.popData,
             payoutInfo,
-            VeriBlock::GetPop().getConfig().getAltParams());
+            *VeriBlock::GetPop().config->alt);
     }
 
     PublicationData createPublicationData(CBlockIndex* endorsed)
