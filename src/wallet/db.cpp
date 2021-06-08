@@ -15,6 +15,7 @@
 #endif
 
 #include <boost/thread.hpp>
+#include <iostream>
 
 namespace {
 
@@ -170,6 +171,8 @@ bool BerkeleyEnvironment::Open(bool retry)
         return true;
     }
 
+    std::cout << "BerkeleyEnvironment::Open1\r\n";
+
     fs::path pathIn = strPath;
     TryCreateDirectories(pathIn);
     if (!LockDirectory(pathIn, ".walletlock")) {
@@ -177,6 +180,7 @@ bool BerkeleyEnvironment::Open(bool retry)
         return false;
     }
 
+    std::cout << "BerkeleyEnvironment::Open2\r\n";
     fs::path pathLogDir = pathIn / "database";
     TryCreateDirectories(pathLogDir);
     fs::path pathErrorFile = pathIn / "db.log";
@@ -196,6 +200,8 @@ bool BerkeleyEnvironment::Open(bool retry)
     dbenv->set_flags(DB_AUTO_COMMIT, 1);
     dbenv->set_flags(DB_TXN_WRITE_NOSYNC, 1);
     dbenv->log_set_config(DB_LOG_AUTO_REMOVE, 1);
+
+    std::cout << "BerkeleyEnvironment::Open3\r\n";
     int ret = dbenv->open(strPath.c_str(),
                          DB_CREATE |
                              DB_INIT_LOCK |
@@ -206,6 +212,7 @@ bool BerkeleyEnvironment::Open(bool retry)
                              DB_RECOVER |
                              nEnvFlags,
                          S_IRUSR | S_IWUSR);
+    std::cout << "BerkeleyEnvironment::Open4\r\n";
     if (ret != 0) {
         LogPrintf("BerkeleyEnvironment::Open: Error %d opening database environment: %s\n", ret, DbEnv::strerror(ret));
         int ret2 = dbenv->close(0);
@@ -232,6 +239,7 @@ bool BerkeleyEnvironment::Open(bool retry)
         }
     }
 
+    std::cout << "BerkeleyEnvironment::Open5\r\n";
     fDbEnvInit = true;
     fMockDb = false;
     return true;
@@ -406,6 +414,7 @@ bool BerkeleyBatch::VerifyEnvironment(const fs::path& file_path, std::string& er
         errorStr = strprintf(_("Error initializing wallet database environment %s!").translated, walletDir);
         return false;
     }
+    std::cout << "BerkeleyEnvironment::VerifyEnvironment1\r\n";
 
     return true;
 }

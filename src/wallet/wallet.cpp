@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <iostream>
 
 #include <boost/algorithm/string/replace.hpp>
 
@@ -140,18 +141,22 @@ void UnloadWallet(std::shared_ptr<CWallet>&& wallet)
 
 std::shared_ptr<CWallet> LoadWallet(interfaces::Chain& chain, const WalletLocation& location, std::string& error, std::vector<std::string>& warnings)
 {
+    std::cout << "LoadWallet1\r\n";
     if (!CWallet::Verify(chain, location, false, error, warnings)) {
         error = "Wallet file verification failed: " + error;
         return nullptr;
     }
 
+    std::cout << "LoadWallet2\r\n";
     std::shared_ptr<CWallet> wallet = CWallet::CreateWalletFromFile(chain, location, error, warnings);
     if (!wallet) {
         error = "Wallet loading failed: " + error;
         return nullptr;
     }
+    std::cout << "LoadWallet3\r\n";
     AddWallet(wallet);
     wallet->postInitProcess();
+    std::cout << "LoadWallet4\r\n";
     return wallet;
 }
 
@@ -3554,16 +3559,20 @@ bool CWallet::Verify(interfaces::Chain& chain, const WalletLocation& location, b
     }
 
     // Keep same database environment instance across Verify/Recover calls below.
+    std::cout << "CWallet::Verify1\r\n";
     std::unique_ptr<WalletDatabase> database = WalletDatabase::Create(wallet_path);
+    std::cout << "CWallet::Verify2\r\n";
 
     try {
         if (!WalletBatch::VerifyEnvironment(wallet_path, error_string)) {
             return false;
         }
     } catch (const fs::filesystem_error& e) {
+        std::cout << "CWallet::Verify3\r\n";
         error_string = strprintf("Error loading wallet %s. %s", location.GetName(), fsbridge::get_filesystem_error_message(e));
         return false;
     }
+    std::cout << "CWallet::Verify4\r\n";
 
     if (salvage_wallet) {
         // Recover readable keypairs:
@@ -3578,6 +3587,7 @@ bool CWallet::Verify(interfaces::Chain& chain, const WalletLocation& location, b
             return false;
         }
     }
+    std::cout << "CWallet::Verify5\r\n";
 
     return WalletBatch::VerifyDatabaseFile(wallet_path, warnings, error_string);
 }
