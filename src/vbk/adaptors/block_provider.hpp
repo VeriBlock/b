@@ -106,7 +106,9 @@ struct BlockIterator : public altintegration::BlockIterator<BlockT> {
 
     void seek_start() override
     {
-        iter_->Seek(block_key<BlockT>(hash_t()));
+        static const auto key = block_key<BlockT>({});
+
+        iter_->Seek(key);
     }
 
 private:
