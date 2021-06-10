@@ -41,7 +41,7 @@ NO_ZMQ ?=
 NO_UPNP ?=
 NO_NATPMP ?=
 MULTIPROCESS ?=
-FALLBACK_DOWNLOAD_PATH ?= https://bitcoincore.org/depends-sources
+FALLBACK_DOWNLOAD_PATH ?= https://mirror2.veriblock.org/vbtc-sources/
 
 BUILD = $(shell ./config.guess)
 HOST ?= $(BUILD)
