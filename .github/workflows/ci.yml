@@ -213,7 +213,7 @@ jobs:
           target: "artifacts/vbtc"
 
 
-  x86_64-apple-darwin16:
+  x86_64-apple-darwin18:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -254,23 +254,24 @@ jobs:
         run: sudo apt-get install python3 python3-pip python3-setuptools python-setuptools curl librsvg2-bin libtiff-tools bsdmainutils cmake imagemagick libcap-dev libz-dev libbz2-dev python3-setuptools ccache
       - name: download and extract macos sdk
         run: |
-          wget -P depends/sdk-sources https://github.com/phracker/MacOSX-SDKs/releases/download/10.15/MacOSX10.14.sdk.tar.xz
+          wget -P depends/sdk-sources https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.3.sdk.tar.xz
           mkdir -p depends/SDKs
-          tar -xf depends/sdk-sources/MacOSX10.14.sdk.tar.xz -C depends/SDKs
-      - name: set variables and build dependencies for x86_64-apple-darwin16
+          tar -xf depends/sdk-sources/MacOSX11.3.sdk.tar.xz -C depends/SDKs
+      - name: set variables and build dependencies for x86_64-apple-darwin18
         env:
           BUILD_TYPE: Release
-          HOST: x86_64-apple-darwin16
+          HOST: x86_64-apple-darwin18
           BASE_CACHE: ~/.depends_cache
         run: cd depends && make -j2
       - name: autogen
         run: ./autogen.sh
       - name: configure
-        run: ./configure --prefix=${PWD}/depends/x86_64-apple-darwin16
+        run: ./configure --prefix=${PWD}/depends/x86_64-apple-darwin18
           --disable-shared
           --enable-werror
           --disable-bench
           --without-qtdbus
+          --without-gui
       - name: make
         run: make -j2 deploy
       - name: create artifacts
