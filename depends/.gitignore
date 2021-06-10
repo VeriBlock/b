@@ -1,6 +1,7 @@
 SDKs/
 work/
 built/
+sdk-sources/
 sources/
 config.site
 x86_64*
