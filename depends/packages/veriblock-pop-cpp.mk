@@ -12,7 +12,7 @@ define $(package)_preprocess_cmds
 endef
 
 define $(package)_config_cmds
-  $($(package)_cmake) -DCMAKE_INSTALL_PREFIX=$(host_prefix) -DCMAKE_BUILD_TYPE=$(package)_build_type -DTESTING=OFF -DSHARED=OFF ..
+  $($(package)_cmake) -DTESTING=OFF -DSHARED=OFF ..
 endef
 
 define $(package)_build_cmds

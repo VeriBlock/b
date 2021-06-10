@@ -181,6 +181,7 @@ jobs:
         run: CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure --prefix=/
           --enable-werror
           --disable-bench
+          --with-incompatible-bdb
       - name: make
         run: make -j2
       - name: make deploy
@@ -271,7 +272,7 @@ jobs:
           --enable-werror
           --disable-bench
           --without-qtdbus
-          --without-gui
+          --with-incompatible-bdb
       - name: make
         run: make -j2 deploy
       - name: create artifacts
