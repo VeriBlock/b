@@ -182,6 +182,7 @@ jobs:
           --enable-werror
           --disable-bench
           --with-incompatible-bdb
+          --with-libs=no
       - name: make
         run: make -j2
       - name: make deploy
