@@ -61,8 +61,10 @@ case $host in
      lt_cv_deplibs_check_method="pass_all"
   ;;
 esac
-dnl Require C++11 compiler (no GNU extensions)
-AX_CXX_COMPILE_STDCXX([11], [noext], [mandatory], [nodefault])
+
+dnl Require C++17 compiler (no GNU extensions)
+AX_CXX_COMPILE_STDCXX([17], [noext], [mandatory])
+
 dnl Check if -latomic is required for <std::atomic>
 CHECK_ATOMIC
 
@@ -1059,43 +1061,36 @@ fi
 
 if test x$use_boost = xyes; then
 
-dnl Minimum required Boost version
-define(MINIMUM_REQUIRED_BOOST, 1.47.0)
-
-dnl Check for boost libs
-AX_BOOST_BASE([MINIMUM_REQUIRED_BOOST])
-if test x$want_boost = xno; then
+  dnl Check for Boost headers
+  AX_BOOST_BASE([1.58.0],[],[AC_MSG_ERROR([Boost is not available!])])
+  if test x$want_boost = xno; then
     AC_MSG_ERROR([[only libbitcoinconsensus can be built without boost]])
-fi
-AX_BOOST_SYSTEM
-AX_BOOST_FILESYSTEM
-AX_BOOST_THREAD
-AX_BOOST_CHRONO
+  fi
+  AX_BOOST_SYSTEM
+  AX_BOOST_FILESYSTEM
 
-dnl Boost 1.56 through 1.62 allow using std::atomic instead of its own atomic
-dnl counter implementations. In 1.63 and later the std::atomic approach is default.
-m4_pattern_allow(DBOOST_AC_USE_STD_ATOMIC) dnl otherwise it's treated like a macro
-BOOST_CPPFLAGS="-DBOOST_SP_USE_STD_ATOMIC -DBOOST_AC_USE_STD_ATOMIC $BOOST_CPPFLAGS"
+  dnl Opt-in to Boost Process if external signer support is requested
+  if test "x$use_external_signer" != xno; then
+    AC_MSG_CHECKING(for Boost Process)
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <boost/process.hpp>]],
+     [[ boost::process::child* child = new boost::process::child; delete child; ]])],
+     [ AC_MSG_RESULT(yes)
+     AC_DEFINE([ENABLE_EXTERNAL_SIGNER],,[define if external signer support is enabled])
+     ],
+     [ AC_MSG_ERROR([Boost::Process is required for external signer support, but not available!])]
+    )
+  fi
 
-if test x$use_reduce_exports = xyes; then
-  AC_MSG_CHECKING([for working boost reduced exports])
-  TEMP_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$BOOST_CPPFLAGS $CPPFLAGS"
-  AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[
-      @%:@include <boost/version.hpp>
-    ]], [[
-      #if BOOST_VERSION >= 104900
-      // Everything is okay
-      #else
-      #  error Boost version is too old
-      #endif
-    ]])],[
-      AC_MSG_RESULT(yes)
-    ],[
-    AC_MSG_ERROR([boost versions < 1.49 are known to be broken with reduced exports. Use --disable-reduce-exports.])
-  ])
-  CPPFLAGS="$TEMP_CPPFLAGS"
-fi
+  if test x$suppress_external_warnings != xno; then
+    BOOST_CPPFLAGS=SUPPRESS_WARNINGS($BOOST_CPPFLAGS)
+  fi
+
+  dnl Boost 1.56 through 1.62 allow using std::atomic instead of its own atomic
+  dnl counter implementations. In 1.63 and later the std::atomic approach is default.
+  m4_pattern_allow(DBOOST_AC_USE_STD_ATOMIC) dnl otherwise it's treated like a macro
+  BOOST_CPPFLAGS="-DBOOST_SP_USE_STD_ATOMIC -DBOOST_AC_USE_STD_ATOMIC $BOOST_CPPFLAGS"
+
+  BOOST_LIBS="$BOOST_LDFLAGS $BOOST_SYSTEM_LIB $BOOST_FILESYSTEM_LIB"
 fi
 
 if test x$use_reduce_exports = xyes; then
