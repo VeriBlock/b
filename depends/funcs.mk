@@ -162,7 +162,7 @@ $(1)_cmake=env CC="$$($(1)_cc)" \
                CXX="$$($(1)_cxx)" \
                CXXFLAGS="$$($(1)_cppflags) $$($(1)_cxxflags)" \
                LDFLAGS="$$($(1)_ldflags)" \
-             cmake"
+             cmake
 endef
 
 define int_add_cmds
