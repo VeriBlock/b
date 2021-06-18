@@ -802,11 +802,11 @@ UniValue extractblockinfo(const JSONRPCRequest& req)
         }
 
         UniValue val(UniValue::VOBJ);
-        val.pushKV("hash", HexStr(header.GetHash()));
+        val.pushKV("hash", header.GetHash().GetHex());
         val.pushKV("height", container.height);
-        val.pushKV("previousHash", HexStr(header.hashPrevBlock));
-        val.pushKV("previousKeystone", HexStr(container.keystones.firstPreviousKeystone));
-        val.pushKV("secondPreviousKeystone", HexStr(container.keystones.secondPreviousKeystone));
+        val.pushKV("previousHash", header.hashPrevBlock.GetHex());
+        val.pushKV("previousKeystone", uint256(container.keystones.firstPreviousKeystone).GetHex());
+        val.pushKV("secondPreviousKeystone", uint256(container.keystones.secondPreviousKeystone).GetHex());
 
         res.push_back(val);
     }
