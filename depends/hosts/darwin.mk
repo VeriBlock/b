@@ -3,16 +3,10 @@ OSX_SDK_VERSION=10.14
 OSX_SDK=$(SDK_PATH)/MacOSX$(OSX_SDK_VERSION).sdk
 LD64_VERSION=253.9
 
-darwin_CC=env -u C_INCLUDE_PATH -u CPLUS_INCLUDE_PATH \
-              -u OBJC_INCLUDE_PATH -u OBJCPLUS_INCLUDE_PATH -u CPATH \
-              -u LIBRARY_PATH \
-            clang --target=$(host) -mmacosx-version-min=$(OSX_MIN_VERSION) \
+darwin_CC=clang --target=$(host) -mmacosx-version-min=$(OSX_MIN_VERSION) \
               -mlinker-version=$(LD64_VERSION) \
               --sysroot=$(OSX_SDK)
-darwin_CXX=env -u C_INCLUDE_PATH -u CPLUS_INCLUDE_PATH \
-               -u OBJC_INCLUDE_PATH -u OBJCPLUS_INCLUDE_PATH -u CPATH \
-               -u LIBRARY_PATH \
-             clang++ --target=$(host) -mmacosx-version-min=$(OSX_MIN_VERSION) \
+darwin_CXX=clang++ --target=$(host) -mmacosx-version-min=$(OSX_MIN_VERSION) \
                -mlinker-version=$(LD64_VERSION) \
                --sysroot=$(OSX_SDK) \
                -stdlib=libc++

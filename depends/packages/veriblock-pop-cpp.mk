@@ -16,6 +16,10 @@ define $(package)_preprocess_cmds
   mkdir -p build
 endef
 
+define $(package)_set_vars
+  $(package)_ldflags+=-Wl,-stack_size -Wl,0x1000000
+endef
+
 define $(package)_config_cmds
   $($(package)_cmake) -DCMAKE_INSTALL_PREFIX=$(host_prefix) -DTESTING=OFF -DSHARED=OFF -DCMAKE_BUILD_TYPE=$($(package)_build_type) ..
 endef
