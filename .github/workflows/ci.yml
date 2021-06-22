@@ -262,7 +262,7 @@ jobs:
           BUILD_TYPE: Release
           HOST: x86_64-apple-darwin16
           BASE_CACHE: ~/.depends_cache
-        run: cd depends && make -j2
+        run: cd depends && make -d -j2
       - name: autogen
         run: ./autogen.sh
       - name: configure
