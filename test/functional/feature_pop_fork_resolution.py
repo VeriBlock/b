@@ -75,13 +75,13 @@ class PopFr(BitcoinTestFramework):
         disconnect_nodes(self.nodes[2], 1)
         self.log.info("node2 is disconnected")
 
-        # node2 mines another 97 blocks, so total height is lastblock + 200
-        self.nodes[2].generate(nblocks=97)
+        # node2 mines another 97 blocks, so total height is lastblock + 220
+        self.nodes[2].generate(nblocks=117)
 
         # fork A is at 303 (lastblock = 200)
-        # fork B is at 400
-        self.nodes[2].waitforblockheight(lastblock + 200)
-        self.log.info("node2 mined 97 more blocks, total height is %d", lastblock + 200)
+        # fork B is at 420
+        self.nodes[2].waitforblockheight(lastblock + 220)
+        self.log.info("node2 mined 117 more blocks, total height is %d", lastblock + 220)
 
         bestblocks = [self.get_best_block(x) for x in self.nodes[0:3]]
 
@@ -94,9 +94,9 @@ class PopFr(BitcoinTestFramework):
         self.sync_all(self.nodes[0:2])
         self.log.info("nodes[0,1] are in sync and are at fork A (%d...%d blocks)", lastblock + 103, lastblock + 113)
 
-        # fork B is at 400
-        assert bestblocks[2]['height'] == lastblock + 200, "unexpected tip: {}".format(bestblocks[2])
-        self.log.info("node2 is at fork B (%d...%d blocks)", lastblock + 103, lastblock + 200)
+        # fork B is at 420
+        assert bestblocks[2]['height'] == lastblock + 220, "unexpected tip: {}".format(bestblocks[2])
+        self.log.info("node2 is at fork B (%d...%d blocks)", lastblock + 103, lastblock + 220)
 
         # endorse block 313 (fork A tip)
         addr0 = self.nodes[0].getnewaddress()
