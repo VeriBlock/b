@@ -228,7 +228,7 @@ BOOST_FIXTURE_TEST_CASE(crossing_keystone_with_pop_1_test, FrFixture)
     auto& config = VeriBlock::GetPop().getConfig();
     int startHeight = ChainActive().Tip()->nHeight;
 
-    // mine a keystone interval of blocks
+    // mine a keystone interval + 20 of blocks
     for (size_t i = 0; i < config.alt->getKeystoneInterval() + 20; ++i) {
         CreateAndProcessBlock({}, cbKey);
     }
@@ -257,6 +257,49 @@ BOOST_FIXTURE_TEST_CASE(crossing_keystone_with_pop_1_test, FrFixture)
     ReconsiderTestBlock(forkBlockNext);
 
     BOOST_CHECK(expectedTip.GetHash() == ChainActive().Tip()->GetBlockHash());
+}
+
+BOOST_FIXTURE_TEST_CASE(crossing_keystone_with_pop_2_test, FrFixture)
+{
+    // this scenario tests a case when longer fork without endorsements crosses
+    // a keystone and shorter fork with POP endorsements does not cross
+    // a keystone
+
+    auto& config = VeriBlock::GetPop().getConfig();
+    int startHeight = ChainActive().Tip()->nHeight;
+
+    //make sure keystone interval is big enough so we do not cross it
+    BOOST_CHECK(pop->getConfig().getAltParams().getKeystoneInterval() >= 3);
+
+    // mine a keystone interval + 5 of blocks
+    for (size_t i = 0; i < config.alt->getKeystoneInterval() + 5; ++i) {
+        CreateAndProcessBlock({}, cbKey);
+    }
+
+    auto* atip = ChainActive().Tip();
+    auto* forkBlockNext = atip->GetAncestor(startHeight + 1);
+    auto* forkBlock = forkBlockNext->pprev;
+    InvalidateTestBlock(forkBlockNext);
+
+    for (size_t i = 0; i < 2; ++i) {
+        CreateAndProcessBlock({}, cbKey);
+    }
+
+    auto* btip = ChainActive().Tip();
+
+    BOOST_CHECK_EQUAL(atip->nHeight, startHeight + config.alt->getKeystoneInterval() + 5);
+    BOOST_CHECK_EQUAL(btip->nHeight, startHeight + 2);
+    BOOST_CHECK_EQUAL(forkBlock->nHeight, startHeight);
+
+    BOOST_CHECK(btip->GetBlockHash() == ChainActive().Tip()->GetBlockHash());
+    auto* endorsedBlock = btip->GetAncestor(btip->nHeight - 1);
+    CBlock expectedTip = endorseAltBlockAndMine(endorsedBlock->GetBlockHash(), 10);
+
+    BOOST_CHECK(expectedTip.GetHash() == ChainActive().Tip()->GetBlockHash());
+
+    ReconsiderTestBlock(forkBlockNext);
+
+    BOOST_CHECK(atip->GetBlockHash() == ChainActive().Tip()->GetBlockHash());
 }
 
 BOOST_FIXTURE_TEST_CASE(crossing_keystone_without_pop_1_test, FrFixture)

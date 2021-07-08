@@ -75,13 +75,13 @@ class PopFr(BitcoinTestFramework):
         disconnect_nodes(self.nodes[2], 1)
         self.log.info("node2 is disconnected")
 
-        # node2 mines another 97 blocks, so total height is lastblock + 220
-        self.nodes[2].generate(nblocks=117)
+        # node2 mines another 97 blocks, so total height is lastblock + 200
+        self.nodes[2].generate(nblocks=97)
 
         # fork A is at 303 (lastblock = 200)
-        # fork B is at 420
-        self.nodes[2].waitforblockheight(lastblock + 220)
-        self.log.info("node2 mined 117 more blocks, total height is %d", lastblock + 220)
+        # fork B is at 400
+        self.nodes[2].waitforblockheight(lastblock + 200)
+        self.log.info("node2 mined 97 more blocks, total height is %d", lastblock + 200)
 
         bestblocks = [self.get_best_block(x) for x in self.nodes[0:3]]
 
@@ -89,19 +89,19 @@ class PopFr(BitcoinTestFramework):
         assert bestblocks[0] == bestblocks[1], "node[0,1] have different best hashes: {} vs {}".format(bestblocks[0],
                                                                                                        bestblocks[1])
 
-        # mine 10 more blocks to fork A
-        self.nodes[0].generate(nblocks=10)
+        # mine 40 more blocks to fork A
+        self.nodes[0].generate(nblocks=40)
         self.sync_all(self.nodes[0:2])
-        self.log.info("nodes[0,1] are in sync and are at fork A (%d...%d blocks)", lastblock + 103, lastblock + 113)
+        self.log.info("nodes[0,1] are in sync and are at fork A (%d...%d blocks)", lastblock + 103, lastblock + 143)
 
-        # fork B is at 420
-        assert bestblocks[2]['height'] == lastblock + 220, "unexpected tip: {}".format(bestblocks[2])
-        self.log.info("node2 is at fork B (%d...%d blocks)", lastblock + 103, lastblock + 220)
+        # fork B is at 400
+        assert bestblocks[2]['height'] == lastblock + 200, "unexpected tip: {}".format(bestblocks[2])
+        self.log.info("node2 is at fork B (%d...%d blocks)", lastblock + 103, lastblock + 200)
 
-        # endorse block 313 (fork A tip)
+        # endorse block 343 (fork A tip)
         addr0 = self.nodes[0].getnewaddress()
-        txid = endorse_block(self.nodes[0], self.apm, lastblock + 113, addr0)
-        self.log.info("node0 endorsed block %d (fork A tip)", lastblock + 113)
+        txid = endorse_block(self.nodes[0], self.apm, lastblock + 143, addr0)
+        self.log.info("node0 endorsed block %d (fork A tip)", lastblock + 143)
         # mine pop tx on node0
         containinghash = self.nodes[0].generate(nblocks=10)
         self.log.info("node0 mines 10 more blocks")
