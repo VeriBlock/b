@@ -130,15 +130,6 @@ UniValue getpopdatabyheight(const JSONRPCRequest& request)
 
     EnsurePopEnabled();
 
-    auto wallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(wallet.get(), request.fHelp)) {
-        return NullUniValue;
-    }
-
-    // Make sure the results are valid at least up to the most recent block
-    // the user could have gotten from another RPC command prior to now
-    wallet->BlockUntilSyncedToCurrentChain();
-
     int height = request.params[0].get_int();
 
     LOCK(cs_main);
@@ -160,15 +151,6 @@ UniValue getpopdatabyhash(const JSONRPCRequest& request)
             HelpExampleCli("getpopdatabyhash", "xxx") + HelpExampleRpc("getpopdatabyhash", "xxx"));
 
     EnsurePopEnabled();
-
-    auto wallet = GetWalletForJSONRPCRequest(request);
-    if (!EnsureWalletIsAvailable(wallet.get(), request.fHelp)) {
-        return NullUniValue;
-    }
-
-    // Make sure the results are valid at least up to the most recent block
-    // the user could have gotten from another RPC command prior to now
-    wallet->BlockUntilSyncedToCurrentChain();
 
     std::string hex = request.params[0].get_str();
     LOCK(cs_main);

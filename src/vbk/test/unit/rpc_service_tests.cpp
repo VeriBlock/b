@@ -18,7 +18,9 @@
 #include <univalue.h>
 #include <validation.h>
 #include <vbk/merkle.hpp>
+#include <veriblock/pop/entities/context_info_container.hpp>
 #include <wallet/wallet.h>
+#include <validation.h>
 
 #include <utility>
 #include <vbk/test/util/e2e_fixture.hpp>
@@ -44,27 +46,37 @@ static UniValue CallRPC(std::string args)
 
 BOOST_AUTO_TEST_SUITE(rpc_service_tests)
 
-BOOST_AUTO_TEST_CASE(getpopdata_test)
+BOOST_FIXTURE_TEST_CASE(getpopdata_test, E2eFixture)
 {
-    //    int blockHeight = 10;
-    //    CBlockIndex* blockIndex = ChainActive()[blockHeight];
-    //    CBlock block;
-    //
-    //    BOOST_CHECK(ReadBlockFromDisk(block, blockIndex, Params().GetConsensus()));
-    //
-    //    CDataStream ssBlock(SER_NETWORK, PROTOCOL_VERSION);
-    //    ssBlock << blockIndex->GetBlockHeader();
-    //
-    //    uint256 txRoot = BlockMerkleRoot(block);
-    //    auto keystones = VeriBlock::getKeystoneHashesForTheNextBlock(blockIndex->pprev);
-    //    auto contextInfo = VeriBlock::ContextInfoContainer(blockIndex->nHeight, keystones, txRoot);
-    //    auto authedContext = contextInfo.getAuthenticated();
-    //
-    //    UniValue result;
-    //    BOOST_CHECK_NO_THROW(result = CallRPC("getpopdata " + std::to_string(blockHeight)));
-    //
-    //    BOOST_CHECK(find_value(result.get_obj(), "raw_contextinfocontainer").get_str() == HexStr(authedContext.begin(), authedContext.end()));
-    //    BOOST_CHECK(find_value(result.get_obj(), "block_header").get_str() == HexStr(ssBlock));
+    for (size_t i = 0; i < 20; ++i) {
+        CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey);
+    }
+
+    int blockHeight = ChainActive().Tip()->nHeight - 5;
+    CBlockIndex* blockIndex = ChainActive()[blockHeight];
+    CBlock block;
+
+    BOOST_CHECK(ReadBlockFromDisk(block, blockIndex, Params().GetConsensus()));
+
+    CDataStream ssBlock(SER_NETWORK, PROTOCOL_VERSION);
+    ssBlock << blockIndex->GetBlockHeader();
+
+    auto txRoot = BlockMerkleRoot(block).asVector();
+    auto authedContext = altintegration::AuthenticatedContextInfoContainer::createFromPrevious(
+        txRoot,
+        block.popData.getMerkleRoot(),
+        VeriBlock::GetAltBlockIndex(blockIndex->pprev),
+        VeriBlock::GetPop().getConfig().getAltParams());
+    altintegration::WriteStream w;
+    authedContext.toVbkEncoding(w);
+
+    UniValue result;
+    BOOST_CHECK_NO_THROW(result = CallRPC("getpopdatabyheight " + std::to_string(blockHeight)));
+
+    auto blockContext = find_value(result.get_obj(), "authenticated_context").get_obj();
+
+    BOOST_CHECK_EQUAL(find_value(blockContext, "serialized").get_str(), HexStr(w.data().begin(), w.data().end()));
+    BOOST_CHECK_EQUAL(find_value(result.get_obj(), "block_header").get_str(), HexStr(ssBlock));
 }
 
 BOOST_FIXTURE_TEST_CASE(submitpop_test, E2eFixture)
@@ -140,10 +152,26 @@ BOOST_FIXTURE_TEST_CASE(setmempooldostalledcheck_test, E2eFixture)
 
 BOOST_FIXTURE_TEST_CASE(getblock_finalized_test, E2eFixture)
 {
-    auto tip = ChainActive().Tip();
+    auto* tip = ChainActive().Tip();
     BOOST_CHECK(tip != nullptr);
 
-    auto blockhash = CallRPC(std::string("getblockhash ") + "0");
+    auto finalityDistance = VeriBlock::GetPop().getAltBlockTree().getParams().getMaxReorgDistance();
+    auto settlementInterval = VeriBlock::GetPop().getAltBlockTree().getParams().preserveBlocksBehindFinal();
+
+    for (size_t i = 0; i < (finalityDistance + settlementInterval + 5); ++i) {
+        CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey);
+    }
+
+    auto blockhash = CallRPC(std::string("getblockhash ") + "1");
+    auto blockBeforeFinalization = CallRPC(std::string("getblock ") + blockhash.get_str());
+
+    ::ChainstateActive().ForceFlushStateToDisk();
+    CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey);
+
+    blockhash = CallRPC(std::string("getblockhash ") + "1");
+    auto blockAfterFinalization = CallRPC(std::string("getblock ") + blockhash.get_str());
+
+    BOOST_CHECK_NE(blockBeforeFinalization.getValStr(), blockAfterFinalization.getValStr());
 }
 
 
