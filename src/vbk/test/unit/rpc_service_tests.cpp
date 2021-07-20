@@ -9,9 +9,9 @@
 #include <chrono>
 #include <consensus/merkle.h>
 #include <fstream>
+#include <rpc/client.h>
 #include <rpc/request.h>
 #include <rpc/server.h>
-#include <rpc/client.h>
 #include <string>
 #include <test/util/setup_common.h>
 #include <thread>
@@ -20,7 +20,6 @@
 #include <vbk/merkle.hpp>
 #include <veriblock/pop/entities/context_info_container.hpp>
 #include <wallet/wallet.h>
-#include <validation.h>
 
 #include <utility>
 #include <vbk/test/util/e2e_fixture.hpp>
@@ -169,9 +168,10 @@ BOOST_FIXTURE_TEST_CASE(getblock_finalized_test, E2eFixture)
     CreateAndProcessBlock({}, ChainActive().Tip()->GetBlockHash(), cbKey);
 
     blockhash = CallRPC(std::string("getblockhash ") + "1");
-    auto blockAfterFinalization = CallRPC(std::string("getblock ") + blockhash.get_str());
+    UniValue blockAfterFinalization;
+    BOOST_CHECK_NO_THROW(blockAfterFinalization = CallRPC(std::string("getblock ") + blockhash.get_str()));
 
-    BOOST_CHECK_NE(blockBeforeFinalization.getValStr(), blockAfterFinalization.getValStr());
+    BOOST_CHECK_NE(blockBeforeFinalization.write(), blockAfterFinalization.write());
 }
 
 
