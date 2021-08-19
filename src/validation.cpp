@@ -2738,7 +2738,7 @@ void CChainState::PruneBlockIndexCandidates()
 
     auto temp_set = setBlockIndexCandidates;
     for (const auto& el : temp_set) {
-        if (m_chain.Tip() != el && el->pprev != nullptr) {
+        if (m_chain.Tip() != el->pprev && el->pprev != nullptr) {
             setBlockIndexCandidates.erase(el->pprev);
         }
     }
