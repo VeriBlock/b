@@ -18,12 +18,21 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
     ~AltChainParamsVBTC() override = default;
     AltChainParamsVBTC() = default;
 
-    explicit AltChainParamsVBTC(const CBlock& genesis)
+    explicit AltChainParamsVBTC(const CBlock& genesis, std::string network)
     {
+        assert(network == "main" or network == "test" or network == "regtest");
+
         bootstrap.hash = genesis.GetHash().asVector();
         // intentionally leave prevHash empty
         bootstrap.height = 0;
         bootstrap.timestamp = genesis.GetBlockTime();
+
+        if (network == "main") {
+            this->mPopPayoutsParams->mPopPayoutDelay = 30;
+            this->mPopPayoutsParams->mDifficultyAveragingInterval = 30;
+            this->mEndorsementSettlementInterval = 30;
+            this->mPreserveBlocksBehindFinal = mEndorsementSettlementInterval;
+        }
 
         //! copying all parameters here to make sure that
         //! if anyone changes them in alt-int-cpp, they
@@ -39,8 +48,6 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
         this->mPopPayoutsParams->mUseFlatScoreRound = true;
         this->mPopPayoutsParams->mMaxScoreThresholdNormal = 2.0;
         this->mPopPayoutsParams->mMaxScoreThresholdKeystone = 3.0;
-        this->mPopPayoutsParams->mDifficultyAveragingInterval = 30;
-        this->mPopPayoutsParams->mPopPayoutDelay = 30;
         this->mPopPayoutsParams->mRoundRatios = {0.97, 1.03, 1.07, 3.00};
         this->mPopPayoutsParams->mLookupTable = {
             1.00000000, 1.00000000, 1.00000000, 1.00000000, 1.00000000, 1.00000000,
@@ -58,8 +65,6 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
         this->mMaxAltchainFutureBlockTime = 10 * 60; // 10 min
         this->mKeystoneInterval = 5;
         this->mFinalityDelay = 100;
-        this->mEndorsementSettlementInterval = 30;
-        this->mPreserveBlocksBehindFinal = mEndorsementSettlementInterval;
         this->mMaxPopDataSize = altintegration::MAX_POPDATA_SIZE;
         this->mMaxVbkBlocksInAltBlock = 200;
         this->mMaxVTBsInAltBlock = 200;
@@ -93,16 +98,16 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
 };
 
 struct AltChainParamsVBTCRegTest : public AltChainParamsVBTC {
-    ~AltChainParamsVBTCRegTest() = default;
+    ~AltChainParamsVBTCRegTest() override = default;
 
-    AltChainParamsVBTCRegTest(const CBlock& genesis) : AltChainParamsVBTC(genesis)
+    explicit AltChainParamsVBTCRegTest(const CBlock& genesis) : AltChainParamsVBTC(genesis, "regtest")
     {
         mMaxReorgDistance = 1000;
     }
 };
 
 struct AltChainParamsVBTCDetRegTest : public AltChainParamsVBTC {
-    ~AltChainParamsVBTCDetRegTest() = default;
+    ~AltChainParamsVBTCDetRegTest() override = default;
 
     AltChainParamsVBTCDetRegTest()
     {

@@ -107,7 +107,7 @@ void selectPopConfig(const std::string& network)
         popconfig.setBTC(testnetBTCstartHeight, testnetBTCblocks, btcparam);
         auto vbkparam = std::make_shared<altintegration::VbkChainParamsTest>();
         popconfig.setVBK(testnetVBKstartHeight, testnetVBKblocks, vbkparam);
-        auto altparam = std::make_shared<VeriBlock::AltChainParamsVBTC>(Params().GenesisBlock());
+        auto altparam = std::make_shared<VeriBlock::AltChainParamsVBTC>(Params().GenesisBlock(), network);
         popconfig.alt = altparam;
     } else if (network == CBaseChainParams::REGTEST) {
         auto btcparam = std::make_shared<altintegration::BtcChainParamsRegTest>();
