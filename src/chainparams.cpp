@@ -195,8 +195,8 @@ CMainParams::CMainParams()
      pchMessageStart[3] = 2 + VBK_VERSION;
      nDefaultPort = 18333;
      nPruneAfterHeight = 1000;
-     m_assumed_blockchain_size = 40;
-     m_assumed_chain_state_size = 2;
+     m_assumed_blockchain_size = 1;
+     m_assumed_chain_state_size = 1;
 
 //     CBlock(hash=0000000fa9a9736fd815daea197d2cf0526e1c4641c365a5e5c811374795fdb6, ver=0x00000001, hashPrevBlock=0000000000000000000000000000000000000000000000000000000000000000, hashMerkleRoot=345a907c247b9500ecb312e5c2b027b0ec3c6bd70ebd428044eadb9f78460046, nTime=1340, nBits=1d1fffff, nNonce=15922192, vtx=1)
 //     CTransaction(hash=345a907c24, ver=1, vin.size=1, vout.size=1, nLockTime=0)
@@ -241,10 +241,10 @@ CMainParams::CMainParams()
          {}};
 
      chainTxData = ChainTxData{
-         // Data from RPC: getchaintxstats 4096 000000000000006433d1efec504c53ca332b64963c425395515b01977bd7b3b0
-         /* nTime    */ 1603359686,
-         /* nTxCount */ 58090238,
-         /* dTxRate  */ 0.1232886622799463,
+         // 00000001da906d7e587fe344ca51b097d621f88aaad0f93389d4df558492e86e
+         /* nTime    */ 1630402053,
+         /* nTxCount */ 51789,
+         /* dTxRate  */ 0.004484290981120139,
      };
  }
 
