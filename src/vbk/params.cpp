@@ -102,30 +102,48 @@ void selectPopConfig(const std::string& network)
 {
     altintegration::Config popconfig;
 
+    if (network == CBaseChainParams::MAIN) {
+        auto btcparam = std::make_shared<altintegration::BtcChainParamsMain>();
+        popconfig.setBTC(testnetBTCstartHeight, testnetBTCblocks, btcparam);
+        auto vbkparam = std::make_shared<altintegration::VbkChainParamsMain>();
+        popconfig.setVBK(testnetVBKstartHeight, testnetVBKblocks, vbkparam);
+        auto altparam = std::make_shared<VeriBlock::AltChainParamsVBTC>(Params().GenesisBlock(), /*mainnet=*/true);
+        popconfig.alt = altparam;
+        return;
+    }
+
     if (network == CBaseChainParams::TESTNET) {
         auto btcparam = std::make_shared<altintegration::BtcChainParamsTest>();
         popconfig.setBTC(testnetBTCstartHeight, testnetBTCblocks, btcparam);
         auto vbkparam = std::make_shared<altintegration::VbkChainParamsTest>();
         popconfig.setVBK(testnetVBKstartHeight, testnetVBKblocks, vbkparam);
-        auto altparam = std::make_shared<VeriBlock::AltChainParamsVBTC>(Params().GenesisBlock(), network);
+        auto altparam = std::make_shared<VeriBlock::AltChainParamsVBTC>(Params().GenesisBlock());
         popconfig.alt = altparam;
-    } else if (network == CBaseChainParams::REGTEST) {
+        return;
+    }
+
+    if (network == CBaseChainParams::REGTEST) {
         auto btcparam = std::make_shared<altintegration::BtcChainParamsRegTest>();
         popconfig.setBTC(0, {}, btcparam);
         auto vbkparam = std::make_shared<altintegration::VbkChainParamsRegTest>();
         popconfig.setVBK(0, {}, vbkparam);
         auto altparam = std::make_shared<VeriBlock::AltChainParamsVBTCRegTest>(Params().GenesisBlock());
         popconfig.alt = altparam;
-    } else if (network == CBaseChainParams::DETREGTEST) {
+        return;
+    }
+
+    if (network == CBaseChainParams::DETREGTEST) {
         auto btcparam = std::make_shared<altintegration::BtcChainParamsRegTest>();
         popconfig.setBTC(0, {}, btcparam);
         auto vbkparam = std::make_shared<altintegration::VbkChainParamsRegTest>();
         popconfig.setVBK(0, {}, vbkparam);
         auto altparam = std::make_shared<VeriBlock::AltChainParamsVBTCDetRegTest>();
         popconfig.alt = altparam;
-    } else {
-        throw std::invalid_argument("currently only supports test/regtest/detregtest");
+        return;
     }
+
+
+    throw std::invalid_argument("currently only supports main/test/regtest/detregtest");
 
     VeriBlock::SetPopConfig(popconfig);
     printConfig(popconfig);

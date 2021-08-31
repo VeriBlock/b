@@ -18,16 +18,14 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
     ~AltChainParamsVBTC() override = default;
     AltChainParamsVBTC() = default;
 
-    explicit AltChainParamsVBTC(const CBlock& genesis, std::string network)
+    explicit AltChainParamsVBTC(const CBlock& genesis, bool mainnet = false)
     {
-        assert(network == "main" or network == "test" or network == "regtest");
-
         bootstrap.hash = genesis.GetHash().asVector();
         // intentionally leave prevHash empty
         bootstrap.height = 0;
         bootstrap.timestamp = genesis.GetBlockTime();
 
-        if (network == "main") {
+        if (mainnet) {
             this->mPopPayoutsParams->mPopPayoutDelay = 30;
             this->mPopPayoutsParams->mDifficultyAveragingInterval = 30;
             this->mEndorsementSettlementInterval = 30;
@@ -100,7 +98,7 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
 struct AltChainParamsVBTCRegTest : public AltChainParamsVBTC {
     ~AltChainParamsVBTCRegTest() override = default;
 
-    explicit AltChainParamsVBTCRegTest(const CBlock& genesis) : AltChainParamsVBTC(genesis, "regtest")
+    explicit AltChainParamsVBTCRegTest(const CBlock& genesis) : AltChainParamsVBTC(genesis)
     {
         mMaxReorgDistance = 1000;
     }
