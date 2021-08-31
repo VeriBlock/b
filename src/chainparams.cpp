@@ -72,13 +72,13 @@ CMainParams::CMainParams()
 {
     strNetworkID = CBaseChainParams::MAIN;
     consensus.nSubsidyHalvingInterval = 210000;
-    consensus.BIP16Exception = uint256S("0x00000000000002dc756eebf4f49723ed8d30cc28a5f108eb94b1ba88ac4f9c22");
+    consensus.BIP16Exception = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
     consensus.BIP34Height = 1;
-    consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
-    consensus.BIP65Height = 1;          // 000000000000000004c2b624ed5d7756c508d90fd0da2c7c679febfa6c4735f0
-    consensus.BIP66Height = 1;          // 00000000000000000379eaa19dce8c9b722d46ae6a57c2f1a988119488b50931
-    consensus.CSVHeight = 1;            // 000000000000000004a1b34462cb8aeebd5799177f7a29cf28f2d1961716b5b5
-    consensus.SegwitHeight = 1;         // 0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893
+    consensus.BIP34Hash = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
+    consensus.BIP65Height = 1;          // 0x0000000000000000000000000000000000000000000000000000000000000000
+    consensus.BIP66Height = 1;          // 0x0000000000000000000000000000000000000000000000000000000000000000
+    consensus.CSVHeight = 1;            // 0x0000000000000000000000000000000000000000000000000000000000000000
+    consensus.SegwitHeight = 1;         // 0x0000000000000000000000000000000000000000000000000000000000000000
     consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
     consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
     consensus.nPowTargetSpacing = 10 * 60;
@@ -92,21 +92,21 @@ CMainParams::CMainParams()
     consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999;   // December 31, 2008
 
     consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000001533efd8d716a517fe2c5008");
-    consensus.defaultAssumeValid = uint256S("0x0000000000000000000b9d2ec5a352ecba0592946514a92f14319dc2b367fc72"); // 654683
+    consensus.defaultAssumeValid = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
 
     /**
          * The message start string is designed to be unlikely to occur in normal data.
          * The characters are rarely used upper ASCII, not valid as UTF-8, and produce
          * a large 32-bit integer with any alignment.
          */
-    pchMessageStart[0] = 1;
-    pchMessageStart[1] = 1;
-    pchMessageStart[2] = 1;
-    pchMessageStart[3] = 1 + VBK_VERSION;
-    nDefaultPort = 8333;
+    pchMessageStart[0] = 'v';
+    pchMessageStart[1] = 'B';
+    pchMessageStart[2] = 'T';
+    pchMessageStart[3] = 'C' + 1;
+    nDefaultPort = 8033;
     nPruneAfterHeight = 100000;
-    m_assumed_blockchain_size = 350;
-    m_assumed_chain_state_size = 6;
+    m_assumed_blockchain_size = 1;
+    m_assumed_chain_state_size = 1;
 
     genesis = CreateGenesisBlockDefault(1231006505, 2083236893, 0x1d00ffff, 1, 50 * COIN);
     consensus.hashGenesisBlock = genesis.GetHash();
@@ -128,7 +128,7 @@ CMainParams::CMainParams()
     base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x88, 0xB2, 0x1E};
     base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x88, 0xAD, 0xE4};
 
-    bech32_hrp = "bc";
+    bech32_hrp = "vbtc";
 
     vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
     vSeeds.clear(); // Clear DNS seeds
@@ -141,10 +141,22 @@ CMainParams::CMainParams()
         {}};
 
     chainTxData = ChainTxData{
-        // Data from RPC: getchaintxstats 4096 00000000000000000005f8920febd3925f8272a6a71237563d78c2edfdd09ddf
-        /* nTime    */ 1569926786,
-        /* nTxCount */ 460596047,
-        /* dTxRate  */ 3.77848885073875,
+        /**
+         * vbitcoin-cli getchaintxstats                                                                                                                                                                                                                                                                                                        bogdan@big
+         * {
+         *    "time": 1630388498,
+         *    "txcount": 51731,
+         *    "window_final_block_hash": "0000000f6c2dd40ebc89b81848934657e1acb9e74441ae6fc337b2da990573c0",
+         *    "window_final_block_height": 51627,
+         *    "window_block_count": 4320,
+         *    "window_tx_count": 4324,
+         *    "window_interval": 964989,
+         *    "txrate": 0.004480880092933702
+         *  }
+         */
+        /* nTime    */ 1630388498,
+        /* nTxCount */ 1,
+        /* dTxRate  */ 0.004480880092933702,
     };
  }
 
