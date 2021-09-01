@@ -23,9 +23,6 @@
 
 #include <veriblock/pop.hpp>
 
-#define VBK_1  0xc0
-#define VBK_VERSION (VBK_1 + 0x2)
-
 static CBlock CreateGenesisBlockDefault(const char* pszTimestamp, const CScript& genesisOutputScript, uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
 {
     CMutableTransaction txNew;
@@ -102,7 +99,7 @@ CMainParams::CMainParams()
     pchMessageStart[0] = 'v';
     pchMessageStart[1] = 'B';
     pchMessageStart[2] = 'T';
-    pchMessageStart[3] = 'C' + 1;
+    pchMessageStart[3] = 'C';
     nDefaultPort = 8033;
     nPruneAfterHeight = 100000;
     m_assumed_blockchain_size = 1;
@@ -192,7 +189,7 @@ CMainParams::CMainParams()
      pchMessageStart[0] = 2;
      pchMessageStart[1] = 2;
      pchMessageStart[2] = 2;
-     pchMessageStart[3] = 2 + VBK_VERSION;
+     pchMessageStart[3] = 2;
      nDefaultPort = 18333;
      nPruneAfterHeight = 1000;
      m_assumed_blockchain_size = 1;
@@ -280,7 +277,7 @@ CRegTestParams::CRegTestParams(const ArgsManager& args)
     pchMessageStart[0] = 3;
     pchMessageStart[1] = 3;
     pchMessageStart[2] = 3;
-    pchMessageStart[3] = 3 + VBK_VERSION;
+    pchMessageStart[3] = 3;
     nDefaultPort = 18444;
     nPruneAfterHeight = 1000;
     m_assumed_blockchain_size = 0;
@@ -413,7 +410,7 @@ CDetRegTestParams::CDetRegTestParams(const ArgsManager& args)
     pchMessageStart[0] = 3;
     pchMessageStart[1] = 3;
     pchMessageStart[2] = 3;
-    pchMessageStart[3] = 3 + VBK_VERSION;
+    pchMessageStart[3] = 3;
     nDefaultPort = 18555;
     nPruneAfterHeight = 1000;
     m_assumed_blockchain_size = 0;
