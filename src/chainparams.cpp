@@ -24,7 +24,7 @@
 #include <veriblock/pop.hpp>
 
 #define VBK_1  0xc0
-#define VBK_VERSION (VBK_1 + 0x1)
+#define VBK_VERSION (VBK_1 + 0x2)
 
 static CBlock CreateGenesisBlockDefault(const char* pszTimestamp, const CScript& genesisOutputScript, uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
 {
@@ -128,7 +128,7 @@ CMainParams::CMainParams()
     base58Prefixes[EXT_PUBLIC_KEY] = {0x04, 0x88, 0xB2, 0x1E};
     base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x88, 0xAD, 0xE4};
 
-    bech32_hrp = "vbtc";
+    bech32_hrp = "bc";
 
     vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
     vSeeds.clear(); // Clear DNS seeds
@@ -167,9 +167,9 @@ CMainParams::CMainParams()
  {
      strNetworkID = CBaseChainParams::TESTNET;
      consensus.nSubsidyHalvingInterval = 210000;
-     consensus.BIP16Exception = uint256S("0x00000000dd30457c001f4095d208cc1296b0eed002427aa599874af7a432b105");
+     consensus.BIP16Exception = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
      consensus.BIP34Height = 1;
-     consensus.BIP34Hash = uint256S("0x0000000023b3a96d3484e5abb3755c413e7d41500f8e2a5c3f0dd01299cd8ef8");
+     consensus.BIP34Hash = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
      consensus.BIP65Height = 1;          // 00000000007f6655f22f98e72ed80d8b06dc761d5da09df0fa1dc4be4f861eb6
      consensus.BIP66Height = 1;          // 000000002104c8c45e99a8853285a3b592602a3ccde2b832481da85e9e4ba182
      consensus.CSVHeight = 1;            // 00000000025e930139bac5c6c31a403776da130831ab85be56578f3fa75369bb
@@ -187,7 +187,7 @@ CMainParams::CMainParams()
      consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999;   // December 31, 2008
 
      consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000000000000aaaa");
-     consensus.defaultAssumeValid = uint256S("0x000000000000006433d1efec504c53ca332b64963c425395515b01977bd7b3b0"); // 1864000
+     consensus.defaultAssumeValid = uint256S("0x0000000000000000000000000000000000000000000000000000000000000000");
 
      pchMessageStart[0] = 2;
      pchMessageStart[1] = 2;
@@ -242,9 +242,9 @@ CMainParams::CMainParams()
 
      chainTxData = ChainTxData{
          // 00000001da906d7e587fe344ca51b097d621f88aaad0f93389d4df558492e86e
-         /* nTime    */ 1630402053,
-         /* nTxCount */ 51789,
-         /* dTxRate  */ 0.004484290981120139,
+         /* nTime    */ 1630388498,
+         /* nTxCount */ 1,
+         /* dTxRate  */ 0.004480880092933702,
      };
  }
 

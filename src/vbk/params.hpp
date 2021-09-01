@@ -18,19 +18,18 @@ struct AltChainParamsVBTC : public altintegration::AltChainParams {
     ~AltChainParamsVBTC() override = default;
     AltChainParamsVBTC() = default;
 
-    explicit AltChainParamsVBTC(const CBlock& genesis, bool mainnet = false)
+    explicit AltChainParamsVBTC(const CBlock& genesis)
     {
         bootstrap.hash = genesis.GetHash().asVector();
         // intentionally leave prevHash empty
         bootstrap.height = 0;
         bootstrap.timestamp = genesis.GetBlockTime();
 
-        if (mainnet) {
-            this->mPopPayoutsParams->mPopPayoutDelay = 30;
-            this->mPopPayoutsParams->mDifficultyAveragingInterval = 30;
-            this->mEndorsementSettlementInterval = 30;
-            this->mPreserveBlocksBehindFinal = mEndorsementSettlementInterval;
-        }
+        // these parameters changed in comparison to default parameters
+        this->mPopPayoutsParams->mPopPayoutDelay = 30;
+        this->mPopPayoutsParams->mDifficultyAveragingInterval = 30;
+        this->mEndorsementSettlementInterval = 30;
+        this->mPreserveBlocksBehindFinal = mEndorsementSettlementInterval;
 
         //! copying all parameters here to make sure that
         //! if anyone changes them in alt-int-cpp, they
