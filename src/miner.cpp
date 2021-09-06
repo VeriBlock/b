@@ -146,10 +146,9 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     if (VeriBlock::isPopEnabled() && chainparams.isPopActive(nHeight))
     {
         pblock->popData = VeriBlock::generatePopData();
-    }
-
-    if (!pblock->popData.empty()) {
-        pblock->nVersion |= VeriBlock::POP_BLOCK_VERSION_BIT;
+        if (!pblock->popData.empty()) {
+            pblock->nVersion |= VeriBlock::POP_BLOCK_VERSION_BIT;
+        }
     }
 
     int64_t nTime1 = GetTimeMicros();
