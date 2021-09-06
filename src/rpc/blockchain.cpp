@@ -923,7 +923,7 @@ static UniValue getblock(const JSONRPCRequest& request)
 
     UniValue json = blockToJSON(block, tip, pblockindex, verbosity >= 2);
 
-    if (VeriBlock::isPopEnabled()) {
+    if (VeriBlock::IsPopActive()) {
         LOCK(cs_main);
         UniValue obj(UniValue::VOBJ);
 

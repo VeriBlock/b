@@ -732,7 +732,7 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
         result.pushKV("default_witness_commitment", HexStr(pblocktemplate->vchCoinbaseCommitment.begin(), pblocktemplate->vchCoinbaseCommitment.end()));
     }
 
-    if (VeriBlock::isPopEnabled()) {
+    if (Params().isPopActive((int64_t)(pindexPrev->nHeight+1))) {
         //VeriBlock Data
         const auto popDataRoot = pblock->popData.getMerkleRoot();
         result.pushKV("pop_data_root", HexStr(popDataRoot.begin(), popDataRoot.end()));

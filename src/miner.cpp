@@ -143,7 +143,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     addPackageTxs<ancestor_score>(nPackagesSelected, nDescendantsUpdated);
 
     // VeriBlock: add PopData into the block
-    if (VeriBlock::isPopEnabled() && chainparams.isPopActive(nHeight))
+    if (VeriBlock::IsPopActive(nHeight))
     {
         pblock->popData = VeriBlock::generatePopData();
         if (!pblock->popData.empty()) {
@@ -165,7 +165,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(nHeight, chainparams);
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
 
-    if (VeriBlock::isPopEnabled()) {
+    if (VeriBlock::IsPopActive(nHeight)) {
         VeriBlock::addPopPayoutsIntoCoinbaseTx(coinbaseTx, *pindexPrev, chainparams);
     }
 

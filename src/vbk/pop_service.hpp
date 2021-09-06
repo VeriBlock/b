@@ -55,9 +55,10 @@ CAmount getCoinbaseSubsidy(const CAmount& subsidy, int32_t height, const CChainP
 
 void addDisconnectedPopdata(const altintegration::PopData& popData);
 
-bool isPopEnabled();
-
-bool isPopEnabled(int32_t height);
+bool IsCrossedBootstrapBlock();
+bool IsCrossedBootstrapBlock(int32_t height);
+bool IsPopActive();
+bool IsPopActive(int32_t height);
 
 } // namespace VeriBlock
 
