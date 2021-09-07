@@ -21,7 +21,7 @@ uint256 TopLevelMerkleRoot(const CBlockIndex* prevIndex, const CBlock& block, bo
 
     // if POP is not enabled/activated for 'block' , use original txRoot as merkle root
     const auto height = prevIndex == nullptr ? 0 : prevIndex->nHeight + 1;
-    if (!VeriBlock::IsPopActive(height)) {
+    if (!VeriBlock::isPopActive(height)) {
         return txRoot;
     }
 

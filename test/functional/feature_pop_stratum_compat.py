@@ -75,8 +75,9 @@ class PopStratumCompat(BitcoinTestFramework):
 
         # stop 1 block behind activation
         self.log.info("Mining blocks until activation -5 blocks")
+        self.log.info("Current node[0] height {}".format(node.getblockcount()))
         mine_until_pop_active(node, addr, delta=-5)
-
+        self.log.info("Current node[0] height {}".format(node.getblockcount()))
         # check that getblocktemplate does NOT have pop-related fields before POP activation
 
         self.log.info("Check that getblocktemplate does not have POP fields")
@@ -88,12 +89,15 @@ class PopStratumCompat(BitcoinTestFramework):
         assert_no_field(resp, 'pop_rewards')
 
         self.log.info("Mining blocks until activation +5 blocks")
+        self.log.info("Current node[0] height {}".format(node.getblockcount()))
         mine_until_pop_active(node, addr, delta=+5)
+        self.log.info("Current node[0] height {}".format(node.getblockcount()))
 
         self.log.info("Mine chain of {} consecutive endorsed blocks".format(POP_PAYOUT_DELAY))
         create_endorsed_chain(node, self.apm, POP_PAYOUT_DELAY, addr)
+        self.log.info("Current node[0] height {}".format(node.getblockcount()))
         endorse_block(self.nodes[0], self.apm, node.getblockcount() - 5, addr)
-
+        self.log.info("Current node[0] height {}".format(node.getblockcount()))
         self.log.info("Check that getblocktemplate does have POP fields")
         resp = self.getblocktemplate()
 
@@ -116,6 +120,7 @@ class PopStratumCompat(BitcoinTestFramework):
         for reward in resp['pop_rewards']:
             assert_field_exists(reward, 'amount', type=is_int)
             assert_field_exists(reward, 'payout_info', type=is_hex)
+        self.log.info("Current node[0] height {}".format(node.getblockcount()))
 
 
 if __name__ == '__main__':

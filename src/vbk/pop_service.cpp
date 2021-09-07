@@ -334,30 +334,30 @@ void addDisconnectedPopdata(const altintegration::PopData& popData) EXCLUSIVE_LO
     }
 }
 
-bool IsCrossedBootstrapBlock()
+bool isCrossedBootstrapBlock()
 {
     auto* tip = ChainActive().Tip();
     if (tip != nullptr) {
-        return IsCrossedBootstrapBlock(tip->nHeight);
+        return isCrossedBootstrapBlock(tip->nHeight);
     }
     return false;
 }
 
-bool IsCrossedBootstrapBlock(int32_t height)
+bool isCrossedBootstrapBlock(int32_t height)
 {
     auto block = VeriBlock::GetPop().getConfig().getAltParams().getBootstrapBlock();
     return height >= block.getHeight();
 }
 
-bool IsPopActive() {
+bool isPopActive() {
     auto* tip = ChainActive().Tip();
     if (tip != nullptr) {
-        return IsPopActive(tip->nHeight);
+        return isPopActive(tip->nHeight);
     }
     return false;
 }
-bool IsPopActive(int32_t height) {
-    if(!IsCrossedBootstrapBlock(height)) {
+bool isPopActive(int32_t height) {
+    if(!isCrossedBootstrapBlock(height)) {
         // if we didn't cross bootstrap block, then POP can't be active
         return false;
     }

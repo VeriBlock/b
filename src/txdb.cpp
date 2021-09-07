@@ -234,7 +234,7 @@ bool CBlockTreeDB::WriteBatchSync(const std::vector<std::pair<int, const CBlockF
     }
 
     // we save trees after we cross bootstrap block
-    if (VeriBlock::IsCrossedBootstrapBlock()) {
+    if (VeriBlock::isCrossedBootstrapBlock()) {
         // write BTC/VBK/ALT blocks
         VeriBlock::saveTrees(&batch);
     }
