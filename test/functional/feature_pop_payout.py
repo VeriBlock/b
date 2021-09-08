@@ -101,7 +101,7 @@ class PopPayouts(BitcoinTestFramework):
         assert lastblock == 210, "calculation below are only valid for POP activation height = 210"
         pop_payout = float(outputs[1]['value'])
         half_payout = POW_PAYOUT / 2
-        assert balance == POW_PAYOUT * 149 + half_payout * 50 + half_payout * .6 * 11 + pop_payout
+        assert balance == POW_PAYOUT * 149 + half_payout * 50 + half_payout * .6 * 11  + pop_payout
         self.log.warning("success! _case1_endorse_keystone_get_paid()")
 
     def run_test(self):
