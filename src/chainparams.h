@@ -119,9 +119,9 @@ protected:
 
     // VeriBlock:
     // cut this % from coinbase subsidy
-    uint32_t mPopRewardPercentage = 40; // %
+    uint32_t mPopRewardPercentage = 20; // %
     // every pop reward will be multiplied by this coefficient
-    int32_t mPopRewardCoefficient = 20;
+    int32_t mPopRewardCoefficient = 40;
 };
 
 class CMainParams : public CChainParams
