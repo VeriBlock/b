@@ -121,7 +121,7 @@ protected:
     // cut this % from coinbase subsidy
     uint32_t mPopRewardPercentage = 50; // %
     // every pop reward will be multiplied by this coefficient
-    double mPopRewardCoefficient = 2.5f;
+    double mPopRewardCoefficient = 2.5;
 };
 
 class CMainParams : public CChainParams
