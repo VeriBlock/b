@@ -107,8 +107,8 @@ CMainParams::CMainParams()
 
     genesis = CreateGenesisBlockDefault(1231006505, 2083236893, 0x1d00ffff, 1, 50 * COIN);
     consensus.hashGenesisBlock = genesis.GetHash();
-    // assert(consensus.hashGenesisBlock == uint256S("0x000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"));
-    // assert(genesis.hashMerkleRoot == uint256S("0x4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"));
+    assert(consensus.hashGenesisBlock == uint256S("0x000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"));
+    assert(genesis.hashMerkleRoot == uint256S("0x4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"));
 
     // VeriBlock
     consensus.VeriBlockPopSecurityHeight = 200;
@@ -205,8 +205,8 @@ CMainParams::CMainParams()
          "047c62bbf7f5aa4dd5c16bad99ac621b857fac4e93de86e45f5ada73404eeb44dedcf377b03c14a24e9d51605d9dd2d8ddaef58760d9c4bb82d9c8f06d96e79488",
          "VeriBlock");
      consensus.hashGenesisBlock = genesis.GetHash();
-    //  assert(consensus.hashGenesisBlock == uint256S("0000000fa9a9736fd815daea197d2cf0526e1c4641c365a5e5c811374795fdb6"));
-    //  assert(genesis.hashMerkleRoot == uint256S("345a907c247b9500ecb312e5c2b027b0ec3c6bd70ebd428044eadb9f78460046"));
+     assert(consensus.hashGenesisBlock == uint256S("0000000fa9a9736fd815daea197d2cf0526e1c4641c365a5e5c811374795fdb6"));
+     assert(genesis.hashMerkleRoot == uint256S("345a907c247b9500ecb312e5c2b027b0ec3c6bd70ebd428044eadb9f78460046"));
 
      vFixedSeeds.clear();
      vSeeds.clear();
