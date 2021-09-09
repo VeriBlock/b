@@ -526,8 +526,8 @@ BOOST_AUTO_TEST_CASE(knapsack_solver_test)
           for (int i = 0; i < RUN_TESTS; i++) {
             // picking 50 from 100 coins doesn't depend on the shuffle,
             // but does depend on randomness in the stochastic approximation code
-            BOOST_CHECK(testWallet.SelectCoinsMinConf(50 * COIN, filter_standard, GroupCoins(vCoins), setCoinsRet , nValueRet, coin_selection_params, bnb_used));
-            BOOST_CHECK(testWallet.SelectCoinsMinConf(50 * COIN, filter_standard, GroupCoins(vCoins), setCoinsRet2, nValueRet, coin_selection_params, bnb_used));
+            BOOST_CHECK(testWallet.SelectCoinsMinConf(5 * COIN, filter_standard, GroupCoins(vCoins), setCoinsRet , nValueRet, coin_selection_params, bnb_used));
+            BOOST_CHECK(testWallet.SelectCoinsMinConf(5 * COIN, filter_standard, GroupCoins(vCoins), setCoinsRet2, nValueRet, coin_selection_params, bnb_used));
             BOOST_CHECK(!equal_sets(setCoinsRet, setCoinsRet2));
 
             int fails = 0;

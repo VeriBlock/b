@@ -25,7 +25,7 @@ struct MerkleFixture {
 BOOST_FIXTURE_TEST_CASE(genesis_block_hash_is_valid, MerkleFixture)
 {
     CBlock block = VeriBlock::CreateGenesisBlock(
-        1337, 36282504, 0x1d0fffff, 1, 50 * COIN,
+        1337, 36282504, 0x1d0fffff, 1, 5 * COIN,
         "047c62bbf7f5aa4dd5c16bad99ac621b857fac4e93de86e45f5ada73404eeb44dedcf377b03c14a24e9d51605d9dd2d8ddaef58760d9c4bb82d9c8f06d96e79488",
         "VeriBlock");
     BlockValidationState state;

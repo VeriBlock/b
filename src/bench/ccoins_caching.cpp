@@ -33,7 +33,7 @@ SetupDummyInputs(FillableSigningProvider& keystoreRet, CCoinsViewCache& coinsRet
     dummyTransactions[0].vout.resize(2);
     dummyTransactions[0].vout[0].nValue = 11 * COIN;
     dummyTransactions[0].vout[0].scriptPubKey << ToByteVector(key[0].GetPubKey()) << OP_CHECKSIG;
-    dummyTransactions[0].vout[1].nValue = 50 * COIN;
+    dummyTransactions[0].vout[1].nValue = 5 * COIN;
     dummyTransactions[0].vout[1].scriptPubKey << ToByteVector(key[1].GetPubKey()) << OP_CHECKSIG;
     AddCoins(coinsRet, CTransaction(dummyTransactions[0]), 0);
 

@@ -27,7 +27,7 @@ public:
 static void TestBlockSubsidyHalvings(const CChainParams& params)
 {
     int maxHalvings = 64;
-    CAmount nInitialSubsidy = VeriBlock::getCoinbaseSubsidy(50 * COIN, 0, params);
+    CAmount nInitialSubsidy = VeriBlock::getCoinbaseSubsidy(5 * COIN, 0, params);
 
     CAmount nPreviousSubsidy = nInitialSubsidy * 2; // for height == 0
     BOOST_CHECK_EQUAL(nPreviousSubsidy, nInitialSubsidy * 2);
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(subsidy_limit_test)
     // skip first 1000 blocks to make sure POP security is ON
     for (int nHeight = 1000; nHeight < 14000000; nHeight += 1000) {
         CAmount nSubsidy = GetBlockSubsidy(nHeight, *chainParams);
-        BOOST_CHECK(nSubsidy <= 50 * COIN);
+        BOOST_CHECK(nSubsidy <= 5 * COIN);
         nSum += nSubsidy * 1000;
         BOOST_CHECK(MoneyRange(nSum));
     }

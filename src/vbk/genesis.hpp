@@ -18,7 +18,7 @@ CBlock MineGenesisBlock(
     uint32_t nBits,
     uint32_t nVersion = 1,
     uint32_t nNonce = 0, // starting nonce
-    uint64_t genesisReward = 50 * COIN);
+    uint64_t genesisReward = 5 * COIN);
 
 } // namespace VeriBlock
 
