@@ -94,7 +94,7 @@ public:
     }
 
     uint32_t PopRewardPercentage() const {return mPopRewardPercentage;}
-    int32_t PopRewardCoefficient() const {return mPopRewardCoefficient;}
+    float PopRewardCoefficient() const {return mPopRewardCoefficient;}
 
 protected:
     CChainParams() {}
@@ -121,7 +121,7 @@ protected:
     // cut this % from coinbase subsidy
     uint32_t mPopRewardPercentage = 50; // %
     // every pop reward will be multiplied by this coefficient
-    int32_t mPopRewardCoefficient = 25;
+    float mPopRewardCoefficient = 2.5f;
 };
 
 class CMainParams : public CChainParams
