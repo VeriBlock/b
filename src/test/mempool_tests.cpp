@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(MempoolIndexingTest)
     CMutableTransaction tx3 = CMutableTransaction();
     tx3.vout.resize(1);
     tx3.vout[0].scriptPubKey = CScript() << OP_11 << OP_EQUAL;
-    tx3.vout[0].nValue = 50 * COIN;
+    tx3.vout[0].nValue = 5 * COIN;
     pool.addUnchecked(entry.Fee(0LL).FromTx(tx3));
 
     /* 2nd highest fee */
@@ -317,7 +317,7 @@ BOOST_AUTO_TEST_CASE(MempoolAncestorIndexingTest)
     CMutableTransaction tx3 = CMutableTransaction();
     tx3.vout.resize(1);
     tx3.vout[0].scriptPubKey = CScript() << OP_11 << OP_EQUAL;
-    tx3.vout[0].nValue = 50 * COIN;
+    tx3.vout[0].nValue = 5 * COIN;
     pool.addUnchecked(entry.Fee(0LL).FromTx(tx3));
 
     /* 2nd highest fee */
@@ -616,7 +616,7 @@ BOOST_AUTO_TEST_CASE(MempoolAncestryTests)
     //
     // [tx1].0 <- [tx2]
     //
-    CTransactionRef tx2 = make_tx(/* output_values */ {495 * CENT, 50 * COIN}, /* inputs */ {tx1});
+    CTransactionRef tx2 = make_tx(/* output_values */ {495 * CENT, 5 * COIN}, /* inputs */ {tx1});
     pool.addUnchecked(entry.Fee(10000LL).FromTx(tx2));
 
     // Ancestors / descendants should be:
@@ -693,7 +693,7 @@ BOOST_AUTO_TEST_CASE(MempoolAncestryTests)
     //
     CTransactionRef ty1, ty2, ty3, ty4, ty5;
     CTransactionRef* ty[5] = {&ty1, &ty2, &ty3, &ty4, &ty5};
-    CAmount v = 50 * COIN;
+    CAmount v = 5 * COIN;
     for (uint64_t i = 0; i < 5; i++) {
         CTransactionRef& tyi = *ty[i];
         tyi = make_tx(/* output_values */ {v}, /* inputs */ i > 0 ? std::vector<CTransactionRef>{*ty[i - 1]} : std::vector<CTransactionRef>{});
@@ -703,7 +703,7 @@ BOOST_AUTO_TEST_CASE(MempoolAncestryTests)
         BOOST_CHECK_EQUAL(ancestors, i+1);
         BOOST_CHECK_EQUAL(descendants, i+1);
     }
-    CTransactionRef ty6 = make_tx(/* output_values */ {50 * COIN}, /* inputs */ {tx3, ty5});
+    CTransactionRef ty6 = make_tx(/* output_values */ {5 * COIN}, /* inputs */ {tx3, ty5});
     pool.addUnchecked(entry.Fee(10000LL).FromTx(ty6));
 
     // Ancestors / descendants should be:
@@ -758,7 +758,7 @@ BOOST_AUTO_TEST_CASE(MempoolAncestryTests)
     //
     CTransactionRef ta, tb, tc, td;
     ta = make_tx(/* output_values */ {10 * COIN});
-    tb = make_tx(/* output_values */ {50 * COIN, 3 * COIN}, /* inputs */  {ta});
+    tb = make_tx(/* output_values */ {5 * COIN, 3 * COIN}, /* inputs */  {ta});
     tc = make_tx(/* output_values */ {2 * COIN}, /* inputs */ {tb}, /* input_indices */ {1});
     td = make_tx(/* output_values */ {6 * COIN}, /* inputs */ {tb, tc}, /* input_indices */ {0, 0});
     pool.clear();
