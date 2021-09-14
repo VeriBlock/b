@@ -48,12 +48,11 @@ void erasePopDataNodeState(const NodeId& id) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
     mapPopDataNodeState.erase(id);
 }
 
+int lastSize = 0;
+int sizeCheckCounter = 0;
 template <typename pop_t>
 bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altintegration::MemPool& pop_mempool)
 {
-    static int lastSize = 0;
-    static int sizeCheckCounter = 0;
-
     std::vector<std::vector<uint8_t>> requested_data;
     vRecv >> requested_data;
 
