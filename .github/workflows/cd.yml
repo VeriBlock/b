@@ -66,12 +66,12 @@ jobs:
           username: ${{ secrets.PUBLIC_DOCKERHUB_USERNAME }}
           password: ${{ secrets.PUBLIC_DOCKERHUB_PASSWORD }}
           dockerfile: ubuntu-asan.Dockerfile
-          tags: "ubuntu-${{ env. BRANCH }}-${{ env.GIT_HASH }}-${{ matrix.build }}-asan"
+          tags: "ubuntu-${{ env. BRANCH }}-${{ env.GIT_HASH }}-asan"
       - name: Show Tags
         run: |
           echo "Successfully pushed the following tags:"
           echo "----"
-          echo "ubuntu-${{ env.BRANCH }}-${{ env.GIT_HASH }}-${{ matrix.build }}-asan"
+          echo "ubuntu-${{ env.BRANCH }}-${{ env.GIT_HASH }}-asan"
           echo "----"
 
   alpine:
