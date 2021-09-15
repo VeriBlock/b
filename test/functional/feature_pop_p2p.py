@@ -136,7 +136,7 @@ class PopP2P(BitcoinTestFramework):
         time.sleep(5)
 
         assert_equal(bn.executed_msg_atv, 1)
-        assert_equal(bn.executed_msg_offer_vbk, 2)
+        assert_equal(bn.executed_msg_offer_vbk, 1)
 
         self.log.info("_run_sync_after_generating successful")
 
