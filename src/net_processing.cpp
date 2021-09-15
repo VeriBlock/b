@@ -1928,11 +1928,10 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
 
     // VeriBlock: if POP is not enabled, ignore POP-related P2P calls
     if (VeriBlock::isPopActive()) {
+        auto& state = *State(pfrom->GetId());
         // ignore all POP-related messages until sync is completed
         if(!ChainstateActive().IsInitialBlockDownload() 
-            && ChainActive().Height() > pfrom->nStartingHeight - 5 
-            && ChainActive().Height() > pindexBestHeader->nHeight - 5) {
-                
+            && (state.pindexBestKnownBlock == nullptr || ChainActive().Height() > state.pindexBestKnownBlock->nHeight - 20)) {
             int pop_res = VeriBlock::p2p::processPopData(pfrom, strCommand, vRecv, connman);
             if (pop_res >= 0) {
                 return pop_res;
@@ -3998,9 +3997,12 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
 
         // VeriBlock offer Pop Data
         if (VeriBlock::isPopActive()) {
-            VeriBlock::p2p::offerPopData<altintegration::ATV>(pto, connman, msgMaker);
-            VeriBlock::p2p::offerPopData<altintegration::VTB>(pto, connman, msgMaker);
-            VeriBlock::p2p::offerPopData<altintegration::VbkBlock>(pto, connman, msgMaker);
+            auto index = ChainActive()[ChainActive().Height() - 5];
+            if (index != nullptr && PeerHasHeader(&state, index)) {
+                    VeriBlock::p2p::offerPopData<altintegration::ATV>(pto, connman, msgMaker);
+                    VeriBlock::p2p::offerPopData<altintegration::VTB>(pto, connman, msgMaker);
+                    VeriBlock::p2p::offerPopData<altintegration::VbkBlock>(pto, connman, msgMaker);
+            }
         }
 
         // Detect whether we're stalling
