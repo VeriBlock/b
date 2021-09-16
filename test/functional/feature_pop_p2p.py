@@ -10,6 +10,7 @@ from test_framework.mininode import (
     P2PInterface,
     msg_get_atv,
 )
+from test_framework.messages import msg_getheaders
 from test_framework.pop import endorse_block, mine_until_pop_active
 from test_framework.test_framework import BitcoinTestFramework
 from test_framework.util import (
@@ -100,6 +101,11 @@ class PopP2P(BitcoinTestFramework):
         bn = BaseNode(self.log)
 
         self.nodes[0].add_p2p_connection(bn)
+
+        msg = msg_getheaders()
+        msg.hashstop = int(self.nodes[0].getbestblockhash(), 16)
+        bn.send_message(msg)
+
         time.sleep(2)
 
         assert bn.executed_msg_atv == 0
@@ -122,6 +128,10 @@ class PopP2P(BitcoinTestFramework):
 
         bn = BaseNode(self.log)
         self.nodes[0].add_p2p_connection(bn)
+
+        msg = msg_getheaders()
+        msg.hashstop = int(self.nodes[0].getbestblockhash(), 16)
+        bn.send_message(msg)
 
         # endorse block 5
         addr = self.nodes[0].getnewaddress()
