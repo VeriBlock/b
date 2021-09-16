@@ -4000,9 +4000,9 @@ bool PeerLogicValidation::SendMessages(CNode* pto)
         if (VeriBlock::isPopActive()) {
             auto index = ChainActive()[ChainActive().Height() - 5];
             if (index != nullptr && PeerHasHeader(&state, index)) {
-                    VeriBlock::p2p::offerPopData<altintegration::ATV>(pto, connman, msgMaker);
-                    VeriBlock::p2p::offerPopData<altintegration::VTB>(pto, connman, msgMaker);
-                    VeriBlock::p2p::offerPopData<altintegration::VbkBlock>(pto, connman, msgMaker);
+                VeriBlock::p2p::offerPopData<altintegration::ATV>(pto, connman, msgMaker);
+                VeriBlock::p2p::offerPopData<altintegration::VTB>(pto, connman, msgMaker);
+                VeriBlock::p2p::offerPopData<altintegration::VbkBlock>(pto, connman, msgMaker);
             }
         }
 
