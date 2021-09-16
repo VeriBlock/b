@@ -91,7 +91,7 @@ jobs:
           name: veriblock/vbitcoin
           username: ${{ secrets.PUBLIC_DOCKERHUB_USERNAME }}
           password: ${{ secrets.PUBLIC_DOCKERHUB_PASSWORD }}
-          dockerfile: ubuntu-asan.Dockerfile
+          dockerfile: ubuntu-valgrind.Dockerfile
           tags: "ubuntu-${{ env. BRANCH }}-${{ env.GIT_HASH }}-valgrind"
       - name: Show Tags
         run: |
