@@ -30,6 +30,7 @@ RUN CC=gcc-7 CXX=g++-7 ./configure \
   --disable-ccache \
   --disable-man \
   --with-libs=no \
+  --enable-debug \
   --with-sanitizers=address
 RUN make -j4 install
 # remove source files to decrease image size
