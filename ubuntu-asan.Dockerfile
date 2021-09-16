@@ -5,6 +5,11 @@ WORKDIR /app
 
 RUN pip3 install cmake
 
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y \
+        gdb \
+        valgrind
+
 RUN export VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1); \
     (\
      cd /opt; \
