@@ -33,12 +33,15 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 
 unsigned int LwmaGetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params& params)
 {
-    // Special difficulty rule for testnet:
-    // If the new block's timestamp is more than 2 * 10 minutes
-    // then allow mining of a min-difficulty block.
-    if (params.fPowAllowMinDifficultyBlocks &&
-        pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 2) {
-        return UintToArith256(params.powLimit).GetCompact();
+    // TODO(warchant): remove this condition when restart the network
+    if(pindexLast->nHeight < params.nDisableMinDiffBlocksHeight) {
+        // Special difficulty rule for testnet:
+        // If the new block's timestamp is more than 2 * 10 minutes
+        // then allow mining of a min-difficulty block.
+        if (params.fPowAllowMinDifficultyBlocks &&
+            pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 2) {
+            return UintToArith256(params.powLimit).GetCompact();
+        }
     }
     return LwmaCalculateNextWorkRequired(pindexLast, params);
 }

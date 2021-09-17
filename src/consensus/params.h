@@ -84,6 +84,7 @@ struct Params {
     // VeriBlock
     uint64_t VeriBlockPopSecurityHeight;
     /** Block height at which Zawy's LWMA difficulty algorithm becomes active */
+    int nDisableMinDiffBlocksHeight = 20000;
     int ZawyLWMAHeight;
     // Params for Zawy's LWMA difficulty adjustment algorithm.
     int64_t nZawyLwmaAveragingWindow;
