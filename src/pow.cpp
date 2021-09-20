@@ -31,17 +31,26 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
     return lwma;
 }
 
+#define VBK_FORK_1_HEIGHT 40000
+
 unsigned int LwmaGetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params& params)
 {
     // TODO(warchant): remove this condition when restart the network
-    if(pindexLast->nHeight < params.nDisableMinDiffBlocksHeight) {
-        // Special difficulty rule for testnet:
-        // If the new block's timestamp is more than 2 * 10 minutes
-        // then allow mining of a min-difficulty block.
-        if (params.fPowAllowMinDifficultyBlocks &&
-            pblock->GetBlockTime() > pindexLast->GetBlockTime() + params.nPowTargetSpacing * 2) {
-            return UintToArith256(params.powLimit).GetCompact();
-        }
+    static const int twelveHours = 12 * 60 * 60;
+    int timeOffset = twelveHours;
+
+    // if height < 40k, then we allow 4 min timeOffset.
+    // otherwise, use 12 hours timeOffset.
+    if(pindexLast->nHeight < VBK_FORK_1_HEIGHT) {
+        timeOffset = params.nPowTargetSpacing * 2;
+    }
+
+    // Special difficulty rule for testnet:
+    // If the new block's timestamp is more than `timeOffset` minutes
+    // then allow mining of a min-difficulty block.
+    if (params.fPowAllowMinDifficultyBlocks &&
+        pblock->GetBlockTime() > pindexLast->GetBlockTime() + timeOffset) {
+        return UintToArith256(params.powLimit).GetCompact();
     }
     return LwmaCalculateNextWorkRequired(pindexLast, params);
 }
@@ -53,9 +62,13 @@ unsigned int LwmaCalculateNextWorkRequired(const CBlockIndex* pindexLast, const 
     }
 
     const int64_t T = params.nPowTargetSpacing;
+    assert(T == 120 && "come here and update N from 150");
 
     // For T=600, 300, 150 use approximately N=60, 90, 120
-    const int64_t N = params.nZawyLwmaAveragingWindow;
+    int64_t N = 150; // before fork_1 we used N=45, after - N=150
+    if(pindexLast->nHeight < VBK_FORK_1_HEIGHT) {
+        N = 45;
+    }
 
     // Define a k that will be used to get a proper average after weighting the solvetimes.
     const int64_t k = N * (N + 1) * T / 2;
