@@ -36,11 +36,11 @@ unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHead
 unsigned int LwmaGetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader* pblock, const Consensus::Params& params)
 {
     // TODO(warchant): remove this condition when restart the network
-    static const int twelveHours = 12 * 60 * 60;
-    int timeOffset = twelveHours;
+    static const int sixHours = 6 * 60 * 60;
+    int timeOffset = sixHours;
 
     // if height < 40k, then we allow 4 min timeOffset.
-    // otherwise, use 12 hours timeOffset.
+    // otherwise, use 6 hours timeOffset.
     if(pindexLast->nHeight < VBK_FORK_1_HEIGHT) {
         timeOffset = params.nPowTargetSpacing * 2;
     }
