@@ -292,11 +292,6 @@ int compareForks(const CBlockIndex& leftForkTip, const CBlockIndex& rightForkTip
         return 0;
     }
 
-    if(leftForkTip.GetAncestor(rightForkTip.nHeight) == &rightForkTip) {
-        // do not run POP FR on blocks which are already in active chain
-        return 1;
-    }
-
     auto left = blockToAltBlock(leftForkTip);
     auto right = blockToAltBlock(rightForkTip);
     auto state = altintegration::ValidationState();
