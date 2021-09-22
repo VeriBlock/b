@@ -106,7 +106,7 @@ bool addAllBlockPayloads(const CBlock& block, BlockValidationState& state) EXCLU
             instate.toString());
     }
 
-    GetPop().getAltBlockTree().acceptBlock(block.GetHash().asVector(), block.popData);
+    GetPop().getAltBlockTree().acceptBlock(hash.asVector(), block.popData);
 
     return true;
 }
