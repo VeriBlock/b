@@ -3,13 +3,15 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "vbk/p2p_sync.hpp"
 #include "validation.h"
+#include "vbk/p2p_sync.hpp"
 #include <veriblock/pop.hpp>
 
 
 namespace VeriBlock {
 namespace p2p {
+
+RecursiveMutex cs_popstate;
 
 static std::map<NodeId, std::shared_ptr<PopDataNodeState>> mapPopDataNodeState;
 
@@ -31,9 +33,9 @@ std::map<altintegration::VbkBlock::id_t, PopP2PState>& PopDataNodeState::getMap<
     return vbk_blocks_state;
 }
 
-PopDataNodeState& getPopDataNodeState(const NodeId& id) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+PopDataNodeState& getPopDataNodeState(const NodeId& id)
 {
-    AssertLockHeld(cs_main);
+    LOCK(cs_popstate);
     std::shared_ptr<PopDataNodeState>& val = mapPopDataNodeState[id];
     if (val == nullptr) {
         mapPopDataNodeState[id] = std::make_shared<PopDataNodeState>();
@@ -42,9 +44,9 @@ PopDataNodeState& getPopDataNodeState(const NodeId& id) EXCLUSIVE_LOCKS_REQUIRED
     return *val;
 }
 
-void erasePopDataNodeState(const NodeId& id) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+void erasePopDataNodeState(const NodeId& id)
 {
-    AssertLockHeld(cs_main);
+    LOCK(cs_popstate);
     mapPopDataNodeState.erase(id);
 }
 
@@ -56,16 +58,19 @@ bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altin
 
     if (requested_data.size() > MAX_POP_DATA_SENDING_AMOUNT) {
         LOCK(cs_main);
+
         LogPrint(BCLog::NET, "peer %d send oversized message getdata size() = %u \n", node->GetId(), requested_data.size());
         Misbehaving(node->GetId(), 20, strprintf("message getdata size() = %u", requested_data.size()));
         return false;
     }
-    
-    LOCK(cs_main);
+
+    LOCK(cs_popstate);
     auto& pop_state_map = getPopDataNodeState(node->GetId()).getMap<pop_t>();
 
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
     for (const auto& data_hash : requested_data) {
+        LOCK(cs_main);
+
         PopP2PState& pop_state = pop_state_map[data_hash];
         uint32_t ddosPreventionCounter = pop_state.known_pop_data++;
 
@@ -93,18 +98,20 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
     vRecv >> offered_data;
 
     if (offered_data.size() > MAX_POP_DATA_SENDING_AMOUNT) {
-        LOCK(cs_main);
+        LOCK(cs_popstate);
         LogPrint(BCLog::NET, "peer %d sent oversized message getdata size() = %u \n", node->GetId(), offered_data.size());
         Misbehaving(node->GetId(), 20, strprintf("message getdata size() = %u", offered_data.size()));
         return false;
     }
 
-    LOCK(cs_main);
+    LOCK(cs_popstate);
     auto& pop_state_map = getPopDataNodeState(node->GetId()).getMap<pop_t>();
 
     std::vector<std::vector<uint8_t>> requested_data;
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
     for (const auto& data_hash : offered_data) {
+        LOCK(cs_main);
+
         PopP2PState& pop_state = pop_state_map[data_hash];
         uint32_t ddosPreventionCounter = pop_state.requested_pop_data++;
 
@@ -139,11 +146,12 @@ bool processPopData(CNode* node, CDataStream& vRecv, altintegration::MemPool& po
         return false;
     }
 
-    LOCK(cs_main);
+    LOCK(cs_popstate);
     auto& pop_state_map = getPopDataNodeState(node->GetId()).getMap<pop_t>();
     PopP2PState& pop_state = pop_state_map[data.getId()];
 
     if (pop_state.requested_pop_data == 0) {
+        LOCK(cs_main);
         LogPrint(BCLog::NET, "peer %d send pop data %s that has not been requested \n", node->GetId(), pop_t::name());
         Misbehaving(node->GetId(), 20, strprintf("peer %d send pop data %s that has not been requested", node->GetId(), pop_t::name()));
         return false;
@@ -152,16 +160,20 @@ bool processPopData(CNode* node, CDataStream& vRecv, altintegration::MemPool& po
     uint32_t ddosPreventionCounter = pop_state.requested_pop_data++;
 
     if (ddosPreventionCounter > MAX_POP_MESSAGE_SENDING_COUNT) {
+        LOCK(cs_main);
         LogPrint(BCLog::NET, "peer %d is spaming pop data %s\n", node->GetId(), pop_t::name());
         Misbehaving(node->GetId(), 20, strprintf("peer %d is spamming pop data %s", node->GetId(), pop_t::name()));
         return false;
     }
 
-    auto result = pop_mempool.submit(data, state);
-    if (!result && result.status == altintegration::MemPool::FAILED_STATELESS) {
-        LogPrint(BCLog::NET, "peer %d sent statelessly invalid pop data: %s\n", node->GetId(), state.toString());
-        Misbehaving(node->GetId(), 20, strprintf("statelessly invalid pop data getdata, reason: %s", state.toString()));
-        return false;
+    {
+        LOCK(cs_main);
+        auto result = pop_mempool.submit(data, state);
+        if (!result && result.status == altintegration::MemPool::FAILED_STATELESS) {
+            LogPrint(BCLog::NET, "peer %d sent statelessly invalid pop data: %s\n", node->GetId(), state.toString());
+            Misbehaving(node->GetId(), 20, strprintf("statelessly invalid pop data getdata, reason: %s", state.toString()));
+            return false;
+        }
     }
 
     return true;
