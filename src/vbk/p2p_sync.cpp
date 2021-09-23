@@ -68,9 +68,8 @@ bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altin
     auto& pop_state_map = getPopDataNodeState(node->GetId()).getMap<pop_t>();
 
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
+    LOCK(cs_main);
     for (const auto& data_hash : requested_data) {
-        LOCK(cs_main);
-
         PopP2PState& pop_state = pop_state_map[data_hash];
         uint32_t ddosPreventionCounter = pop_state.known_pop_data++;
 
@@ -109,9 +108,8 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
 
     std::vector<std::vector<uint8_t>> requested_data;
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
+    LOCK(cs_main);
     for (const auto& data_hash : offered_data) {
-        LOCK(cs_main);
-
         PopP2PState& pop_state = pop_state_map[data_hash];
         uint32_t ddosPreventionCounter = pop_state.requested_pop_data++;
 
