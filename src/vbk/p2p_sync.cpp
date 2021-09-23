@@ -98,7 +98,7 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
     vRecv >> offered_data;
 
     if (offered_data.size() > MAX_POP_DATA_SENDING_AMOUNT) {
-        LOCK(cs_popstate);
+        LOCK(cs_main);
         LogPrint(BCLog::NET, "peer %d sent oversized message getdata size() = %u \n", node->GetId(), offered_data.size());
         Misbehaving(node->GetId(), 20, strprintf("message getdata size() = %u", offered_data.size()));
         return false;
