@@ -33,9 +33,9 @@ std::map<altintegration::VbkBlock::id_t, PopP2PState>& PopDataNodeState::getMap<
     return vbk_blocks_state;
 }
 
-PopDataNodeState& getPopDataNodeState(const NodeId& id)
+PopDataNodeState& getPopDataNodeState(const NodeId& id) EXCLUSIVE_LOCKS_REQUIRED(cs_popstate)
 {
-    LOCK(cs_popstate);
+    AssertLockHeld(cs_popstate);
     std::shared_ptr<PopDataNodeState>& val = mapPopDataNodeState[id];
     if (val == nullptr) {
         mapPopDataNodeState[id] = std::make_shared<PopDataNodeState>();
@@ -44,9 +44,9 @@ PopDataNodeState& getPopDataNodeState(const NodeId& id)
     return *val;
 }
 
-void erasePopDataNodeState(const NodeId& id)
+void erasePopDataNodeState(const NodeId& id) EXCLUSIVE_LOCKS_REQUIRED(cs_popstate)
 {
-    LOCK(cs_popstate);
+    AssertLockHeld(cs_popstate);
     mapPopDataNodeState.erase(id);
 }
 
@@ -64,11 +64,11 @@ bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altin
         return false;
     }
 
+    LOCK(cs_main);
     LOCK(cs_popstate);
     auto& pop_state_map = getPopDataNodeState(node->GetId()).getMap<pop_t>();
 
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
-    LOCK(cs_main);
     for (const auto& data_hash : requested_data) {
         PopP2PState& pop_state = pop_state_map[data_hash];
         uint32_t ddosPreventionCounter = pop_state.known_pop_data++;
@@ -103,12 +103,12 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
         return false;
     }
 
+    LOCK(cs_main);
     LOCK(cs_popstate);
     auto& pop_state_map = getPopDataNodeState(node->GetId()).getMap<pop_t>();
 
     std::vector<std::vector<uint8_t>> requested_data;
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
-    LOCK(cs_main);
     for (const auto& data_hash : offered_data) {
         PopP2PState& pop_state = pop_state_map[data_hash];
         uint32_t ddosPreventionCounter = pop_state.requested_pop_data++;
@@ -143,25 +143,27 @@ bool processPopData(CNode* node, CDataStream& vRecv, altintegration::MemPool& po
         Misbehaving(node->GetId(), 20, strprintf("statelessly invalid pop data getdata, reason: %s", state.toString()));
         return false;
     }
+    
+    {
+        LOCK(cs_popstate);
+        auto& pop_state_map = getPopDataNodeState(node->GetId()).getMap<pop_t>();
+        PopP2PState& pop_state = pop_state_map[data.getId()];
 
-    LOCK(cs_popstate);
-    auto& pop_state_map = getPopDataNodeState(node->GetId()).getMap<pop_t>();
-    PopP2PState& pop_state = pop_state_map[data.getId()];
+        if (pop_state.requested_pop_data == 0) {
+            LOCK(cs_main);
+            LogPrint(BCLog::NET, "peer %d send pop data %s that has not been requested \n", node->GetId(), pop_t::name());
+            Misbehaving(node->GetId(), 20, strprintf("peer %d send pop data %s that has not been requested", node->GetId(), pop_t::name()));
+            return false;
+        }
 
-    if (pop_state.requested_pop_data == 0) {
-        LOCK(cs_main);
-        LogPrint(BCLog::NET, "peer %d send pop data %s that has not been requested \n", node->GetId(), pop_t::name());
-        Misbehaving(node->GetId(), 20, strprintf("peer %d send pop data %s that has not been requested", node->GetId(), pop_t::name()));
-        return false;
-    }
+        uint32_t ddosPreventionCounter = pop_state.requested_pop_data++;
 
-    uint32_t ddosPreventionCounter = pop_state.requested_pop_data++;
-
-    if (ddosPreventionCounter > MAX_POP_MESSAGE_SENDING_COUNT) {
-        LOCK(cs_main);
-        LogPrint(BCLog::NET, "peer %d is spaming pop data %s\n", node->GetId(), pop_t::name());
-        Misbehaving(node->GetId(), 20, strprintf("peer %d is spamming pop data %s", node->GetId(), pop_t::name()));
-        return false;
+        if (ddosPreventionCounter > MAX_POP_MESSAGE_SENDING_COUNT) {
+            LOCK(cs_main);
+            LogPrint(BCLog::NET, "peer %d is spaming pop data %s\n", node->GetId(), pop_t::name());
+            Misbehaving(node->GetId(), 20, strprintf("peer %d is spamming pop data %s", node->GetId(), pop_t::name()));
+            return false;
+        }
     }
 
     {
