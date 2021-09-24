@@ -11,7 +11,7 @@
 namespace VeriBlock {
 namespace p2p {
 
-RecursiveMutex cs_popstate;
+CCriticalSection cs_popstate;
 
 static std::map<NodeId, std::shared_ptr<PopDataNodeState>> mapPopDataNodeState;
 

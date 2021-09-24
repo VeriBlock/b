@@ -19,7 +19,7 @@ namespace VeriBlock {
 
 namespace p2p {
 
-extern RecursiveMutex cs_popstate;
+extern CCriticalSection cs_popstate;
 
 struct PopP2PState {
     uint32_t known_pop_data{0};
