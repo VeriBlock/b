@@ -143,38 +143,35 @@ bool processPopData(CNode* node, CDataStream& vRecv, altintegration::MemPool& po
         Misbehaving(node->GetId(), 20, strprintf("statelessly invalid pop data getdata, reason: %s", state.toString()));
         return false;
     }
-    
-    {
-        LOCK(cs_popstate);
-        auto& pop_state_map = getPopDataNodeState(node->GetId()).getMap<pop_t>();
-        PopP2PState& pop_state = pop_state_map[data.getId()];
 
-        if (pop_state.requested_pop_data == 0) {
-            LOCK(cs_main);
-            LogPrint(BCLog::NET, "peer %d send pop data %s that has not been requested \n", node->GetId(), pop_t::name());
-            Misbehaving(node->GetId(), 20, strprintf("peer %d send pop data %s that has not been requested", node->GetId(), pop_t::name()));
-            return false;
-        }
 
-        uint32_t ddosPreventionCounter = pop_state.requested_pop_data++;
+    LOCK(cs_main);
+    LOCK(cs_popstate);
+    auto& pop_state_map = getPopDataNodeState(node->GetId()).getMap<pop_t>();
+    PopP2PState& pop_state = pop_state_map[data.getId()];
 
-        if (ddosPreventionCounter > MAX_POP_MESSAGE_SENDING_COUNT) {
-            LOCK(cs_main);
-            LogPrint(BCLog::NET, "peer %d is spaming pop data %s\n", node->GetId(), pop_t::name());
-            Misbehaving(node->GetId(), 20, strprintf("peer %d is spamming pop data %s", node->GetId(), pop_t::name()));
-            return false;
-        }
+    if (pop_state.requested_pop_data == 0) {
+        LogPrint(BCLog::NET, "peer %d send pop data %s that has not been requested \n", node->GetId(), pop_t::name());
+        Misbehaving(node->GetId(), 20, strprintf("peer %d send pop data %s that has not been requested", node->GetId(), pop_t::name()));
+        return false;
     }
 
-    {
-        LOCK(cs_main);
-        auto result = pop_mempool.submit(data, state);
-        if (!result && result.status == altintegration::MemPool::FAILED_STATELESS) {
-            LogPrint(BCLog::NET, "peer %d sent statelessly invalid pop data: %s\n", node->GetId(), state.toString());
-            Misbehaving(node->GetId(), 20, strprintf("statelessly invalid pop data getdata, reason: %s", state.toString()));
-            return false;
-        }
+    uint32_t ddosPreventionCounter = pop_state.requested_pop_data++;
+
+    if (ddosPreventionCounter > MAX_POP_MESSAGE_SENDING_COUNT) {
+        LogPrint(BCLog::NET, "peer %d is spaming pop data %s\n", node->GetId(), pop_t::name());
+        Misbehaving(node->GetId(), 20, strprintf("peer %d is spamming pop data %s", node->GetId(), pop_t::name()));
+        return false;
     }
+
+
+    auto result = pop_mempool.submit(data, state);
+    if (!result && result.status == altintegration::MemPool::FAILED_STATELESS) {
+        LogPrint(BCLog::NET, "peer %d sent statelessly invalid pop data: %s\n", node->GetId(), state.toString());
+        Misbehaving(node->GetId(), 20, strprintf("statelessly invalid pop data getdata, reason: %s", state.toString()));
+        return false;
+    }
+
 
     return true;
 }
