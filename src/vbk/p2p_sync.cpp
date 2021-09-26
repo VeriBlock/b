@@ -11,26 +11,31 @@
 namespace VeriBlock {
 namespace p2p {
 
+const int64_t offerIntervalMs = 5 * 1000;
+const int64_t getIntervalMs = 5 * 1000;
+
 CCriticalSection cs_popstate;
 
 static std::map<NodeId, std::shared_ptr<PopDataNodeState>> mapPopDataNodeState;
+static uint32_t offers_recv = 0;
+
 
 template <>
-std::map<altintegration::ATV::id_t, PopP2PState>& PopDataNodeState::getMap<altintegration::ATV>()
+PopPayloadState<altintegration::ATV>& PopDataNodeState::getPayloadState()
 {
-    return atv_state;
+    return atvs;
 }
 
 template <>
-std::map<altintegration::VTB::id_t, PopP2PState>& PopDataNodeState::getMap<altintegration::VTB>()
+PopPayloadState<altintegration::VTB>& PopDataNodeState::getPayloadState()
 {
-    return vtb_state;
+    return vtbs;
 }
 
 template <>
-std::map<altintegration::VbkBlock::id_t, PopP2PState>& PopDataNodeState::getMap<altintegration::VbkBlock>()
+PopPayloadState<altintegration::VbkBlock>& PopDataNodeState::getPayloadState()
 {
-    return vbk_blocks_state;
+    return vbks;
 }
 
 PopDataNodeState& getPopDataNodeState(const NodeId& id) EXCLUSIVE_LOCKS_REQUIRED(cs_popstate)
@@ -66,24 +71,35 @@ bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altin
 
     LOCK(cs_main);
     LOCK(cs_popstate);
-    auto& pop_state_map = getPopDataNodeState(node->GetId()).getMap<pop_t>();
+    auto& nodestate = getPopDataNodeState(node->GetId());
+    auto& state = nodestate.getPayloadState<pop_t>();
 
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
-    for (const auto& data_hash : requested_data) {
-        PopP2PState& pop_state = pop_state_map[data_hash];
-        uint32_t ddosPreventionCounter = pop_state.known_pop_data++;
-
-        if (ddosPreventionCounter > MAX_POP_MESSAGE_SENDING_COUNT) {
-            LogPrint(BCLog::NET, "peer %d is spamming pop data %s \n", node->GetId(), pop_t::name());
-            Misbehaving(node->GetId(), 20, strprintf("peer %d is spamming pop data %s", node->GetId(), pop_t::name()));
-            return false;
+    auto currentTime = GetTimeMillis();
+    if (state.lastProcessedGet + getIntervalMs < currentTime) {
+        // it's not time to process getters yet.
+        // save them in setRecv and exit.
+        for (const auto& hash : requested_data) {
+            state.recvGets.push_back(hash);
         }
+        state.lastProcessedGet = GetTimeMillis();
+        return true;
+    }
 
-        const auto* data = pop_mempool.get<pop_t>(data_hash);
+    // process GET
+    LogPrint(BCLog::NET, "Processing {} GETs\n", state.recvGets.size());
+
+    for (auto it = state.recvGets.begin(), end = state.recvGets.end(); it != end;) {
+        const auto& hash = *it;
+        const auto* data = pop_mempool.get<pop_t>(hash);
         if (data != nullptr) {
             connman->PushMessage(node, msgMaker.Make(pop_t::name(), *data));
+            it = state.recvGets.erase(it);
+        } else {
+            ++it;
         }
     }
+    state.lastProcessedGet = GetTimeMillis();
 
     return true;
 }
@@ -105,26 +121,51 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
 
     LOCK(cs_main);
     LOCK(cs_popstate);
-    auto& pop_state_map = getPopDataNodeState(node->GetId()).getMap<pop_t>();
+    auto& nodestate = getPopDataNodeState(node->GetId());
+    auto& state = nodestate.getPayloadState<pop_t>();
 
-    std::vector<std::vector<uint8_t>> requested_data;
     const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
-    for (const auto& data_hash : offered_data) {
-        PopP2PState& pop_state = pop_state_map[data_hash];
-        uint32_t ddosPreventionCounter = pop_state.requested_pop_data++;
-
-        if (!pop_mempool.get<pop_t>(data_hash)) {
-            requested_data.push_back(data_hash);
-        } else if (ddosPreventionCounter > MAX_POP_MESSAGE_SENDING_COUNT) {
-            LogPrint(BCLog::NET, "peer %d is spamming pop data %s \n", node->GetId(), pop_t::name());
-            Misbehaving(node->GetId(), 20, strprintf("peer %d is spamming pop data %s", node->GetId(), pop_t::name()));
-            return false;
+    auto currentTime = GetTimeMillis();
+    if (state.lastProcessedOffer + offerIntervalMs < currentTime) {
+        // it's not time to process offers yet.
+        // save them in recvOffers and exit.
+        for (const auto& hash : offered_data) {
+            state.recvOffers.push_back(hash);
         }
+        state.lastProcessedOffer = GetTimeMillis();
+        return true;
     }
 
-    if (!requested_data.empty()) {
-        connman->PushMessage(node, msgMaker.Make(get_prefix + pop_t::name(), requested_data));
+    LogPrint(BCLog::NET, "Processing {} OFFERs\n", state.recvGets.size());
+
+    // it's time to process offers. do that all at once.
+    std::vector<typename PopPayloadState<pop_t>::id_t> requestIds;
+    for (auto it = state.recvOffers.begin(), end = state.recvOffers.end(); it != end; ++it) {
+        if (requestIds.size() == MAX_POP_DATA_SENDING_AMOUNT) {
+            // we processed range [begin... it). remove this subset.
+            state.recvOffers.erase(state.recvOffers.begin(), it);
+            break;
+        }
+
+        const auto& hash = *it;
+        bool isKnown = pop_mempool.isKnown<pop_t>(hash);
+        if (isKnown) {
+            // we already know about this payload.
+            continue;
+        }
+
+        requestIds.push_back(hash);
     }
+
+    // finally send GETs for offered payloads
+    if (!requestIds.empty()) {
+        for (auto& hash : requestIds) {
+            state.sentGets.insert(hash);
+        }
+        connman->PushMessage(node, msgMaker.Make(get_prefix + pop_t::name(), requestIds));
+    }
+
+    state.lastProcessedOffer = GetTimeMillis();
 
     return true;
 }
@@ -136,42 +177,36 @@ bool processPopData(CNode* node, CDataStream& vRecv, altintegration::MemPool& po
     pop_t data;
     vRecv >> data;
 
-    altintegration::ValidationState state;
-    if (!VeriBlock::GetPop().check(data, state)) {
-        LogPrint(BCLog::NET, "peer %d sent statelessly invalid pop data: %s\n", node->GetId(), state.toString());
+    altintegration::ValidationState valstate;
+    if (!VeriBlock::GetPop().check(data, valstate)) {
+        LogPrint(BCLog::NET, "peer %d sent statelessly invalid pop data: %s\n", node->GetId(), valstate.toString());
         LOCK(cs_main);
-        Misbehaving(node->GetId(), 20, strprintf("statelessly invalid pop data getdata, reason: %s", state.toString()));
+        Misbehaving(node->GetId(), 20, strprintf("statelessly invalid pop data getdata, reason: %s", valstate.toString()));
         return false;
     }
 
 
     LOCK(cs_main);
     LOCK(cs_popstate);
-    auto& pop_state_map = getPopDataNodeState(node->GetId()).getMap<pop_t>();
-    PopP2PState& pop_state = pop_state_map[data.getId()];
+    auto& nodeState = getPopDataNodeState(node->GetId());
+    auto& state = nodeState.template getPayloadState<pop_t>();
+    const auto id = data.getId().asVector();
 
-    if (pop_state.requested_pop_data == 0) {
-        LogPrint(BCLog::NET, "peer %d send pop data %s that has not been requested \n", node->GetId(), pop_t::name());
-        Misbehaving(node->GetId(), 20, strprintf("peer %d send pop data %s that has not been requested", node->GetId(), pop_t::name()));
+    if (state.sentGets.count(id) == 0) {
+        LogPrint(BCLog::NET, "peer %d sent pop data %s that has not been requested\n", node->GetId(), pop_t::name());
+        Misbehaving(node->GetId(), 20, strprintf("peer %d sent pop data %s that has not been requested", node->GetId(), pop_t::name()));
         return false;
     }
 
-    uint32_t ddosPreventionCounter = pop_state.requested_pop_data++;
+    // we received body, so remove
+    state.sentGets.erase(id);
 
-    if (ddosPreventionCounter > MAX_POP_MESSAGE_SENDING_COUNT) {
-        LogPrint(BCLog::NET, "peer %d is spaming pop data %s\n", node->GetId(), pop_t::name());
-        Misbehaving(node->GetId(), 20, strprintf("peer %d is spamming pop data %s", node->GetId(), pop_t::name()));
-        return false;
-    }
-
-
-    auto result = pop_mempool.submit(data, state);
+    auto result = pop_mempool.submit(data, valstate);
     if (!result && result.status == altintegration::MemPool::FAILED_STATELESS) {
-        LogPrint(BCLog::NET, "peer %d sent statelessly invalid pop data: %s\n", node->GetId(), state.toString());
-        Misbehaving(node->GetId(), 20, strprintf("statelessly invalid pop data getdata, reason: %s", state.toString()));
+        LogPrint(BCLog::NET, "peer %d sent statelessly invalid pop data: %s\n", node->GetId(), valstate.toString());
+        Misbehaving(node->GetId(), 20, strprintf("statelessly invalid pop data getdata, reason: %s", valstate.toString()));
         return false;
     }
-
 
     return true;
 }
