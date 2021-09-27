@@ -17,7 +17,7 @@ const int64_t getIntervalMs = 5 * 1000;
 CCriticalSection cs_popstate;
 
 static std::map<NodeId, std::shared_ptr<PopDataNodeState>> mapPopDataNodeState;
-static uint32_t offers_recv = 0;
+// static uint32_t offers_recv = 0;
 
 
 template <>
