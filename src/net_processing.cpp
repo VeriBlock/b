@@ -807,9 +807,9 @@ void PeerLogicValidation::InitializeNode(CNode *pnode) {
     assert(g_rpc_node->connman);
     {
         LOCK(cs_main);
-        VeriBlock::p2p::RelayPopMempool<altintegration::ATV>(pnode->GetId(), g_rpc_node->connman.get());
-        VeriBlock::p2p::RelayPopMempool<altintegration::VTB>(pnode->GetId(), g_rpc_node->connman.get());
-        VeriBlock::p2p::RelayPopMempool<altintegration::VbkBlock>(pnode->GetId(), g_rpc_node->connman.get());
+        VeriBlock::p2p::RelayPopMempool<altintegration::ATV>(pnode);
+        VeriBlock::p2p::RelayPopMempool<altintegration::VTB>(pnode);
+        VeriBlock::p2p::RelayPopMempool<altintegration::VbkBlock>(pnode);
     }
 }
 

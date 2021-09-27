@@ -984,13 +984,10 @@ public:
 
             if (!m_tx_relay->filterInventoryKnown.contains(inv.hash)) {
                 if (inv.type == MSG_POP_ATV) {
-                    LogPrint(BCLog::NET, "push inventory add %s\n", inv.ToString());
                     m_tx_relay->setInventoryAtvToSend.insert(inv.hash);
                 } else if (inv.type == MSG_POP_VTB) {
-                    LogPrint(BCLog::NET, "push inventory add %s\n", inv.ToString());
                     m_tx_relay->setInventoryVtbToSend.insert(inv.hash);
                 } else if (inv.type == MSG_POP_VBK) {
-                    LogPrint(BCLog::NET, "push inventory add %s\n", inv.ToString());
                     m_tx_relay->setInventoryVbkToSend.insert(inv.hash);
                 }
             }

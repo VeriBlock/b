@@ -45,12 +45,16 @@ template <> inline int GetType<altintegration::VbkBlock>(){ return MSG_POP_VBK; 
 // clang-format on
 
 template <typename T>
+CInv PayloadToInv(const typename T::id_t& id) {
+    return CInv(GetType<T>(), IdToUint256<T>(id));
+}
+
+template <typename T>
 void RelayPopPayload(
     CConnman* connman,
     const T& t)
 {
-    uint256 hash = IdToUint256<T>(t.getId());
-    CInv inv(GetType<T>(), hash);
+    auto inv = PayloadToInv<T>(t.getId());
     connman->ForEachNode([&inv](CNode* pto) {
         pto->PushInventory(inv);
     });
@@ -96,7 +100,7 @@ bool ProcessPopPayload(CNode* pfrom, CConnman* connman, CDataStream& vRecv, F on
 }
 
 template <typename T>
-void RelayPopMempool(const NodeId& id, CConnman* connman) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+void RelayPopMempool(const CNode* pto) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
     auto& mp = VeriBlock::GetPop().getMemPool();
@@ -104,17 +108,19 @@ void RelayPopMempool(const NodeId& id, CConnman* connman) EXCLUSIVE_LOCKS_REQUIR
     size_t counter = 0;
     for (const auto& p : mp.getMap<T>()) {
         T& t = *p.second;
-        RelayPopPayload(connman, t);
+        auto inv = PayloadToInv<T>(t.getId());
+        pto->PushInventory(inv);
         counter++;
     }
 
     for (const auto& p : mp.template getInFlightMap<T>()) {
         T& t = *p.second;
-        RelayPopPayload(connman, t);
+        auto inv = PayloadToInv<T>(t.getId());
+        pto->PushInventory(inv);
         counter++;
     }
 
-    LogPrint(BCLog::NET, "relay %s=%u from POP mempool to peer=%d\n", T::name(), counter, id);
+    LogPrint(BCLog::NET, "relay %s=%u from POP mempool to peer=%d\n", T::name(), counter, pto->GetId());
 }
 
 } // namespace p2p
