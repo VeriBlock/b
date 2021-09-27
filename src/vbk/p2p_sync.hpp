@@ -36,8 +36,8 @@ struct PopPayloadState {
     // set of sent offers of type T to this heer
     std::unordered_set<id_t> sentOffers;
 
-    int64_t lastProcessedOffer{std::numeric_limits<int64_t>::max()};
-    int64_t lastProcessedGet{std::numeric_limits<int64_t>::max()};
+    int64_t lastProcessedOffer{0};
+    int64_t lastProcessedGet{0};
 };
 
 // The state of the Node that stores already known Pop Data
@@ -69,45 +69,9 @@ const static std::string offer_prefix = "of";
 const static uint32_t MAX_POP_DATA_SENDING_AMOUNT = 100;
 const static uint32_t MAX_POP_RECV_OFFERS_AMOUNT = 1000;
 
-template <typename pop_t>
-void offerPopData(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
-{
-    AssertLockHeld(cs_main);
-    LOCK(cs_popstate);
+void broadcastPopData(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker);
 
-    auto& nodeState = getPopDataNodeState(node->GetId());
-    auto& state = nodeState.getPayloadState<pop_t>();
-    auto& pop_mempool = VeriBlock::GetPop().getMemPool();
-    std::vector<std::vector<uint8_t>> hashes;
-
-    auto addhashes = [&](const std::unordered_map<typename pop_t::id_t, std::shared_ptr<pop_t>>& map) {
-        for (const auto& el : map) {
-            auto id = el.first.asVector();
-
-            if (state.sentOffers.count(id)) {
-                // do not advertise payload which we already advertised
-                continue;
-            }
-
-            state.sentOffers.insert(id);
-            hashes.push_back(id);
-
-            if (hashes.size() == MAX_POP_DATA_SENDING_AMOUNT) {
-                connman->PushMessage(node, msgMaker.Make(offer_prefix + pop_t::name(), hashes));
-                hashes.clear();
-            }
-        }
-    };
-
-    addhashes(pop_mempool.getMap<pop_t>());
-    addhashes(pop_mempool.getInFlightMap<pop_t>());
-
-    if (!hashes.empty()) {
-        connman->PushMessage(node, msgMaker.Make(offer_prefix + pop_t::name(), hashes));
-    }
-}
-
-int processPopData(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
+int receivePopData(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman);
 
 } // namespace p2p
 } // namespace VeriBlock

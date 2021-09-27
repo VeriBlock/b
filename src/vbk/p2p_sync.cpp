@@ -56,7 +56,7 @@ void erasePopDataNodeState(const NodeId& id) EXCLUSIVE_LOCKS_REQUIRED(cs_popstat
 }
 
 template <typename pop_t>
-bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altintegration::MemPool& pop_mempool)
+bool receiveGetPayload(CNode* node, CConnman* connman, CDataStream& vRecv, altintegration::MemPool& pop_mempool)
 {
     std::vector<std::vector<uint8_t>> requested_data;
     vRecv >> requested_data;
@@ -105,7 +105,7 @@ bool processGetPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altin
 }
 
 template <typename pop_t>
-bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, altintegration::MemPool& pop_mempool)
+bool receiveOfferPayload(CNode* node, CConnman* connman, CDataStream& vRecv, altintegration::MemPool& pop_mempool)
 {
     LogPrint(BCLog::NET, "received offered pop data: %s, bytes size: %d\n", pop_t::name(), vRecv.size());
 
@@ -124,54 +124,14 @@ bool processOfferPopData(CNode* node, CConnman* connman, CDataStream& vRecv, alt
     auto& nodestate = getPopDataNodeState(node->GetId());
     auto& state = nodestate.getPayloadState<pop_t>();
 
-    const CNetMsgMaker msgMaker(PROTOCOL_VERSION);
-    auto currentTime = GetTimeMillis();
-    if (state.lastProcessedOffer + offerIntervalMs < currentTime) {
-        // it's not time to process offers yet.
-        // save them in recvOffers and exit.
-        for (const auto& hash : offered_data) {
-            state.recvOffers.push_back(hash);
-        }
-        state.lastProcessedOffer = GetTimeMillis();
-        return true;
+    for (const auto& hash : offered_data) {
+        state.recvOffers.push_back(hash);
     }
-
-    LogPrint(BCLog::NET, "Processing {} OFFERs\n", state.recvGets.size());
-
-    // it's time to process offers. do that all at once.
-    std::vector<typename PopPayloadState<pop_t>::id_t> requestIds;
-    for (auto it = state.recvOffers.begin(), end = state.recvOffers.end(); it != end; ++it) {
-        if (requestIds.size() == MAX_POP_DATA_SENDING_AMOUNT) {
-            // we processed range [begin... it). remove this subset.
-            state.recvOffers.erase(state.recvOffers.begin(), it);
-            break;
-        }
-
-        const auto& hash = *it;
-        bool isKnown = pop_mempool.isKnown<pop_t>(hash);
-        if (isKnown) {
-            // we already know about this payload.
-            continue;
-        }
-
-        requestIds.push_back(hash);
-    }
-
-    // finally send GETs for offered payloads
-    if (!requestIds.empty()) {
-        for (auto& hash : requestIds) {
-            state.sentGets.insert(hash);
-        }
-        connman->PushMessage(node, msgMaker.Make(get_prefix + pop_t::name(), requestIds));
-    }
-
-    state.lastProcessedOffer = GetTimeMillis();
-
     return true;
 }
 
 template <typename pop_t>
-bool processPopData(CNode* node, CDataStream& vRecv, altintegration::MemPool& pop_mempool)
+bool receivePayload(CNode* node, CDataStream& vRecv, altintegration::MemPool& pop_mempool)
 {
     LogPrint(BCLog::NET, "received pop data: %s, bytes size: %d\n", pop_t::name(), vRecv.size());
     pop_t data;
@@ -211,60 +171,194 @@ bool processPopData(CNode* node, CDataStream& vRecv, altintegration::MemPool& po
     return true;
 }
 
-int processPopData(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
+int receivePopData(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman* connman)
 {
     auto& pop_mempool = VeriBlock::GetPop().getMemPool();
 
     // process Pop Data
     if (strCommand == altintegration::ATV::name()) {
-        return processPopData<altintegration::ATV>(pfrom, vRecv, pop_mempool);
+        return receivePayload<altintegration::ATV>(pfrom, vRecv, pop_mempool);
     }
 
     if (strCommand == altintegration::VTB::name()) {
-        return processPopData<altintegration::VTB>(pfrom, vRecv, pop_mempool);
+        return receivePayload<altintegration::VTB>(pfrom, vRecv, pop_mempool);
     }
 
     if (strCommand == altintegration::VbkBlock::name()) {
-        return processPopData<altintegration::VbkBlock>(pfrom, vRecv, pop_mempool);
+        return receivePayload<altintegration::VbkBlock>(pfrom, vRecv, pop_mempool);
     }
     //----------------------
 
     // offer Pop Data
     static std::string ofATV = offer_prefix + altintegration::ATV::name();
     if (strCommand == ofATV) {
-        return processOfferPopData<altintegration::ATV>(pfrom, connman, vRecv, pop_mempool);
+        return receiveOfferPayload<altintegration::ATV>(pfrom, connman, vRecv, pop_mempool);
     }
 
     static std::string ofVTB = offer_prefix + altintegration::VTB::name();
     if (strCommand == ofVTB) {
-        return processOfferPopData<altintegration::VTB>(pfrom, connman, vRecv, pop_mempool);
+        return receiveOfferPayload<altintegration::VTB>(pfrom, connman, vRecv, pop_mempool);
     }
 
     static std::string ofVBK = offer_prefix + altintegration::VbkBlock::name();
     if (strCommand == ofVBK) {
-        return processOfferPopData<altintegration::VbkBlock>(pfrom, connman, vRecv, pop_mempool);
+        return receiveOfferPayload<altintegration::VbkBlock>(pfrom, connman, vRecv, pop_mempool);
     }
     //-----------------
 
     // get Pop Data
     static std::string getATV = get_prefix + altintegration::ATV::name();
     if (strCommand == getATV) {
-        return processGetPopData<altintegration::ATV>(pfrom, connman, vRecv, pop_mempool);
+        return receiveGetPayload<altintegration::ATV>(pfrom, connman, vRecv, pop_mempool);
     }
 
     static std::string getVTB = get_prefix + altintegration::VTB::name();
     if (strCommand == getVTB) {
-        return processGetPopData<altintegration::VTB>(pfrom, connman, vRecv, pop_mempool);
+        return receiveGetPayload<altintegration::VTB>(pfrom, connman, vRecv, pop_mempool);
     }
 
     static std::string getVBK = get_prefix + altintegration::VbkBlock::name();
     if (strCommand == getVBK) {
-        return processGetPopData<altintegration::VbkBlock>(pfrom, connman, vRecv, pop_mempool);
+        return receiveGetPayload<altintegration::VbkBlock>(pfrom, connman, vRecv, pop_mempool);
     }
 
     return -1;
 }
 
+template <typename pop_t>
+void broadcastOfferPayload(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+{
+    AssertLockHeld(cs_main);
+    LOCK(cs_popstate);
+
+    auto& nodeState = getPopDataNodeState(node->GetId());
+    auto& state = nodeState.getPayloadState<pop_t>();
+    auto& pop_mempool = VeriBlock::GetPop().getMemPool();
+    std::vector<std::vector<uint8_t>> hashes;
+
+    auto addhashes = [&](const std::unordered_map<typename pop_t::id_t, std::shared_ptr<pop_t>>& map) {
+        for (const auto& el : map) {
+            auto id = el.first.asVector();
+
+            if (state.sentOffers.count(id)) {
+                // do not advertise payload which we already advertised
+                continue;
+            }
+
+            state.sentOffers.insert(id);
+            hashes.push_back(id);
+
+            if (hashes.size() == MAX_POP_DATA_SENDING_AMOUNT) {
+                connman->PushMessage(node, msgMaker.Make(offer_prefix + pop_t::name(), hashes));
+                hashes.clear();
+            }
+        }
+    };
+
+    addhashes(pop_mempool.getMap<pop_t>());
+    addhashes(pop_mempool.getInFlightMap<pop_t>());
+
+    if (!hashes.empty()) {
+        connman->PushMessage(node, msgMaker.Make(offer_prefix + pop_t::name(), hashes));
+    }
+}
+
+template <typename pop_t>
+void broadcastGetPayload(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+{
+    AssertLockHeld(cs_main);
+    LOCK(cs_popstate);
+
+    auto& nodeState = getPopDataNodeState(node->GetId());
+    auto& state = nodeState.getPayloadState<pop_t>();
+    auto& pop_mempool = VeriBlock::GetPop().getMemPool();
+
+    auto currentTime = GetTimeMillis();
+    if (state.lastProcessedOffer + offerIntervalMs < currentTime) {
+        // it's not time to process offers yet.
+        // save them in recvOffers and exit.
+        return;
+    }
+
+    LogPrint(BCLog::NET, "Processing {} OFFERs\n", state.recvOffers.size());
+
+    // it's time to process offers. do that all at once.
+    std::vector<typename PopPayloadState<pop_t>::id_t> requestIds;
+    for (auto it = state.recvOffers.begin(), end = state.recvOffers.end(); it != end; ++it) {
+        if (requestIds.size() == MAX_POP_DATA_SENDING_AMOUNT) {
+            // we processed range [begin... it). remove this subset.
+            state.recvOffers.erase(state.recvOffers.begin(), it);
+            break;
+        }
+
+        const auto& hash = *it;
+        bool isKnown = pop_mempool.isKnown<pop_t>(hash);
+        if (isKnown) {
+            // we already know about this payload.
+            continue;
+        }
+
+        requestIds.push_back(hash);
+    }
+
+    // finally send GETs for offered payloads
+    if (!requestIds.empty()) {
+        for (auto& hash : requestIds) {
+            state.sentGets.insert(hash);
+        }
+        connman->PushMessage(node, msgMaker.Make(get_prefix + pop_t::name(), requestIds));
+    }
+    state.lastProcessedOffer = GetTimeMillis();
+}
+
+template <typename pop_t>
+void broadcastPayload(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+{
+    AssertLockHeld(cs_main);
+    LOCK(cs_popstate);
+
+    auto& nodeState = getPopDataNodeState(node->GetId());
+    auto& state = nodeState.getPayloadState<pop_t>();
+    auto& pop_mempool = VeriBlock::GetPop().getMemPool();
+
+    auto currentTime = GetTimeMillis();
+    if (state.lastProcessedGet + getIntervalMs < currentTime) {
+        // it's not time to process getters yet.
+        // save them in setRecv and exit.
+        return;
+    }
+
+    // process GET
+    LogPrint(BCLog::NET, "Processing {} GETs\n", state.recvGets.size());
+
+    for (auto it = state.recvGets.begin(), end = state.recvGets.end(); it != end;) {
+        const auto& hash = *it;
+        const auto* data = pop_mempool.get<pop_t>(hash);
+        if (data != nullptr) {
+            connman->PushMessage(node, msgMaker.Make(pop_t::name(), *data));
+            it = state.recvGets.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    state.lastProcessedGet = GetTimeMillis();
+}
+
+
+void broadcastPopData(CNode* node, CConnman* connman, const CNetMsgMaker& msgMaker) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+{
+    broadcastOfferPayload<altintegration::ATV>(node, connman, msgMaker);
+    broadcastOfferPayload<altintegration::VTB>(node, connman, msgMaker);
+    broadcastOfferPayload<altintegration::VbkBlock>(node, connman, msgMaker);
+
+    broadcastGetPayload<altintegration::ATV>(node, connman, msgMaker);
+    broadcastGetPayload<altintegration::VTB>(node, connman, msgMaker);
+    broadcastGetPayload<altintegration::VbkBlock>(node, connman, msgMaker);
+
+    broadcastPayload<altintegration::ATV>(node, connman, msgMaker);
+    broadcastPayload<altintegration::VTB>(node, connman, msgMaker);
+    broadcastPayload<altintegration::VbkBlock>(node, connman, msgMaker);
+}
 
 } // namespace p2p
 
