@@ -100,7 +100,7 @@ bool ProcessPopPayload(CNode* pfrom, CConnman* connman, CDataStream& vRecv, F on
 }
 
 template <typename T>
-void RelayPopMempool(const CNode* pto) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
+void RelayPopMempool(CNode* pto) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
     AssertLockHeld(cs_main);
     auto& mp = VeriBlock::GetPop().getMemPool();
