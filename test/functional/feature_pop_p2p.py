@@ -9,10 +9,6 @@ import time
 from test_framework.mininode import (
     P2PInterface,
 )
-from test_framework.messages import (
-    CInv,
-    msg_inv,
-)
 from test_framework.pop import endorse_block, mine_until_pop_active
 from test_framework.test_framework import BitcoinTestFramework
 from test_framework.util import (
