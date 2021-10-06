@@ -16,7 +16,7 @@ struct VBTCLogger : public altintegration::Logger {
 
     void log(altintegration::LogLevel l, const std::string& msg) override
     {
-        LogPrint(BCLog::POP, "[alt-cpp] [%s] %s\n", altintegration::LevelToString(l), msg);
+        LogPrint(BCLog::POP, "[alt-cpp] %s\n", msg);
     }
 };
 
