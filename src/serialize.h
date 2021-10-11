@@ -22,7 +22,6 @@
 
 #include <prevector.h>
 #include <span.h>
-#include <uint256.h>
 
 #include <vbk/adaptors/univalue_json.hpp>
 
@@ -628,13 +627,6 @@ void UnserializeOrThrow(const std::vector<uint8_t>& in, T& out) {
     }
 }
 
-inline void checkVectorHash(const std::vector<uint8_t>& h)
-{
-    if (h.size() != uint256().size()) {
-        throw std::invalid_argument("Invalid hash size: expected " + std::to_string(uint256().size()) + " got " + std::to_string(h.size()));
-    }
-}
-
 template<typename Stream> inline void Unserialize(Stream& s, altintegration::PopData& pop_data) {
     std::vector<uint8_t> bytes_data;
     Unserialize(s, bytes_data);
@@ -687,16 +679,6 @@ template<typename Stream> inline void Unserialize(Stream& s, altintegration::Sto
     std::vector<uint8_t> bytes_data;
     Unserialize(s, bytes_data);
     UnserializeOrThrow(bytes_data, b);
-
-    checkVectorHash(b.header->getHash());
-    for (const auto* endorsedBy : b.addon.popState.getEndorsedBy()) {
-        checkVectorHash(endorsedBy->containingHash);
-        checkVectorHash(endorsedBy->endorsedHash);
-    }
-    for (const auto& e : b.addon.popState.getContainingEndorsements()) {
-        checkVectorHash(e.second->containingHash);
-        checkVectorHash(e.second->endorsedHash);
-    }
 }
 template<typename Stream, size_t N> inline void Serialize(Stream& s, const altintegration::Blob<N>& b) {
     Serialize(s, b.asVector());
