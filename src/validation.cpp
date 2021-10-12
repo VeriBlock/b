@@ -4266,6 +4266,7 @@ bool BlockManager::LoadBlockIndex(
             pindex->nStatus |= BLOCK_FAILED_CHILD;
             setDirtyBlockIndex.insert(pindex);
         }
+        // VeriBlock: we need to add into the block_index_candidates only current tip
         // if (pindex->IsValid(BLOCK_VALID_TRANSACTIONS) && (pindex->HaveTxsDownloaded() || pindex->pprev == nullptr)) {
         //     block_index_candidates.insert(pindex);
         // }
