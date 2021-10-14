@@ -103,7 +103,10 @@ struct AltChainParamsVBTCRegTest : public AltChainParamsVBTC {
 
     explicit AltChainParamsVBTCRegTest(const CBlock& genesis) : AltChainParamsVBTC(genesis)
     {
-        mMaxReorgDistance = 1000;
+        this->mMaxReorgDistance = 1000;
+        this->mMaxVbkBlocksInAltBlock = 200;
+        this->mMaxVTBsInAltBlock = 200;
+        this->mMaxATVsInAltBlock = 1000;
     }
 };
 
