@@ -2,7 +2,7 @@
 .vscode
 *.idx
 
-vbtc_state_test
+BTCSQ_state_test
 src/vbk/grpc_integration/*.pb.cc
 src/vbk/grpc_integration/*.pb.h
 
