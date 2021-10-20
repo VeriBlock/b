@@ -8,11 +8,11 @@ src/vbk/grpc_integration/*.pb.h
 
 *.exe
 *.pdb
-src/vbitcoin
-src/vbitcoind
-src/vbitcoin-cli
-src/vbitcoin-tx
-src/vbitcoin-wallet
+src/bitcoinsq
+src/bitcoinsqd
+src/bitcoinsq-cli
+src/bitcoinsq-tx
+src/bitcoinsq-wallet
 src/test/test_bitcoin
 src/test/test_bitcoin_fuzzy
 src/qt/test/test_bitcoin-qt
@@ -56,11 +56,11 @@ src/qt/forms/ui_*.h
 
 src/qt/test/moc*.cpp
 
-src/qt/vbitcoin-qt.config
-src/qt/vbitcoin-qt.creator
-src/qt/vbitcoin-qt.creator.user
-src/qt/vbitcoin-qt.files
-src/qt/vbitcoin-qt.includes
+src/qt/bitcoinsq-qt.config
+src/qt/bitcoinsq-qt.creator
+src/qt/bitcoinsq-qt.creator.user
+src/qt/bitcoinsq-qt.files
+src/qt/bitcoinsq-qt.includes
 
 .deps
 .dirstamp
@@ -97,7 +97,7 @@ src/qt/vbitcoin-qt.includes
 *.qm
 Makefile
 !depends/Makefile
-vbitcoin-qt
+bitcoinsq-qt
 vBitcoin-Qt.app
 background.tiff*
 
@@ -156,6 +156,6 @@ compile_commands.json
 .settings
 configure.lineno
 *.pb.*
-vbitcoin*
-!test/integration/vbitcoind_node.py
+bitcoinsq*
+!test/integration/bitcoinsqd_node.py
 configure~

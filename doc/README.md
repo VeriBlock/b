@@ -15,12 +15,12 @@ The following are some helpful notes on how to run vBitcoin Core on your native 
 
 Unpack the files into a directory and run:
 
-- `bin/vbitcoin-qt` (GUI) or
-- `bin/vbitcoind` (headless)
+- `bin/bitcoinsq-qt` (GUI) or
+- `bin/bitcoinsqd` (headless)
 
 ### Windows
 
-Unpack the files into a directory, and then run vbitcoin-qt.exe.
+Unpack the files into a directory, and then run bitcoinsq-qt.exe.
 
 ### macOS
 
@@ -69,7 +69,7 @@ The vBitcoin repo's [root README](/README.md) contains relevant information on t
 
 ### Miscellaneous
 - [Assets Attribution](assets-attribution.md)
-- [vbitcoin.conf Configuration File](vbitcoin-conf.md)
+- [bitcoinsq.conf Configuration File](bitcoinsq-conf.md)
 - [Files](files.md)
 - [Fuzz-testing](fuzzing.md)
 - [Reduce Memory](reduce-memory.md)

@@ -17,13 +17,13 @@ BEGIN
         BLOCK "040904E4" // U.S. English - multilingual (hex)
         BEGIN
             VALUE "CompanyName",        "vBitcoin"
-            VALUE "FileDescription",    "vbitcoin-tx (CLI Bitcoin transaction editor utility)"
+            VALUE "FileDescription",    "bitcoinsq-tx (CLI Bitcoin transaction editor utility)"
             VALUE "FileVersion",        VER_FILEVERSION_STR
-            VALUE "InternalName",       "vbitcoin-tx"
+            VALUE "InternalName",       "bitcoinsq-tx"
             VALUE "LegalCopyright",     COPYRIGHT_STR
             VALUE "LegalTrademarks1",   "Distributed under the MIT software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php."
-            VALUE "OriginalFilename",   "vbitcoin-tx.exe"
-            VALUE "ProductName",        "vbitcoin-tx"
+            VALUE "OriginalFilename",   "bitcoinsq-tx.exe"
+            VALUE "ProductName",        "bitcoinsq-tx"
             VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
         END
     END

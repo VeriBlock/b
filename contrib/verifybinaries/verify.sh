@@ -19,7 +19,7 @@ function clean_up {
    done
 }
 
-WORKINGDIR="/tmp/vbitcoin_verify_binaries"
+WORKINGDIR="/tmp/bitcoinsq_verify_binaries"
 TMPFILE="hashes.tmp"
 
 SIGNATUREFILENAME="SHA256SUMS.asc"
@@ -27,7 +27,7 @@ RCSUBDIR="test"
 HOST1="https://veriblock.org"
 HOST2="https://veriblock.org"
 BASEDIR="/bin/"
-VERSIONPREFIX="vbitcoin-core-"
+VERSIONPREFIX="bitcoinsq-core-"
 RCVERSIONSTRING="rc"
 
 if [ ! -d "$WORKINGDIR" ]; then

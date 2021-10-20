@@ -22,13 +22,13 @@ The data directory is the default location where the vBitcoin Core files are sto
 
 Platform | Data directory path
 ---------|--------------------
-Linux    | `$HOME/.vbitcoin/`
+Linux    | `$HOME/.bitcoinsq/`
 macOS    | `$HOME/Library/Application Support/vBitcoin/`
 Windows  | `%APPDATA%\vBitcoin\` <sup>[\[1\]](#note1)</sup>
 
 2. The non-default data directory path can be specified by `-datadir` option.
 
-3. All content of the data directory, except for `vbitcoin.conf` file, is chain-specific. This means the actual data directory paths for non-mainnet cases differ:
+3. All content of the data directory, except for `bitcoinsq.conf` file, is chain-specific. This means the actual data directory paths for non-mainnet cases differ:
 
 Chain option        | Data directory path
 --------------------|--------------------

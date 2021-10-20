@@ -17,13 +17,13 @@ BEGIN
         BLOCK "040904E4" // U.S. English - multilingual (hex)
         BEGIN
             VALUE "CompanyName",        "vBitcoin"
-            VALUE "FileDescription",    "vbitcoin-cli (JSON-RPC client for " PACKAGE_NAME ")"
+            VALUE "FileDescription",    "bitcoinsq-cli (JSON-RPC client for " PACKAGE_NAME ")"
             VALUE "FileVersion",        VER_FILEVERSION_STR
-            VALUE "InternalName",       "vbitcoin-cli"
+            VALUE "InternalName",       "bitcoinsq-cli"
             VALUE "LegalCopyright",     COPYRIGHT_STR
             VALUE "LegalTrademarks1",   "Distributed under the MIT software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php."
-            VALUE "OriginalFilename",   "vbitcoin-cli.exe"
-            VALUE "ProductName",        "vbitcoin-cli"
+            VALUE "OriginalFilename",   "bitcoinsq-cli.exe"
+            VALUE "ProductName",        "bitcoinsq-cli"
             VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
         END
     END

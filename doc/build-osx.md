@@ -83,18 +83,18 @@ In this case there is no dependency on Berkeley DB 4.8.
 Mining is also possible in disable-wallet mode using the `getblocktemplate` RPC call.
 
 ## Running
-vBitcoin Core is now available at `./src/vbitcoind`
+vBitcoin Core is now available at `./src/bitcoinsqd`
 
 Before running, you may create an empty configuration file:
 ```shell
 mkdir -p "/Users/${USER}/Library/Application Support/vBitcoin"
 
-touch "/Users/${USER}/Library/Application Support/vBitcoin/vbitcoin.conf"
+touch "/Users/${USER}/Library/Application Support/vBitcoin/bitcoinsq.conf"
 
-chmod 600 "/Users/${USER}/Library/Application Support/vBitcoin/vbitcoin.conf"
+chmod 600 "/Users/${USER}/Library/Application Support/vBitcoin/bitcoinsq.conf"
 ```
 
-The first time you run vbitcoind, it will start downloading the blockchain. This process could
+The first time you run bitcoinsqd, it will start downloading the blockchain. This process could
 take many hours, or even days on slower than average systems.
 
 You can monitor the download process by looking at the debug.log file:
@@ -104,9 +104,9 @@ tail -f $HOME/Library/Application\ Support/vBitcoin/debug.log
 
 ## Other commands:
 ```shell
-./src/vbitcoind -daemon      # Starts the vbitcoin daemon.
-./src/vbitcoin-cli --help    # Outputs a list of command-line options.
-./src/vbitcoin-cli help      # Outputs a list of RPC commands when the daemon is running.
+./src/bitcoinsqd -daemon      # Starts the bitcoinsq daemon.
+./src/bitcoinsq-cli --help    # Outputs a list of command-line options.
+./src/bitcoinsq-cli help      # Outputs a list of RPC commands when the daemon is running.
 ```
 
 ## Notes

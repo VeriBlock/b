@@ -11,7 +11,7 @@ with each other, with the help of a P2P network to check for double-spending.
 
 Setup
 -----
-Unpack the files into a directory and run vbitcoin-qt.exe.
+Unpack the files into a directory and run bitcoinsq-qt.exe.
 
 vBitcoin Core is the original vBitcoin client and it builds the backbone of the network.
 However, it downloads and stores the entire history of vBitcoin transactions;

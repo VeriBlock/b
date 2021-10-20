@@ -49,7 +49,7 @@
       <string>org.veriblock.vBitcoinPayment</string>
       <key>CFBundleURLSchemes</key>
       <array>
-        <string>vbitcoin</string>
+        <string>bitcoinsq</string>
       </array>
     </dict>
   </array>
