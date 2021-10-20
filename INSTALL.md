@@ -1,5 +1,5 @@
-Building vBitcoin
+Building Bitcoinsq
 ================
 
 See doc/build-*.md for instructions on building the various
-elements of the vBitcoin Core reference implementation of vBitcoin.
+elements of the Bitcoinsq Core reference implementation of Bitcoinsq.

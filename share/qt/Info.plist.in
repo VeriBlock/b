@@ -29,16 +29,16 @@
   <string>????</string>
 
   <key>CFBundleExecutable</key>
-  <string>vBitcoin-Qt</string>
+  <string>Bitcoinsq-Qt</string>
 
   <key>CFBundleName</key>
-  <string>vBitcoin-Qt</string>
+  <string>Bitcoinsq-Qt</string>
 
   <key>LSHasLocalizedDisplayName</key>
   <true/>
 
   <key>CFBundleIdentifier</key>
-  <string>org.veriblock.vBitcoin-Qt</string>
+  <string>org.veriblock.Bitcoinsq-Qt</string>
 
   <key>CFBundleURLTypes</key>
   <array>
@@ -46,7 +46,7 @@
       <key>CFBundleTypeRole</key>
       <string>Editor</string>
       <key>CFBundleURLName</key>
-      <string>org.veriblock.vBitcoinPayment</string>
+      <string>org.veriblock.BitcoinsqPayment</string>
       <key>CFBundleURLSchemes</key>
       <array>
         <string>bitcoinsq</string>

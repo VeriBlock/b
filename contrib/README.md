@@ -12,7 +12,7 @@ Construct a linear, no-fork, best version of the blockchain.
 
 ### [Qos](/contrib/qos) ###
 
-A Linux bash script that will set up traffic control (tc) to limit the outgoing bandwidth for connections to the vBitcoin network. This means one can have an always-on bitcoinsqd instance running, and another local bitcoinsqd/bitcoinsq-qt instance which connects to this node and receives blocks from it.
+A Linux bash script that will set up traffic control (tc) to limit the outgoing bandwidth for connections to the Bitcoinsq network. This means one can have an always-on bitcoinsqd instance running, and another local bitcoinsqd/bitcoinsq-qt instance which connects to this node and receives blocks from it.
 
 ### [Seeds](/contrib/seeds) ###
 Utility to generate the pnSeed[] array that is compiled into the client.
@@ -26,10 +26,10 @@ The [Debian](/contrib/debian) subfolder contains the copyright file.
 All other packaging related files can be found in the [bitcoinsq-core/packaging](https://github.com/VeriBlock/vbk-ri-btc) repository.
 
 ### [Gitian-descriptors](/contrib/gitian-descriptors) ###
-Files used during the gitian build process. For more information about gitian, see the [the vBitcoin Core documentation repository](https://github.com/VeriBlock/vbk-ri-btc/docs).
+Files used during the gitian build process. For more information about gitian, see the [the Bitcoinsq Core documentation repository](https://github.com/VeriBlock/vbk-ri-btc/docs).
 
 ### [Gitian-keys](/contrib/gitian-keys)
-PGP keys used for signing vBitcoin Core [Gitian release](/doc/release-process.md) results.
+PGP keys used for signing Bitcoinsq Core [Gitian release](/doc/release-process.md) results.
 
 ### [MacDeploy](/contrib/macdeploy) ###
 Scripts and notes for Mac builds.
@@ -41,7 +41,7 @@ Test and Verify Tools
 ---------------------
 
 ### [TestGen](/contrib/testgen) ###
-Utilities to generate test vectors for the data-driven vBitcoin tests.
+Utilities to generate test vectors for the data-driven Bitcoinsq tests.
 
 ### [Verify Binaries](/contrib/verifybinaries) ###
 This script attempts to download and verify the signature file SHA256SUMS.asc from bitcoin.org.

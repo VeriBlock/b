@@ -98,7 +98,7 @@ src/qt/bitcoinsq-qt.includes
 Makefile
 !depends/Makefile
 bitcoinsq-qt
-vBitcoin-Qt.app
+Bitcoinsq-Qt.app
 background.tiff*
 
 # Qt Creator

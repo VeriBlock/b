@@ -10,7 +10,7 @@
 # config file.
 
 [Unit]
-Description=vBitcoin daemon
+Description=Bitcoinsq daemon
 After=network.target
 
 [Service]

@@ -84,9 +84,9 @@ OpenRC).
 ### macOS
 
 Binary:              `/usr/local/bin/bitcoind`
-Configuration file:  `~/Library/Application Support/vBitcoin/bitcoinsq.conf`
-Data directory:      `~/Library/Application Support/vBitcoin`
-Lock file:           `~/Library/Application Support/vBitcoin/.lock`
+Configuration file:  `~/Library/Application Support/Bitcoinsq/bitcoinsq.conf`
+Data directory:      `~/Library/Application Support/Bitcoinsq`
+Lock file:           `~/Library/Application Support/Bitcoinsq/.lock`
 
 Installing Service Configuration
 -----------------------------------

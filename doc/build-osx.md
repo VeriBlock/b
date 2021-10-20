@@ -42,17 +42,17 @@ from the root of the repository.
 
 **Note**: You only need Berkeley DB if the wallet is enabled (see [*Disable-wallet mode*](/doc/build-osx.md#disable-wallet-mode)).
 
-## Build vBitcoin Core
+## Build Bitcoinsq Core
 
-1. Clone the vBitcoin Core source code:
+1. Clone the Bitcoinsq Core source code:
     ```shell
     git clone https://github.com/VeriBlock/vbk-ri-btc
     cd vbk-ri-btc
     ```
 
-2.  Build vBitcoin Core:
+2.  Build Bitcoinsq Core:
 
-    Configure and build the headless vBitcoin Core binaries as well as the GUI (if Qt is found).
+    Configure and build the headless Bitcoinsq Core binaries as well as the GUI (if Qt is found).
 
     You can disable the GUI build by passing `--without-gui` to configure.
     ```shell
@@ -72,7 +72,7 @@ from the root of the repository.
     ```
 
 ## `disable-wallet` mode
-When the intention is to run only a P2P node without a wallet, vBitcoin Core may be
+When the intention is to run only a P2P node without a wallet, Bitcoinsq Core may be
 compiled in `disable-wallet` mode with:
 ```shell
 ./configure --disable-wallet
@@ -83,15 +83,15 @@ In this case there is no dependency on Berkeley DB 4.8.
 Mining is also possible in disable-wallet mode using the `getblocktemplate` RPC call.
 
 ## Running
-vBitcoin Core is now available at `./src/bitcoinsqd`
+Bitcoinsq Core is now available at `./src/bitcoinsqd`
 
 Before running, you may create an empty configuration file:
 ```shell
-mkdir -p "/Users/${USER}/Library/Application Support/vBitcoin"
+mkdir -p "/Users/${USER}/Library/Application Support/Bitcoinsq"
 
-touch "/Users/${USER}/Library/Application Support/vBitcoin/bitcoinsq.conf"
+touch "/Users/${USER}/Library/Application Support/Bitcoinsq/bitcoinsq.conf"
 
-chmod 600 "/Users/${USER}/Library/Application Support/vBitcoin/bitcoinsq.conf"
+chmod 600 "/Users/${USER}/Library/Application Support/Bitcoinsq/bitcoinsq.conf"
 ```
 
 The first time you run bitcoinsqd, it will start downloading the blockchain. This process could
@@ -99,7 +99,7 @@ take many hours, or even days on slower than average systems.
 
 You can monitor the download process by looking at the debug.log file:
 ```shell
-tail -f $HOME/Library/Application\ Support/vBitcoin/debug.log
+tail -f $HOME/Library/Application\ Support/Bitcoinsq/debug.log
 ```
 
 ## Other commands:

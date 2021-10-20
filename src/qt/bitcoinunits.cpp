@@ -64,9 +64,9 @@ QString BitcoinUnits::description(int unit)
 {
     switch(unit)
     {
-    case BTCSQ: return QString("vBitcoins");
-    case mBTCSQ: return QString("Milli-vBitcoins (1 / 1" THIN_SP_UTF8 "000)");
-    case uBTCSQ: return QString("Micro-vBitcoins (bits) (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+    case BTCSQ: return QString("Bitcoinsqs");
+    case mBTCSQ: return QString("Milli-Bitcoinsqs (1 / 1" THIN_SP_UTF8 "000)");
+    case uBTCSQ: return QString("Micro-Bitcoinsqs (bits) (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
     case SAT: return QString("Satoshi (sat) (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
     default: return QString("???");
     }

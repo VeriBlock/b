@@ -1,5 +1,5 @@
 # Linearize
-Construct a linear, no-fork, best version of the vBitcoin blockchain.
+Construct a linear, no-fork, best version of the Bitcoinsq blockchain.
 
 ## Step 1: Download hash list
 

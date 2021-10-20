@@ -18,7 +18,7 @@ RUN make -j$(nproc)
 RUN make install
 RUN rm -rf ${BERKELEYDB_PREFIX}/docs
 
-# Build stage for vBitcoin Core
+# Build stage for Bitcoinsq Core
 FROM alpine as bitcoinsq-core
 
 COPY --from=berkeleydb /opt /opt
@@ -49,7 +49,7 @@ RUN set -ex \
     gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" ; \
   done
 
-ENV VBITCOIN_PREFIX=/opt/bitcoinsq
+ENV Bitcoinsq_PREFIX=/opt/bitcoinsq
 
 COPY . /bitcoinsq
 
@@ -77,14 +77,14 @@ RUN ./configure LDFLAGS=-L`ls -d /opt/db-*`/lib/ CPPFLAGS=-I`ls -d /opt/db-*`/in
     --without-gui \
     --with-libs=no \
     --with-daemon \
-    --prefix=${VBITCOIN_PREFIX}
+    --prefix=${Bitcoinsq_PREFIX}
 
 RUN make -j$(nproc) install
 
-RUN strip ${VBITCOIN_PREFIX}/bin/bitcoinsq-cli
-RUN strip ${VBITCOIN_PREFIX}/bin/bitcoinsqd
-RUN strip ${VBITCOIN_PREFIX}/bin/bitcoinsq-tx
-RUN strip ${VBITCOIN_PREFIX}/bin/bitcoinsq-wallet
+RUN strip ${Bitcoinsq_PREFIX}/bin/bitcoinsq-cli
+RUN strip ${Bitcoinsq_PREFIX}/bin/bitcoinsqd
+RUN strip ${Bitcoinsq_PREFIX}/bin/bitcoinsq-tx
+RUN strip ${Bitcoinsq_PREFIX}/bin/bitcoinsq-wallet
 
 # Build stage for compiled artifacts
 FROM alpine
@@ -98,8 +98,8 @@ RUN apk --no-cache add \
   git
 
 ENV DATA_DIR=/home/bitcoinsq/.bitcoinsq
-ENV VBITCOIN_PREFIX=/opt/bitcoinsq
-ENV PATH=${VBITCOIN_PREFIX}/bin:$PATH
+ENV Bitcoinsq_PREFIX=/opt/bitcoinsq
+ENV PATH=${Bitcoinsq_PREFIX}/bin:$PATH
 
 COPY --from=bitcoinsq-core /opt /opt
 
