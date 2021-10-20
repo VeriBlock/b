@@ -45,7 +45,6 @@ class SpendGenesisCoinbase(BitcoinTestFramework):
         self.nodes[0].importprivkey(priv)
         assert_equal(self.nodes[0].getbalance(), 5)
 
-        node2balance = self.nodes[1].getbalance()
         node2addr = self.nodes[1].getnewaddress()
         self.log.info("attempt to spend coinbase in genesis block")
         amount = 3
@@ -63,6 +62,7 @@ class SpendGenesisCoinbase(BitcoinTestFramework):
         except:
             raise Exception("node1 does not know about tx={}. it's a sign that coinbase tx can not be spent.".format(txid))
 
+        assert_approx(float(self.nodes[0].getbalance()), 2., vspan=0.001)
 
 if __name__ == '__main__':
     SpendGenesisCoinbase().main()
