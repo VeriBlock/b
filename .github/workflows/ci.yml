@@ -106,7 +106,7 @@ jobs:
           username: ${{ secrets.MIRROR_ARTIFACTS_USER }}
           key: ${{ secrets.MIRROR_ARTIFACTS_KEY }}
           source: Bitcoinsq-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-linux-x64.tar.gz
-          target: "artifacts/btcsq"
+          target: "artifacts/vbtc"
       - name: make check
         timeout-minutes: 60
         run: make check
@@ -217,7 +217,7 @@ jobs:
           username: ${{ secrets.MIRROR_ARTIFACTS_USER }}
           key: ${{ secrets.MIRROR_ARTIFACTS_KEY }}
           source: Bitcoinsq-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-win64-qt.zip
-          target: "artifacts/btcsq"
+          target: "artifacts/vbtc"
 
 
   x86_64-apple-darwin16:
@@ -311,7 +311,7 @@ jobs:
           username: ${{ secrets.MIRROR_ARTIFACTS_USER }}
           key: ${{ secrets.MIRROR_ARTIFACTS_KEY }}
           source: Bitcoinsq-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-macos-qt.zip
-          target: "artifacts/btcsq"
+          target: "artifacts/vbtc"
 
 
   macos-native:
