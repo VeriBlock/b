@@ -22,7 +22,7 @@ RUN make install
 RUN rm -rf ${BERKELEYDB_PREFIX}/docs
 
 # Build stage for vBitcoin Core
-FROM alpine as vbitcoin-core
+FROM alpine as bitcoinsq-core
 
 COPY --from=berkeleydb /opt /opt
 
@@ -52,11 +52,11 @@ RUN set -ex \
     gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" ; \
   done
 
-ENV VBITCOIN_PREFIX=/opt/vbitcoin
+ENV VBITCOIN_PREFIX=/opt/bitcoinsq
 
-COPY . /vbitcoin
+COPY . /bitcoinsq
 
-WORKDIR /vbitcoin
+WORKDIR /bitcoinsq
 
 # Install alt-integration-cpp
 RUN export VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1); \
@@ -96,16 +96,16 @@ RUN apk --no-cache add \
   su-exec \
   git
 
-ENV DATA_DIR=/home/vbitcoin/.vbitcoin
-ENV VBITCOIN_PREFIX=/opt/vbitcoin
+ENV DATA_DIR=/home/bitcoinsq/.bitcoinsq
+ENV VBITCOIN_PREFIX=/opt/bitcoinsq
 ENV PATH=${VBITCOIN_PREFIX}/bin:$PATH
 
-COPY --from=vbitcoin-core /opt /opt
+COPY --from=bitcoinsq-core /opt /opt
 
 RUN mkdir -p ${DATA_DIR}
 RUN set -x \
-    && addgroup -g 1001 -S vbitcoin \
-    && adduser -u 1001 -D -S -G vbitcoin vbitcoin
+    && addgroup -g 1001 -S bitcoinsq \
+    && adduser -u 1001 -D -S -G bitcoinsq bitcoinsq
 RUN chown -R 1001:1001 ${DATA_DIR}
-USER vbitcoin
+USER bitcoinsq
 WORKDIR $DATA_DIR

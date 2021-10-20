@@ -86,18 +86,18 @@ TESTS =
 BENCHMARKS =
 
 if BUILD_BITCOIND
-  bin_PROGRAMS += vbitcoind
+  bin_PROGRAMS += bitcoinsqd
 endif
 
 if BUILD_BITCOIN_CLI
-  bin_PROGRAMS += vbitcoin-cli
+  bin_PROGRAMS += bitcoinsq-cli
 endif
 if BUILD_BITCOIN_TX
-  bin_PROGRAMS += vbitcoin-tx
+  bin_PROGRAMS += bitcoinsq-tx
 endif
 if ENABLE_WALLET
 if BUILD_BITCOIN_WALLET
-  bin_PROGRAMS += vbitcoin-wallet
+  bin_PROGRAMS += bitcoinsq-wallet
 endif
 endif
 
@@ -289,7 +289,7 @@ obj/build.h: FORCE
 libbitcoin_util_a-clientversion.$(OBJEXT): obj/build.h
 
 
-# server: shared between vbitcoind and vbitcoin-qt
+# server: shared between bitcoinsqd and bitcoinsq-qt
 # Contains code accessing mempool and chain state that is meant to be separated
 # from wallet and gui code (see node/README.md). Shared code should go in
 # libbitcoin_common or libbitcoin_util libraries, instead.
@@ -371,7 +371,7 @@ libbitcoin_zmq_a_SOURCES = \
 endif
 
 
-# wallet: shared between vbitcoind and vbitcoin-qt, but only linked
+# wallet: shared between bitcoinsqd and bitcoinsq-qt, but only linked
 # when wallet enabled
 libbitcoin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
@@ -488,7 +488,7 @@ libbitcoin_consensus_a_SOURCES = \
   util/strencodings.h \
   version.h
 
-# common: shared between vbitcoind, and vbitcoin-qt and non-server tools
+# common: shared between bitcoinsqd, and bitcoinsq-qt and non-server tools
 libbitcoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
 libbitcoin_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libbitcoin_common_a_SOURCES = \
@@ -588,19 +588,19 @@ libbitcoin_cli_a_SOURCES = \
 nodist_libbitcoin_util_a_SOURCES = $(srcdir)/obj/build.h
 #
 
-# vbitcoind binary #
-vbitcoind_SOURCES = bitcoind.cpp
-vbitcoind_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-vbitcoind_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-vbitcoind_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# bitcoinsqd binary #
+bitcoinsqd_SOURCES = bitcoind.cpp
+bitcoinsqd_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+bitcoinsqd_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bitcoinsqd_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-vbitcoind_SOURCES += bitcoind-res.rc
+bitcoinsqd_SOURCES += bitcoind-res.rc
 endif
 
 # Libraries below may be listed more than once to resolve circular dependencies (see
 # https://eli.thegreenplace.net/2013/07/09/library-order-in-static-linking#circular-dependency)
-vbitcoind_LDADD = \
+bitcoinsqd_LDADD = \
   $(VERIBLOCK_POP_CPP_LIBS) \
   $(LIBBITCOIN_SERVER) \
   $(LIBBITCOIN_WALLET) \
@@ -615,38 +615,38 @@ vbitcoind_LDADD = \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-vbitcoind_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(VERIBLOCK_POP_CPP_LIBS)
+bitcoinsqd_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS) $(VERIBLOCK_POP_CPP_LIBS)
 
 # bitcoin-cli binary #
-vbitcoin_cli_SOURCES = bitcoin-cli.cpp
-vbitcoin_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
-vbitcoin_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-vbitcoin_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+bitcoinsq_cli_SOURCES = bitcoin-cli.cpp
+bitcoinsq_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(EVENT_CFLAGS)
+bitcoinsq_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bitcoinsq_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-vbitcoin_cli_SOURCES += bitcoin-cli-res.rc
+bitcoinsq_cli_SOURCES += bitcoin-cli-res.rc
 endif
 
-vbitcoin_cli_LDADD = \
+bitcoinsq_cli_LDADD = \
   $(LIBBITCOIN_CLI) \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_UTIL) \
   $(LIBBITCOIN_CRYPTO) \
   $(VERIBLOCK_POP_CPP_LIBS)
 
-vbitcoin_cli_LDADD += $(BOOST_LIBS) $(EVENT_LIBS)
+bitcoinsq_cli_LDADD += $(BOOST_LIBS) $(EVENT_LIBS)
 
-# vbitcoin-tx binary #
-vbitcoin_tx_SOURCES = bitcoin-tx.cpp
-vbitcoin_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-vbitcoin_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-vbitcoin_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# bitcoinsq-tx binary #
+bitcoinsq_tx_SOURCES = bitcoin-tx.cpp
+bitcoinsq_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+bitcoinsq_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bitcoinsq_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-vbitcoin_tx_SOURCES += bitcoin-tx-res.rc
+bitcoinsq_tx_SOURCES += bitcoin-tx-res.rc
 endif
 
-vbitcoin_tx_LDADD = \
+bitcoinsq_tx_LDADD = \
   $(VERIBLOCK_POP_CPP_LIBS) \
   $(LIBUNIVALUE) \
   $(LIBBITCOIN_COMMON) \
@@ -655,19 +655,19 @@ vbitcoin_tx_LDADD = \
   $(LIBBITCOIN_CRYPTO) \
   $(LIBSECP256K1)
 
-vbitcoin_tx_LDADD += $(BOOST_LIBS) $(VERIBLOCK_POP_CPP_LIBS)
+bitcoinsq_tx_LDADD += $(BOOST_LIBS) $(VERIBLOCK_POP_CPP_LIBS)
 
-# vbitcoin-wallet binary #
-vbitcoin_wallet_SOURCES = bitcoin-wallet.cpp
-vbitcoin_wallet_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
-vbitcoin_wallet_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-vbitcoin_wallet_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# bitcoinsq-wallet binary #
+bitcoinsq_wallet_SOURCES = bitcoin-wallet.cpp
+bitcoinsq_wallet_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)
+bitcoinsq_wallet_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+bitcoinsq_wallet_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-vbitcoin_wallet_SOURCES += bitcoin-wallet-res.rc
+bitcoinsq_wallet_SOURCES += bitcoin-wallet-res.rc
 endif
 
-vbitcoin_wallet_LDADD = \
+bitcoinsq_wallet_LDADD = \
   $(LIBBITCOIN_WALLET_TOOL) \
   $(LIBBITCOIN_WALLET) \
   $(LIBBITCOIN_COMMON) \
@@ -682,7 +682,7 @@ vbitcoin_wallet_LDADD = \
   $(LIBUNIVALUE) \
   $(VERIBLOCK_POP_CPP_LIBS)
 
-vbitcoin_wallet_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(MINIUPNPC_LIBS) $(ZMQ_LIBS)
+bitcoinsq_wallet_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(MINIUPNPC_LIBS) $(ZMQ_LIBS)
 #
 
 # bitcoinconsensus library #
