@@ -22,7 +22,7 @@ RUN make install
 RUN rm -rf ${BERKELEYDB_PREFIX}/docs
 
 # Build stage for Bitcoinsq Core
-FROM alpine as bitcoinsq-core
+FROM alpine as btcsq-core
 
 COPY --from=berkeleydb /opt /opt
 
@@ -52,11 +52,11 @@ RUN set -ex \
     gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" ; \
   done
 
-ENV Bitcoinsq_PREFIX=/opt/bitcoinsq
+ENV Bitcoinsq_PREFIX=/opt/btcsq
 
-COPY . /bitcoinsq
+COPY . /btcsq
 
-WORKDIR /bitcoinsq
+WORKDIR /btcsq
 
 # Install alt-integration-cpp
 RUN export VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1); \
@@ -96,16 +96,16 @@ RUN apk --no-cache add \
   su-exec \
   git
 
-ENV DATA_DIR=/home/bitcoinsq/.bitcoinsq
-ENV Bitcoinsq_PREFIX=/opt/bitcoinsq
+ENV DATA_DIR=/home/btcsq/.btcsq
+ENV Bitcoinsq_PREFIX=/opt/btcsq
 ENV PATH=${Bitcoinsq_PREFIX}/bin:$PATH
 
-COPY --from=bitcoinsq-core /opt /opt
+COPY --from=btcsq-core /opt /opt
 
 RUN mkdir -p ${DATA_DIR}
 RUN set -x \
-    && addgroup -g 1001 -S bitcoinsq \
-    && adduser -u 1001 -D -S -G bitcoinsq bitcoinsq
+    && addgroup -g 1001 -S btcsq \
+    && adduser -u 1001 -D -S -G btcsq btcsq
 RUN chown -R 1001:1001 ${DATA_DIR}
-USER bitcoinsq
+USER btcsq
 WORKDIR $DATA_DIR

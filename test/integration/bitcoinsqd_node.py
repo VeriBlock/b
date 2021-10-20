@@ -15,8 +15,8 @@ PORT_MAX = 25000
 BIND_TO = '127.0.0.1'
 
 
-def _write_bitcoinsq_conf(datadir, p2p_port, rpc_port, rpc_user, rpc_password):
-    bitcoin_conf_file = Path(datadir, "bitcoinsq.conf")
+def _write_btcsq_conf(datadir, p2p_port, rpc_port, rpc_user, rpc_password):
+    bitcoin_conf_file = Path(datadir, "btcsq.conf")
     with open(bitcoin_conf_file, 'w', encoding='utf8') as f:
         f.write("regtest=1\n")
         f.write("[{}]\n".format("regtest"))
@@ -51,13 +51,13 @@ class BitcoinsqdNode(Node):
         rpc_password = 'testpassword'
         self.rpc = JsonRpcApi(rpc_url, user=rpc_user, password=rpc_password)
 
-        bitcoinsqd_path = os.environ.get('BitcoinsqD_PATH')
-        if bitcoinsqd_path == None:
-            raise Exception("BitcoinsqD_PATH env var is not set. Set up the path to the bitcoinsqd binary to the BitcoinsqD_PATH env var")
+        btcsqd_path = os.environ.get('BitcoinsqD_PATH')
+        if btcsqd_path == None:
+            raise Exception("BitcoinsqD_PATH env var is not set. Set up the path to the btcsqd binary to the BitcoinsqD_PATH env var")
 
-        exe = Path(Path.cwd(), bitcoinsqd_path)
+        exe = Path(Path.cwd(), btcsqd_path)
         if not exe:
-            raise Exception("BitcoinsqNode: bitcoinsqd is not found in PATH")
+            raise Exception("BitcoinsqNode: btcsqd is not found in PATH")
 
         assert_dir_accessible(datadir)
         args = [
@@ -73,7 +73,7 @@ class BitcoinsqdNode(Node):
         ]
         self.manager = ProcessManager(args, datadir)
 
-        _write_bitcoinsq_conf(datadir, p2p_port, rpc_port, rpc_user, rpc_password)
+        _write_btcsq_conf(datadir, p2p_port, rpc_port, rpc_user, rpc_password)
 
     def start(self) -> None:
         self.manager.start()

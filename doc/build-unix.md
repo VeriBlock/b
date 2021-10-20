@@ -24,7 +24,7 @@ make
 make install # optional
 ```
 
-This will build bitcoinsq-qt as well, if the dependencies are met.
+This will build btcsq-qt as well, if the dependencies are met.
 
 Dependencies
 ---------------------
@@ -118,7 +118,7 @@ ZMQ dependencies (provides ZMQ API):
 
 GUI dependencies:
 
-If you want to build bitcoinsq-qt, make sure that the required packages for Qt development
+If you want to build btcsq-qt, make sure that the required packages for Qt development
 are installed. Qt 5 is necessary to build the GUI.
 To build without GUI pass `--without-gui`.
 
@@ -160,7 +160,7 @@ libqrencode (optional) can be installed with:
 
 Notes
 -----
-The release is built with GCC and then "strip bitcoinsqd" to strip the debug
+The release is built with GCC and then "strip btcsqd" to strip the debug
 symbols, which reduces the executable size by about 90%.
 
 
@@ -223,7 +223,7 @@ Hardening enables the following features:
 
     To test that you have built PIE executable, install scanelf, part of paxutils, and use:
 
-    	scanelf -e ./bitcoinsq
+    	scanelf -e ./btcsq
 
     The output should contain:
 
@@ -237,7 +237,7 @@ Hardening enables the following features:
     executable without the non-executable stack protection.
 
     To verify that the stack is non-executable after compiling use:
-    `scanelf -e ./bitcoinsq`
+    `scanelf -e ./btcsq`
 
     The output should contain:
 	STK/REL/PTL

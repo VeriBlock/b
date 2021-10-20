@@ -71,7 +71,7 @@
 // Application startup time (used for uptime calculation)
 const int64_t nStartupTime = GetTime();
 
-const char * const BITCOIN_CONF_FILENAME = "bitcoinsq.conf";
+const char * const BITCOIN_CONF_FILENAME = "btcsq.conf";
 
 ArgsManager gArgs;
 
@@ -578,7 +578,7 @@ fs::path GetDefaultDataDir()
     return pathRet / "Library/Application Support/Bitcoinsq";
 #else
     // Unix
-    return pathRet / ".bitcoinsq";
+    return pathRet / ".btcsq";
 #endif
 #endif
 }

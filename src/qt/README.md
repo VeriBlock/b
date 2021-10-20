@@ -9,7 +9,7 @@ See build instructions ([macOS](/doc/build-osx.md), [Windows](/doc/build-windows
 To run:
 
 ```sh
-./src/qt/bitcoinsq-qt
+./src/qt/btcsq-qt
 ```
 
 ## Files and directories

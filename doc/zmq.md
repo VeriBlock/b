@@ -6,7 +6,7 @@ providing various message-oriented semantics such as publish/subscribe,
 request/reply, and push/pull.
 
 The Bitcoinsq Core daemon can be configured to act as a trusted "border
-router", implementing the bitcoinsq wire protocol and relay, making
+router", implementing the btcsq wire protocol and relay, making
 consensus decisions, maintaining the local blockchain database,
 broadcasting locally generated transactions into the network, and
 providing a queryable RPC interface to interact on a polled basis for
@@ -117,5 +117,5 @@ is the case after calling invalidateblock RPC.
 
 There are several possibilities that ZMQ notification can get lost
 during transmission depending on the communication type you are
-using. bitcoinsqd appends an up-counting sequence number to each
+using. btcsqd appends an up-counting sequence number to each
 notification which allows listeners to detect lost notifications.

@@ -163,7 +163,7 @@ QString TransactionDesc::FormatBFIStatus(TransactionRecord *rec)
 
         if (reply->error()) {
             if (vbkEndPoint.isEmpty()) {
-                vbkMessage = tr("BFI not setup yet, specify bfiendpoint=url in bitcoinsq.conf");
+                vbkMessage = tr("BFI not setup yet, specify bfiendpoint=url in btcsq.conf");
             }
             else {
                 vbkMessage = tr("Unconfirmed Bitcoin Finality");

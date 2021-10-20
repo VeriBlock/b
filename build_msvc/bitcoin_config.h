@@ -349,7 +349,7 @@
 #define PACKAGE_STRING "Bitcoinsq Core 0.0.3"
 
 /* Define to the one symbol short name of this package. */
-#define PACKAGE_TARNAME "bitcoinsq"
+#define PACKAGE_TARNAME "btcsq"
 
 /* Define to the home page for this package. */
 #define PACKAGE_URL "https://www.veriblock.org/"

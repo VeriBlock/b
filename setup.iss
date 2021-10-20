@@ -5,7 +5,7 @@
 #define MyAppVersion "0.0.3"
 #define MyAppPublisher "VeriBlock"
 #define MyAppURL "https://www.veriblock.org"
-#define MyAppExeName "bitcoinsq-qt.exe"
+#define MyAppExeName "btcsq-qt.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -21,7 +21,7 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DisableProgramGroupPage=yes
-OutputBaseFilename=setup-bitcoinsq-0.0.3
+OutputBaseFilename=setup-btcsq-0.0.3
 Compression=lzma
 SolidCompression=yes
 
@@ -35,11 +35,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\git\repo\vbk-ri-btc\src\qt\bitcoinsq-qt.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\git\repo\vbk-ri-btc\bitcoinsq.conf"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\git\repo\vbk-ri-btc\bitcoinsq.conf"; DestDir: "{userappdata}\bitcoinsq\"; Flags: ignoreversion
-Source: "C:\git\repo\vbk-ri-btc\src\bitcoinsq-cli.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\git\repo\vbk-ri-btc\src\bitcoinsqd.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\git\repo\vbk-ri-btc\src\qt\btcsq-qt.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\git\repo\vbk-ri-btc\btcsq.conf"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\git\repo\vbk-ri-btc\btcsq.conf"; DestDir: "{userappdata}\btcsq\"; Flags: ignoreversion
+Source: "C:\git\repo\vbk-ri-btc\src\btcsq-cli.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\git\repo\vbk-ri-btc\src\btcsqd.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\git\repo\vbk-ri-btc\README.md"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

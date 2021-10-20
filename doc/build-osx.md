@@ -83,18 +83,18 @@ In this case there is no dependency on Berkeley DB 4.8.
 Mining is also possible in disable-wallet mode using the `getblocktemplate` RPC call.
 
 ## Running
-Bitcoinsq Core is now available at `./src/bitcoinsqd`
+Bitcoinsq Core is now available at `./src/btcsqd`
 
 Before running, you may create an empty configuration file:
 ```shell
 mkdir -p "/Users/${USER}/Library/Application Support/Bitcoinsq"
 
-touch "/Users/${USER}/Library/Application Support/Bitcoinsq/bitcoinsq.conf"
+touch "/Users/${USER}/Library/Application Support/Bitcoinsq/btcsq.conf"
 
-chmod 600 "/Users/${USER}/Library/Application Support/Bitcoinsq/bitcoinsq.conf"
+chmod 600 "/Users/${USER}/Library/Application Support/Bitcoinsq/btcsq.conf"
 ```
 
-The first time you run bitcoinsqd, it will start downloading the blockchain. This process could
+The first time you run btcsqd, it will start downloading the blockchain. This process could
 take many hours, or even days on slower than average systems.
 
 You can monitor the download process by looking at the debug.log file:
@@ -104,9 +104,9 @@ tail -f $HOME/Library/Application\ Support/Bitcoinsq/debug.log
 
 ## Other commands:
 ```shell
-./src/bitcoinsqd -daemon      # Starts the bitcoinsq daemon.
-./src/bitcoinsq-cli --help    # Outputs a list of command-line options.
-./src/bitcoinsq-cli help      # Outputs a list of RPC commands when the daemon is running.
+./src/btcsqd -daemon      # Starts the btcsq daemon.
+./src/btcsq-cli --help    # Outputs a list of command-line options.
+./src/btcsq-cli help      # Outputs a list of RPC commands when the daemon is running.
 ```
 
 ## Notes

@@ -17,13 +17,13 @@ BEGIN
         BLOCK "040904E4" // U.S. English - multilingual (hex)
         BEGIN
             VALUE "CompanyName",        "Bitcoinsq"
-            VALUE "FileDescription",    "bitcoinsq-wallet (CLI tool for " PACKAGE_NAME " wallets)"
+            VALUE "FileDescription",    "btcsq-wallet (CLI tool for " PACKAGE_NAME " wallets)"
             VALUE "FileVersion",        VER_FILEVERSION_STR
-            VALUE "InternalName",       "bitcoinsq-wallet"
+            VALUE "InternalName",       "btcsq-wallet"
             VALUE "LegalCopyright",     COPYRIGHT_STR
             VALUE "LegalTrademarks1",   "Distributed under the MIT software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php."
-            VALUE "OriginalFilename",   "bitcoinsq-wallet.exe"
-            VALUE "ProductName",        "bitcoinsq-wallet"
+            VALUE "OriginalFilename",   "btcsq-wallet.exe"
+            VALUE "ProductName",        "btcsq-wallet"
             VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
         END
     END

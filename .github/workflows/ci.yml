@@ -124,13 +124,13 @@ jobs:
         if: always()
         timeout-minutes: 60
         env:
-          BitcoinsqD_PATH: './src/bitcoinsqd'
+          BitcoinsqD_PATH: './src/btcsqd'
         run: python3 test/integration/test_runner.py
       # - name: run pop integration benchmark
       #   if: always()
       #   timeout-minutes: 60
       #   env:
-      #     BitcoinsqD_PATH: './src/bitcoinsqd'
+      #     BitcoinsqD_PATH: './src/btcsqd'
       #   run: python3 test/integration/benchmark_runner.py
 
   x86_64-w64-mingw32:
@@ -196,7 +196,7 @@ jobs:
       - name: create artifacts
         if: success()
         run: |
-          mv ./bitcoinsq-0.19.99-win64-setup-unsigned.exe release/
+          mv ./btcsq-0.19.99-win64-setup-unsigned.exe release/
           mv ./release Bitcoinsq-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
           zip -r9 Bitcoinsq-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-win64-qt.zip Bitcoinsq-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
       - name: upload artifacts
@@ -386,7 +386,7 @@ jobs:
         if: always()
         timeout-minutes: 60
         env:
-          BitcoinsqD_PATH: './src/bitcoinsqd'
+          BitcoinsqD_PATH: './src/btcsqd'
         run: python3 test/integration/test_runner.py
 
   linux-asan:
@@ -489,5 +489,5 @@ jobs:
         if: always()
         timeout-minutes: 60
         env:
-          BitcoinsqD_PATH: './src/bitcoinsqd'
+          BitcoinsqD_PATH: './src/btcsqd'
         run: python3 test/integration/test_runner.py

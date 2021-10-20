@@ -15,12 +15,12 @@ The following are some helpful notes on how to run Bitcoinsq Core on your native
 
 Unpack the files into a directory and run:
 
-- `bin/bitcoinsq-qt` (GUI) or
-- `bin/bitcoinsqd` (headless)
+- `bin/btcsq-qt` (GUI) or
+- `bin/btcsqd` (headless)
 
 ### Windows
 
-Unpack the files into a directory, and then run bitcoinsq-qt.exe.
+Unpack the files into a directory, and then run btcsq-qt.exe.
 
 ### macOS
 
@@ -69,7 +69,7 @@ The Bitcoinsq repo's [root README](/README.md) contains relevant information on 
 
 ### Miscellaneous
 - [Assets Attribution](assets-attribution.md)
-- [bitcoinsq.conf Configuration File](bitcoinsq-conf.md)
+- [btcsq.conf Configuration File](btcsq-conf.md)
 - [Files](files.md)
 - [Fuzz-testing](fuzzing.md)
 - [Reduce Memory](reduce-memory.md)

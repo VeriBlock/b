@@ -47,16 +47,16 @@ rpcport=4000
 
 ## Configuration File Path
 
-The configuration file is not automatically created; you can create it using your favorite text editor. By default, the configuration file name is `bitcoinsq.conf` and it is located in the Bitcoinsq data directory, but both the Bitcoinsq data directory and the configuration file path may be changed using the `-datadir` and `-conf` command-line options.
+The configuration file is not automatically created; you can create it using your favorite text editor. By default, the configuration file name is `btcsq.conf` and it is located in the Bitcoinsq data directory, but both the Bitcoinsq data directory and the configuration file path may be changed using the `-datadir` and `-conf` command-line options.
 
-The `includeconf=<file>` option in the `bitcoinsq.conf` file can be used to include additional configuration files.
+The `includeconf=<file>` option in the `btcsq.conf` file can be used to include additional configuration files.
 
 ### Default configuration file locations
 
 Operating System | Data Directory | Example Path
 -- | -- | --
-Windows | `%APPDATA%\Bitcoinsq\` | `C:\Users\username\AppData\Roaming\Bitcoinsq\bitcoinsq.conf`
-Linux | `$HOME/.bitcoinsq/` | `/home/username/.bitcoinsq/bitcoinsq.conf`
-macOS | `$HOME/Library/Application Support/Bitcoinsq/` | `/Users/username/Library/Application Support/Bitcoinsq/bitcoinsq.conf`
+Windows | `%APPDATA%\Bitcoinsq\` | `C:\Users\username\AppData\Roaming\Bitcoinsq\btcsq.conf`
+Linux | `$HOME/.btcsq/` | `/home/username/.btcsq/btcsq.conf`
+macOS | `$HOME/Library/Application Support/Bitcoinsq/` | `/Users/username/Library/Application Support/Bitcoinsq/btcsq.conf`
 
-You can find an example bitcoinsq.conf file in [share/examples/bitcoinsq.conf](../share/examples/bitcoinsq.conf).
+You can find an example btcsq.conf file in [share/examples/btcsq.conf](../share/examples/btcsq.conf).
