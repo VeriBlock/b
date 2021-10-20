@@ -38,7 +38,7 @@ def _write_bitcoinsq_conf(datadir, p2p_port, rpc_port, rpc_user, rpc_password):
         f.write("poplogverbosity=info\n")
 
 
-class VBitcoindNode(Node):
+class BitcoinsqdNode(Node):
     def __init__(self, number: int, datadir: Path):
         self.number = number
 
@@ -51,13 +51,13 @@ class VBitcoindNode(Node):
         rpc_password = 'testpassword'
         self.rpc = JsonRpcApi(rpc_url, user=rpc_user, password=rpc_password)
 
-        bitcoinsqd_path = os.environ.get('VBITCOIND_PATH')
+        bitcoinsqd_path = os.environ.get('BitcoinsqD_PATH')
         if bitcoinsqd_path == None:
-            raise Exception("VBITCOIND_PATH env var is not set. Set up the path to the bitcoinsqd binary to the VBITCOIND_PATH env var")
+            raise Exception("BitcoinsqD_PATH env var is not set. Set up the path to the bitcoinsqd binary to the BitcoinsqD_PATH env var")
 
         exe = Path(Path.cwd(), bitcoinsqd_path)
         if not exe:
-            raise Exception("VBitcoinNode: bitcoinsqd is not found in PATH")
+            raise Exception("BitcoinsqNode: bitcoinsqd is not found in PATH")
 
         assert_dir_accessible(datadir)
         args = [

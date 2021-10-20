@@ -19,8 +19,8 @@ BEGIN
     BEGIN
         BLOCK "040904E4" // U.S. English - multilingual (hex)
         BEGIN
-            VALUE "CompanyName",        "vBitcoin"
-            VALUE "FileDescription",    PACKAGE_NAME " (GUI node for vBitcoin)"
+            VALUE "CompanyName",        "Bitcoinsq"
+            VALUE "FileDescription",    PACKAGE_NAME " (GUI node for Bitcoinsq)"
             VALUE "FileVersion",        VER_FILEVERSION_STR
             VALUE "InternalName",       "bitcoinsq-qt"
             VALUE "LegalCopyright",     COPYRIGHT_STR

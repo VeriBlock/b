@@ -66,12 +66,12 @@
         <translation>Adresses de réception</translation>
     </message>
     <message>
-        <source>These are your vBitcoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Ceci sont vos addresses vBitcoin pour envoyer vos paiements. Il faut toujours verifier les montants et l'addresse de reception avant de valider la transaction.</translation>
+        <source>These are your Bitcoinsq addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Ceci sont vos addresses Bitcoinsq pour envoyer vos paiements. Il faut toujours verifier les montants et l'addresse de reception avant de valider la transaction.</translation>
     </message>
     <message>
-        <source>These are your vBitcoin addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
-        <translation>Ceci sont vos addresses vBitcoin pour recevoir vos paiements. Il est recommandé d'utiliser une nouvelle adresse de recepetion pour chaque transaction</translation>
+        <source>These are your Bitcoinsq addresses for receiving payments. It is recommended to use a new receiving address for each transaction.</source>
+        <translation>Ceci sont vos addresses Bitcoinsq pour recevoir vos paiements. Il est recommandé d'utiliser une nouvelle adresse de recepetion pour chaque transaction</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -346,7 +346,7 @@
         <translation>Réindexer les blocs sur le disque...</translation>
     </message>
     <message>
-        <source>Send coins to a vBitcoin address</source>
+        <source>Send coins to a Bitcoinsq address</source>
         <translation>Envoyer des pièces à une adresse Bitcoin</translation>
     </message>
     <message>
@@ -398,12 +398,12 @@
         <translation>Crypter les clé privées qui appartiennent votre portefeuille</translation>
     </message>
     <message>
-        <source>Sign messages with your vBitcoin addresses to prove you own them</source>
-        <translation>Signer vos messages avec vos adresses vBitcoin pour prouver que vous les détenez</translation>
+        <source>Sign messages with your Bitcoinsq addresses to prove you own them</source>
+        <translation>Signer vos messages avec vos adresses Bitcoinsq pour prouver que vous les détenez</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified vBitcoin addresses</source>
-        <translation>Vérifier les messages pour s'assurer qu'ils soient signés avec les adresses vBitcoin spécifiées</translation>
+        <source>Verify messages to ensure they were signed with specified Bitcoinsq addresses</source>
+        <translation>Vérifier les messages pour s'assurer qu'ils soient signés avec les adresses Bitcoinsq spécifiées</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -442,7 +442,7 @@
         <translation>&amp;Options de ligne de commande</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to vBitcoin network</source>
+        <source>%n active connection(s) to Bitcoinsq network</source>
         <translation><numerusform>%n connexion active avec le réseau Bitcoin</numerusform><numerusform>%n connexions actives avec le réseau Bitcoin</numerusform></translation>
     </message>
     <message>
@@ -482,7 +482,7 @@
         <translation>À jour</translation>
     </message>
     <message>
-        <source>Show the %1 help message to get a list with possible vBitcoin command-line options</source>
+        <source>Show the %1 help message to get a list with possible Bitcoinsq command-line options</source>
         <translation>Afficher le %1 message d'aide pour récupérer une liste des options de ligne de commande Bitcoin</translation>
     </message>
     <message>
@@ -552,8 +552,8 @@
         <translation>Le porte-monnaie est &lt;b&gt;chiffré&lt;/b&gt; et est actuellement &lt;b&gt;verrouillé&lt;/b&gt;</translation>
     </message>
     <message>
-        <source>A fatal error occurred. vBitcoin can no longer continue safely and will quit.</source>
-        <translation>Une erreur fatale a eu lieu. vBitcoin ne peut plus continuer en toute sécurité et va s'éteindre</translation>
+        <source>A fatal error occurred. Bitcoinsq can no longer continue safely and will quit.</source>
+        <translation>Une erreur fatale a eu lieu. Bitcoinsq ne peut plus continuer en toute sécurité et va s'éteindre</translation>
     </message>
 </context>
 <context>
@@ -742,8 +742,8 @@
         <translation>Éditer l'adresse d'envoi</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid vBitcoin address.</source>
-        <translation>L'adresse entrée "%1" n'est pas une adresse vBitcoin valide.</translation>
+        <source>The entered address "%1" is not a valid Bitcoinsq address.</source>
+        <translation>L'adresse entrée "%1" n'est pas une adresse Bitcoinsq valide.</translation>
     </message>
     <message>
         <source>Could not unlock wallet.</source>
@@ -912,8 +912,8 @@
         <translation>Expert</translation>
     </message>
     <message>
-        <source>Automatically open the vBitcoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Ouvrir le port du client vBitcoin automatiquement sur le routeur. Cela ne fonctionne que si votre routeur supporte l'UPnP et si la fonctionnalité est activée.</translation>
+        <source>Automatically open the Bitcoinsq client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Ouvrir le port du client Bitcoinsq automatiquement sur le routeur. Cela ne fonctionne que si votre routeur supporte l'UPnP et si la fonctionnalité est activée.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
@@ -1112,8 +1112,8 @@
         <translation>Montant</translation>
     </message>
     <message>
-        <source>Enter a vBitcoin address (e.g. %1)</source>
-        <translation>Entrer une adresse vBitcoin (e.g. %1)</translation>
+        <source>Enter a Bitcoinsq address (e.g. %1)</source>
+        <translation>Entrer une adresse Bitcoinsq (e.g. %1)</translation>
     </message>
     <message>
         <source>%1 d</source>
@@ -1677,8 +1677,8 @@
         <translation>Payer seulement les frais obligatoire de %1</translation>
     </message>
     <message>
-        <source>Warning: Invalid vBitcoin address</source>
-        <translation>Attention: Adresse vBitcoin Invalide</translation>
+        <source>Warning: Invalid Bitcoinsq address</source>
+        <translation>Attention: Adresse Bitcoinsq Invalide</translation>
     </message>
     <message>
         <source>(no label)</source>
