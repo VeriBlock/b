@@ -147,8 +147,8 @@
 <context>
     <name>BitcoinGUI</name>
     <message>
-        <source>Send coins to a Bitcoinsq address</source>
-        <translation>ផ្ញើកាក់ទៅកាន់ អាសយដ្ឋាន Bitcoinsq មួយ</translation>
+        <source>Send coins to a BTCSQ address</source>
+        <translation>ផ្ញើកាក់ទៅកាន់ អាសយដ្ឋាន BTCSQ មួយ</translation>
     </message>
     </context>
 <context>

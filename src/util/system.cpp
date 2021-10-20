@@ -565,7 +565,7 @@ fs::path GetDefaultDataDir()
     // Unix: ~/.bitcoin
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "Bitcoinsq";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "BTCSQ";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -575,7 +575,7 @@ fs::path GetDefaultDataDir()
         pathRet = fs::path(pszHome);
 #ifdef MAC_OSX
     // Mac
-    return pathRet / "Library/Application Support/Bitcoinsq";
+    return pathRet / "Library/Application Support/BTCSQ";
 #else
     // Unix
     return pathRet / ".btcsq";

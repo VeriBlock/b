@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-<!-- This issue tracker is only for technical issues related to Bitcoinsq Core.
+<!-- This issue tracker is only for technical issues related to BTCSQ Core.
 
 General btcsq questions and/or support requests are best directed to the VeriBlock team at https://discord.gg/wJZEjry
 
@@ -29,7 +29,7 @@ If the node is "stuck" during sync or giving "block checksum mismatch" errors, p
 
 **System information**
 
-<!-- What version of Bitcoinsq Core are you using, where did you get it (website, self-compiled, etc)? -->
+<!-- What version of BTCSQ Core are you using, where did you get it (website, self-compiled, etc)? -->
 
 <!-- What type of machine are you observing the error on (OS/CPU and disk type)? -->
 

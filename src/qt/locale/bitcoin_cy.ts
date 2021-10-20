@@ -62,8 +62,8 @@
         <translation>Derbyn cyfeiriadau</translation>
     </message>
     <message>
-        <source>These are your Bitcoinsq addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation>Rhain ydi eich cyfeiriadau Bitcoinsq ar gyfer gyrru taliadau. Gwnewch yn sicr o'r swm a'r cyfeiriad derbyn cyn gyrru arian.</translation>
+        <source>These are your BTCSQ addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation>Rhain ydi eich cyfeiriadau BTCSQ ar gyfer gyrru taliadau. Gwnewch yn sicr o'r swm a'r cyfeiriad derbyn cyn gyrru arian.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -310,7 +310,7 @@
         <translation>Ailfynegi y blociau ar ddisg...</translation>
     </message>
     <message>
-        <source>Send coins to a Bitcoinsq address</source>
+        <source>Send coins to a BTCSQ address</source>
         <translation>Anfon arian i gyfeiriad Bitcoin</translation>
     </message>
     <message>
@@ -350,12 +350,12 @@
         <translation>Amgryptio'r allweddi preifat sy'n perthyn i'ch waled</translation>
     </message>
     <message>
-        <source>Sign messages with your Bitcoinsq addresses to prove you own them</source>
-        <translation>Arwyddo negeseuon gyda eich cyfeiriadau Bitcoinsq i brofi mae chi sy'n berchen arnynt</translation>
+        <source>Sign messages with your BTCSQ addresses to prove you own them</source>
+        <translation>Arwyddo negeseuon gyda eich cyfeiriadau BTCSQ i brofi mae chi sy'n berchen arnynt</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Bitcoinsq addresses</source>
-        <translation>Gwirio negeseuon i sicrhau eu bod wedi eu harwyddo gyda cyfeiriadau Bitcoinsq penodol</translation>
+        <source>Verify messages to ensure they were signed with specified BTCSQ addresses</source>
+        <translation>Gwirio negeseuon i sicrhau eu bod wedi eu harwyddo gyda cyfeiriadau BTCSQ penodol</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -512,8 +512,8 @@
         <translation>Mae'r waled &lt;b&gt;wedi'i amgryptio&lt;/b&gt; ac &lt;b&gt;ar glo&lt;/b&gt; ar hyn o bryd</translation>
     </message>
     <message>
-        <source>A fatal error occurred. Bitcoinsq can no longer continue safely and will quit.</source>
-        <translation>Mae gwall angheuol wedi digwydd. Ni all Bitcoinsq barhau'n ddiogel ac mae'n cau lawr.</translation>
+        <source>A fatal error occurred. BTCSQ can no longer continue safely and will quit.</source>
+        <translation>Mae gwall angheuol wedi digwydd. Ni all BTCSQ barhau'n ddiogel ac mae'n cau lawr.</translation>
     </message>
 </context>
 <context>

@@ -343,10 +343,10 @@
 #define PACKAGE_BUGREPORT "https://github.com/VeriBlock/vbk-ri-btc/issues"
 
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "Bitcoinsq Core"
+#define PACKAGE_NAME "BTCSQ Core"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "Bitcoinsq Core 0.0.3"
+#define PACKAGE_STRING "BTCSQ Core 0.0.3"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "btcsq"

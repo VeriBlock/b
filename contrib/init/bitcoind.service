@@ -10,7 +10,7 @@
 # config file.
 
 [Unit]
-Description=Bitcoinsq daemon
+Description=BTCSQ daemon
 After=network.target
 
 [Service]

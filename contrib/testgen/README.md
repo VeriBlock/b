@@ -1,6 +1,6 @@
 ### TestGen ###
 
-Utilities to generate test vectors for the data-driven Bitcoinsq tests.
+Utilities to generate test vectors for the data-driven BTCSQ tests.
 
 Usage:
 

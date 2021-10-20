@@ -21,7 +21,7 @@ RUN make -j$(nproc)
 RUN make install
 RUN rm -rf ${BERKELEYDB_PREFIX}/docs
 
-# Build stage for Bitcoinsq Core
+# Build stage for BTCSQ Core
 FROM alpine as btcsq-core
 
 COPY --from=berkeleydb /opt /opt
@@ -52,7 +52,7 @@ RUN set -ex \
     gpg --batch --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys "$key" ; \
   done
 
-ENV Bitcoinsq_PREFIX=/opt/btcsq
+ENV BTCSQ_PREFIX=/opt/btcsq
 
 COPY . /btcsq
 
@@ -81,7 +81,7 @@ RUN ./configure LDFLAGS=-L`ls -d /opt/db-*`/lib/ CPPFLAGS=-I`ls -d /opt/db-*`/in
     --without-gui \
     --with-libs=no \
     --with-daemon \
-    --prefix=${Bitcoinsq_PREFIX}
+    --prefix=${BTCSQ_PREFIX}
 
 RUN make -j$(nproc) install
 
@@ -97,8 +97,8 @@ RUN apk --no-cache add \
   git
 
 ENV DATA_DIR=/home/btcsq/.btcsq
-ENV Bitcoinsq_PREFIX=/opt/btcsq
-ENV PATH=${Bitcoinsq_PREFIX}/bin:$PATH
+ENV BTCSQ_PREFIX=/opt/btcsq
+ENV PATH=${BTCSQ_PREFIX}/bin:$PATH
 
 COPY --from=btcsq-core /opt /opt
 

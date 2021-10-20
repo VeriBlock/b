@@ -1,5 +1,5 @@
-Building Bitcoinsq
+Building BTCSQ
 ================
 
 See doc/build-*.md for instructions on building the various
-elements of the Bitcoinsq Core reference implementation of Bitcoinsq.
+elements of the BTCSQ Core reference implementation of BTCSQ.

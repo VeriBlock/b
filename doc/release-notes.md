@@ -1,4 +1,4 @@
-*After branching off for a major version release of Bitcoinsq Core, use this
+*After branching off for a major version release of BTCSQ Core, use this
 template to create the initial release notes draft.*
 
 *The release notes draft is a temporary file that can be added to by anyone. See
@@ -15,7 +15,7 @@ https://github.com/bitcoin-core/bitcoin-devwiki/wiki/
 *version* Release Notes Draft
 ===============================
 
-Bitcoinsq Core version *version* is now available from:
+BTCSQ Core version *version* is now available from:
 
   <https://www.veriblock.org/>
 
@@ -32,25 +32,25 @@ How to Upgrade
 
 If you are running an older version, shut it down. Wait until it has completely
 shut down (which might take a few minutes for older versions), then run the
-installer (on Windows) or just copy over `/Applications/Bitcoinsq-Qt` (on Mac)
+installer (on Windows) or just copy over `/Applications/BTCSQ-Qt` (on Mac)
 or `btcsqd`/`btcsq-qt` (on Linux).
 
-Upgrading directly from a version of Bitcoinsq Core that has reached its EOL is
+Upgrading directly from a version of BTCSQ Core that has reached its EOL is
 possible, but it might take some time if the datadir needs to be migrated. Old
-wallet versions of Bitcoinsq Core are generally supported.
+wallet versions of BTCSQ Core are generally supported.
 
 Compatibility
 ==============
 
-Bitcoinsq Core is supported and extensively tested on operating systems using
+BTCSQ Core is supported and extensively tested on operating systems using
 the Linux kernel, macOS 10.12+, and Windows 7 and newer. It is not recommended
 to use Bitcoin Core on unsupported systems.
 
-Bitcoinsq Core should also work on most other Unix-like systems but is not
+BTCSQ Core should also work on most other Unix-like systems but is not
 as frequently tested on them.
 
-From Bitcoinsq Core 0.20.0 onwards, macOS versions earlier than 10.12 are no
-longer supported. Additionally, Bitcoinsq Core does not yet change appearance
+From BTCSQ Core 0.20.0 onwards, macOS versions earlier than 10.12 are no
+longer supported. Additionally, BTCSQ Core does not yet change appearance
 when macOS "dark mode" is activated.
 
 In addition to previously supported CPU platforms, this release's pre-compiled
@@ -62,7 +62,7 @@ Notable changes
 Build System
 ------------
 
-- OpenSSL is no longer used by Bitcoinsq Core. The last usage of the library
+- OpenSSL is no longer used by BTCSQ Core. The last usage of the library
 was removed in #17265.
 
 - glibc 2.17 or greater is now required to run the release binaries. This
