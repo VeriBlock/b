@@ -971,7 +971,7 @@ bool MemPoolAccept::Finalize(ATMPArgs& args, Workspace& ws)
 
     // Remove conflicting transactions from the mempool
     for (CTxMemPool::txiter it : allConflicting) {
-        LogPrint(BCLog::MEMPOOL, "replacing tx %s with %s for %s vBTC additional fees, %d delta bytes\n",
+        LogPrint(BCLog::MEMPOOL, "replacing tx %s with %s for %s BTCSQ additional fees, %d delta bytes\n",
             it->GetTx().GetHash().ToString(),
             hash.ToString(),
             FormatMoney(nModifiedFees - nConflictingFees),
@@ -1721,7 +1721,8 @@ DisconnectResult CChainState::DisconnectBlock(const CBlock& block, const CBlockI
     auto prevHash = pindex->pprev->GetBlockHash();
     if (VeriBlock::isCrossedBootstrapBlock()) {
         altintegration::ValidationState state;
-        VeriBlock::setState(prevHash, state);
+        bool ok = VeriBlock::setState(prevHash, state);
+        assert(ok);
     }
 
     // move best block pointer to prevout block
@@ -2422,6 +2423,8 @@ void static UpdateTip(const CBlockIndex* pindexNew, const CChainParams& chainPar
 
     if (VeriBlock::isPopActive()) {
         auto& pop = VeriBlock::GetPop();
+        auto* alttip = pop.getAltBlockTree().getBestChain().tip();
+        assert(pindexNew->nHeight == alttip->getHeight());
         auto* vbktip = pop.getVbkBlockTree().getBestChain().tip();
         auto* btctip = pop.getBtcBlockTree().getBestChain().tip();
         LogPrintf("%s: new best=ALT:%d:%s %s %s version=0x%08x log2_work=%.8g tx=%lu date='%s' progress=%f cache=%.1fMiB(%utxo)%s\n",
@@ -2944,10 +2947,14 @@ bool CChainState::ActivateBestChain(BlockValidationState& state, const CChainPar
                 }
 
                 assert(pindexBestChain);
-                // if pindexBestHeader is a direct successor of pindexBestChain, pindexBestHeader is still best.
+                // VeriBlock: if pindexBestHeader is a direct successor of pindexBestChain, pindexBestHeader is still best.
                 // otherwise pindexBestChain is new best pindexBestHeader
                 if (pindexBestHeader == nullptr || pindexBestHeader->GetAncestor(pindexBestChain->nHeight) != pindexBestChain) {
-                    pindexBestHeader = pindexBestChain;
+                    auto *alt = VeriBlock::GetPop().getAltBlockTree().getBlockIndex(pindexBestChain->GetBlockHash().asVector());
+                    assert(alt);
+                    if (pindexBestHeader->IsValid() && alt->isValid()) {
+                        pindexBestHeader = pindexBestChain;
+                    }
                 }
 
                 bool fInvalidFound = false;
@@ -4280,7 +4287,7 @@ bool BlockManager::LoadBlockIndex(
         // do not set best chain here
     }
 
-    // get best chain from ALT tree and update vBTC's best chain
+    // get best chain from ALT tree and update BTCSQ's best chain
     {
         AssertLockHeld(cs_main);
 
