@@ -65,7 +65,7 @@ struct AltChainParamsBTCSQ : public altintegration::AltChainParams {
             0.02193952, 0.02134922};
 
         // altchain params
-        this->mMaxReorgDistance = 2500;              // blocks
+        this->mMaxReorgDistance = 50000;              // blocks
         this->mMaxAltchainFutureBlockTime = 10 * 60; // 10 min
         this->mKeystoneInterval = 5;
         this->mFinalityDelay = 100;
