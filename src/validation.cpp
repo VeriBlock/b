@@ -2666,8 +2666,6 @@ CBlockIndex* CChainState::FindBestChain()
         return nullptr;
     }
 
-    LogPrint(BCLog::POP, "FindBestChain with setBlockIndexCandidates size = %d\n", setBlockIndexCandidates.size());
-
     auto temp_set = setBlockIndexCandidates;
     for (auto* pindexNew : temp_set) {
         if (pindexNew == bestCandidate || !TestBlockIndex(pindexNew)) {

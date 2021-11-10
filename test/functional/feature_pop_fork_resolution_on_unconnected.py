@@ -43,6 +43,7 @@ class PopFrUnconnected(BitcoinTestFramework):
         self.num_nodes = 1
         self.extra_args = [["-txindex"]]
         self.extra_args = [x + ['-debug=pop'] for x in self.extra_args]
+        self.orphans_to_generate = 100
 
     def skip_test_if_missing_module(self):
         self.skip_if_no_wallet()
@@ -62,7 +63,7 @@ class PopFrUnconnected(BitcoinTestFramework):
         lastblock = self.nodes[0].getblockcount()
 
         candidates = []
-        for i in range(100):
+        for i in range(self.orphans_to_generate):
             addr1 = self.nodes[0].getnewaddress()
             hash = self.nodes[0].generatetoaddress(nblocks=1, address=addr1)[-1]
             candidates.append(hash)
@@ -75,8 +76,10 @@ class PopFrUnconnected(BitcoinTestFramework):
         for c in candidates:
             self.nodes[0].reconsiderblock(c)
 
-        self.log.info("node0 generated 100 orphans")
+        self.log.info("node0 generated {} orphans".format(self.orphans_to_generate))
         assert self.get_best_block(self.nodes[0])['height'] == lastblock + 1
+
+        compares_before = self.nodes[0].getpopscorestats()['stats']['popScoreComparisons']
 
         # connect to fake node
         bn = BaseNode(self.log)
@@ -95,7 +98,7 @@ class PopFrUnconnected(BitcoinTestFramework):
 
         headers_message = msg_headers()
         headers_message.headers = [CBlockHeader(block1)]
-        self.nodes[0].p2p.send_message(headers_message)
+        self.nodes[0].p2p.send_and_ping(headers_message)
         self.popctx.accept_block(height, block1.hash, block_to_connect_hash)
 
         tip = int(block1.hash, 16)
@@ -106,19 +109,22 @@ class PopFrUnconnected(BitcoinTestFramework):
         block2.solve()
 
         block_message = msg_block(block2)
-        self.nodes[0].p2p.send_message(block_message)
+        self.nodes[0].p2p.send_and_ping(block_message)
 
         prevbest = self.nodes[0].getblockhash(lastblock + 1)
         newbest = self.nodes[0].getbestblockhash()
         assert newbest == prevbest, "bad tip. \n\tExpected : {}\n\tGot      : {}".format(prevbest, newbest)
+
+        compares_after = self.nodes[0].getpopscorestats()['stats']['popScoreComparisons']
+        test_comparisons = compares_after - compares_before
+        assert test_comparisons == self.orphans_to_generate, "Expected {} comparisons, got {}".format(self.orphans_to_generate, test_comparisons)
+        self.log.info("node0 made {} POP score comparisons".format(test_comparisons))
 
         assert self.get_best_block(self.nodes[0])['height'] == lastblock + 1
         self.log.warning("_find_best_chain_on_unconnected_block() succeeded!")
 
     def run_test(self):
         """Main test logic"""
-
-        self.sync_all(self.nodes[0:2])
 
         from pypoptools.pypopminer import MockMiner
         self.apm = MockMiner()
