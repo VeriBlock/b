@@ -117,7 +117,7 @@ class PopFrUnconnected(BitcoinTestFramework):
 
         compares_after = self.nodes[0].getpopscorestats()['stats']['popScoreComparisons']
         test_comparisons = compares_after - compares_before
-        assert test_comparisons == self.orphans_to_generate, "Expected {} comparisons, got {}".format(self.orphans_to_generate, test_comparisons)
+        assert test_comparisons == 0, "Expected {} comparisons, got {}".format(self.orphans_to_generate, test_comparisons)
         self.log.info("node0 made {} POP score comparisons".format(test_comparisons))
 
         assert self.get_best_block(self.nodes[0])['height'] == lastblock + 1
