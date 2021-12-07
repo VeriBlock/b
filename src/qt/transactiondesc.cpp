@@ -105,11 +105,11 @@ QJsonObject objectFromString(const QString& in)
         if (doc.isObject()) {
             obj = doc.object();
         } else {
-            qDebug() << "Document is not an object" << Qt::endl;
+            qDebug() << "Document is not an object";
         }
     } else {
         qDebug() << "Invalid JSON...\n"
-                 << in << Qt::endl;
+                 << in;
     }
 
     return obj;
