@@ -1204,22 +1204,15 @@ bool ReadRawBlockFromDisk(std::vector<uint8_t>& block, const CBlockIndex* pindex
     return ReadRawBlockFromDisk(block, block_pos, message_start);
 }
 
+// VeriBlock:
 CAmount GetBlockSubsidy(int nHeight, const CChainParams& params)
 {
-    int halvings = nHeight / params.GetConsensus().nSubsidyHalvingInterval;
-    // Force block reward to zero when right shift is undefined.
-    if (halvings >= 64)
-        return 0;
-
-    CAmount nSubsidy = 50 * COIN;
-
-    if (VeriBlock::isPopActive(nHeight)) {
-        nSubsidy = 5 * COIN;
-        nSubsidy = VeriBlock::getCoinbaseSubsidy(nSubsidy, nHeight, params);
+    CAmount nSubsidy = VeriBlock::GetSubsidyMultiplier(nHeight, params);
+    if(VeriBlock::isPopActive()) {
+        // we cut 50% of POW payouts towards POP payouts
+        nSubsidy /= 2;
     }
 
-    // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
-    nSubsidy >>= halvings;
     return nSubsidy;
 }
 
