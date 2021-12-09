@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(subsidy_limit_test)
     // with 50 BTCSQ payout:
 //    BOOST_CHECK_EQUAL(nSum, CAmount{2099999997690000});
     // with 50*20% BTCSQ payout and RegTest
-    BOOST_CHECK_EQUAL(nSum, CAmount{1739404738779000});
+    BOOST_CHECK_EQUAL(nSum, CAmount{869702369389000});
 }
 
 static bool ReturnFalse() { return false; }
