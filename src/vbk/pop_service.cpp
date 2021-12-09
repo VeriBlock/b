@@ -176,7 +176,7 @@ PoPRewards getPopRewards(const CBlockIndex& tip, const CChainParams& params) EXC
         auto payout = (coeff * VeriBlock::GetSubsidyMultiplier(tip.nHeight, params) / 2) / COIN;
         if(payout > 0) {
             CScript key = CScript(r.first.begin(), r.first.end());
-            assert(payout < std::numeric_limits<int64_t>::max() && "overflow!");
+            assert(payout <= std::numeric_limits<int64_t>::max() && "overflow!");
             result[key] = payout.GetLow64();
         }
     }
