@@ -770,7 +770,6 @@ UniValue getpopparams(const JSONRPCRequest& req)
 
     ret.pushKV("popActivationHeight", Params().GetConsensus().VeriBlockPopSecurityHeight);
     ret.pushKV("popRewardPercentage", (int64_t)Params().PopRewardPercentage());
-    ret.pushKV("popRewardCoefficient", Params().PopRewardCoefficient());
 
     return ret;
 }

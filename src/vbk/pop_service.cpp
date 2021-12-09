@@ -170,7 +170,7 @@ PoPRewards getPopRewards(const CBlockIndex& tip, const CChainParams& params) EXC
     for (const auto& r : rewards) {
         auto coeff = r.second;
         // 50% of multiplier towards POP
-        auto payout = (VeriBlock::GetSubsidyMultiplier(tip.nHeight, params) / 2) * coeff;
+        auto payout = coeff * VeriBlock::GetSubsidyMultiplier(tip.nHeight, params) / 2 / COIN;
         if(payout > 0) {
             CScript key = CScript(r.first.begin(), r.first.end());
             result[key] = payout;
