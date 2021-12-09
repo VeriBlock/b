@@ -3,10 +3,12 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include "arith_uint256.h"
 #include <chain.h>
 #include <chainparams.h>
 #include <consensus/validation.h>
 #include <dbwrapper.h>
+#include <limits>
 #include <shutdown.h>
 #include <validation.h>
 #include <vbk/adaptors/payloads_provider.hpp>
@@ -165,15 +167,17 @@ PoPRewards getPopRewards(const CBlockIndex& tip, const CChainParams& params) EXC
     ret = pop.getPopPayout(prevHash, rewards, state);
     VBK_ASSERT_MSG(ret, "error: %s", state.toString());
 
-    PoPRewards result{};
     // erase rewards, that pay 0 satoshis, then halve rewards
+    PoPRewards result{};
     for (const auto& r : rewards) {
-        auto coeff = r.second;
+        // we use airth_uint256 to prevent any overflows
+        arith_uint256 coeff(r.second);
         // 50% of multiplier towards POP
-        auto payout = coeff * VeriBlock::GetSubsidyMultiplier(tip.nHeight, params) / 2 / COIN;
+        auto payout = (coeff * VeriBlock::GetSubsidyMultiplier(tip.nHeight, params) / 2) / COIN;
         if(payout > 0) {
             CScript key = CScript(r.first.begin(), r.first.end());
-            result[key] = payout;
+            assert(payout < std::numeric_limits<int64_t>::max() && "overflow!");
+            result[key] = payout.GetLow64();
         }
     }
 
