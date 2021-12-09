@@ -172,8 +172,10 @@ PoPRewards getPopRewards(const CBlockIndex& tip, const CChainParams& params) EXC
     for (const auto& r : rewards) {
         // we use airth_uint256 to prevent any overflows
         arith_uint256 coeff(r.second);
-        // 50% of multiplier towards POP
-        auto payout = (coeff * VeriBlock::GetSubsidyMultiplier(tip.nHeight, params) / 2) / COIN;
+        // 50% of multiplier towards POP.
+        // we divide by COIN here because `coeff` is X * COIN, Multiplier is Y*COIN.
+        // so payout becomes = X*Y*COIN*COIN/2. 
+        arith_uint256 payout = (coeff * VeriBlock::GetSubsidyMultiplier(tip.nHeight + 1, params) / 2) / COIN;
         if(payout > 0) {
             CScript key = CScript(r.first.begin(), r.first.end());
             assert(payout <= std::numeric_limits<int64_t>::max() && "overflow!");
@@ -248,13 +250,12 @@ bool checkCoinbaseTxWithPopRewards(const CTransaction& tx, const CAmount& nFees,
         nTotalPopReward += expectedAmount;
     }
 
-    CAmount PoWBlockReward =
-        GetBlockSubsidy(pindex.nHeight, params);
+    CAmount PoWBlockReward = GetBlockSubsidy(pindex.nHeight, params);
 
     if (tx.GetValueOut() > nTotalPopReward + PoWBlockReward + nFees) {
         return state.Invalid(BlockValidationResult::BLOCK_CONSENSUS,
             "bad-cb-pop-amount",
-            strprintf("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)", tx.GetValueOut(), PoWBlockReward + nTotalPopReward));
+            strprintf("ConnectBlock(): coinbase pays too much (actual=%d vs POW=%d + POP=%d)", tx.GetValueOut(), PoWBlockReward, nTotalPopReward));
     }
 
     return true;

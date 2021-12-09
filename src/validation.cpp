@@ -1207,12 +1207,20 @@ bool ReadRawBlockFromDisk(std::vector<uint8_t>& block, const CBlockIndex* pindex
 // VeriBlock:
 CAmount GetBlockSubsidy(int nHeight, const CChainParams& params)
 {
-    CAmount nSubsidy = VeriBlock::GetSubsidyMultiplier(nHeight, params);
-    if(VeriBlock::isPopActive()) {
+    if (VeriBlock::isPopActive(nHeight)) {
         // we cut 50% of POW payouts towards POP payouts
-        nSubsidy /= 2;
-    }
+        return VeriBlock::GetSubsidyMultiplier(nHeight, params) / 2;
+    } 
 
+    // if POP is not active, use original emissions curve. It is used in many tests.
+
+    int halvings = nHeight / params.GetConsensus().nSubsidyHalvingInterval;
+    // Force block reward to zero when right shift is undefined.
+    if (halvings >= 64)
+        return 0;
+
+    CAmount nSubsidy = 50 * COIN;
+    nSubsidy >>= halvings;
     return nSubsidy;
 }
 
