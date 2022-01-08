@@ -351,10 +351,14 @@ jobs:
         run: |
           current_date=`date +%Y%m%d_%H%M%SZ`
           echo "::set-output name=timestamp::${current_date}"
+          ccache_dir=$(ccache -k cache_dir)
+          echo "::set-output name=ccache_dir::${ccache_dir}"
       - name: ccache cache files
-        uses: actions/cache@v1.1.0
+        uses: actions/cache@v2
         with:
-          path: ~/.ccache
+          path: |
+            ~/.ccache
+            ${{ steps.cache_timestamp.outputs.ccache_dir }}
           key: macos-ccache-${{ steps.cache_timestamp.outputs.timestamp }}
           restore-keys: |
             macos-ccache-
@@ -516,7 +520,6 @@ jobs:
           REL=btcsq-linux-asan-x64
           mkdir -p $REL
           cp ./src/btcsq{d,-cli,-tx,-wallet} $REL
-          cp ./src/qt/btcsqd-qt $REL
           echo "ASAN_OPTIONS=detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1" >> $REL/env
           echo "LSAN_OPTIONS=suppressions=${{ github.workspace }}/test/sanitizer_suppressions/lsan" >> $REL/env
           echo "TSAN_OPTIONS=suppressions=${{ github.workspace }}/test/sanitizer_suppressions/tsan:log_path=${{ github.workspace }}/sanitizer-output/tsan" >> $REL/env
