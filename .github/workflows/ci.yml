@@ -341,6 +341,9 @@ jobs:
         with:
           python-version: '3.9' # Version range or exact version of a Python version to use, using SemVer's version range syntax
           architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+      - name: install dependencies
+        run: |
+          brew install ccache automake berkeley-db boost boost-python3 miniupnpc pkg-config protobuf librsvg ccache qrencode zeromq qt
       - name: Extract branch name & commit
         id: extract_branch
         run: |
@@ -366,9 +369,6 @@ jobs:
         run: echo "VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)" >> $GITHUB_ENV
       - name: veriblock-pop-cpp release version
         run: echo Using veriblock-pop-cpp version ${VERIBLOCK_POP_CPP_VERSION}
-      - name: install dependencies
-        run: |
-          brew install ccache automake berkeley-db boost boost-python3 miniupnpc pkg-config protobuf librsvg ccache qrencode zeromq qt
       - name: install veriblock-pop-cpp
         env:
           BUILD_TYPE: Release
