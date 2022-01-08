@@ -509,3 +509,21 @@ jobs:
         env:
           BTCSQD_PATH: './src/btcsqd'
         run: python3 test/integration/test_runner.py
+
+      - name: Create ASAN artifacts
+        if: success()
+        run: |
+          REL=btcsq-linux-asan-x64
+          mkdir -p $REL
+          cp ./src/btcsq{d,-cli,-tx,-wallet} $REL
+          cp ./src/qt/btcsqd-qt $REL
+          echo "ASAN_OPTIONS=detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1" >> $REL/env
+          echo "LSAN_OPTIONS=suppressions=${{ github.workspace }}/test/sanitizer_suppressions/lsan" >> $REL/env
+          echo "TSAN_OPTIONS=suppressions=${{ github.workspace }}/test/sanitizer_suppressions/tsan:log_path=${{ github.workspace }}/sanitizer-output/tsan" >> $REL/env
+          echo "UBSAN_OPTIONS=suppressions=${{ github.workspace }}/test/sanitizer_suppressions/ubsan:print_stacktrace=1:halt_on_error=1:report_error_type=1" >> $REL/env
+      - name: Archive artifacts on GH
+        if: success()
+        uses: actions/upload-artifact@v2
+        with:
+          name: btcsq-linux-asan-x64
+          path: btcsq-linux-asan-x64
