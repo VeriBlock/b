@@ -30,10 +30,17 @@ else ifeq ($(HOST), x86_64-pc-linux-gnu)
     cmake -DCMAKE_INSTALL_PREFIX=$(host_prefix) -DCMAKE_BUILD_TYPE=$(package)_build_type \
     -DTESTING=OFF -DSHARED=OFF ..
   endef
+else ifeq ($(HOST), x86_64-w64-mingw32)
+  define $(package)_config_cmds
+    cmake -DCMAKE_INSTALL_PREFIX=$(host_prefix) -DCMAKE_BUILD_TYPE=$(package)_build_type \
+    -DTESTING=OFF -DSHARED=OFF --toolchain ../cmake/toolchain/$(HOST).cmake ..
+  endef
 else
   define $(package)_config_cmds
+    echo "HOST: $(HOST)"
     cmake -DCMAKE_C_COMPILER=$(HOST)-gcc -DCMAKE_CXX_COMPILER=$(HOST)-g++ \
-    -DCMAKE_INSTALL_PREFIX=$(host_prefix) -DTESTING=OFF -DSHARED=OFF ..
+    -DCMAKE_INSTALL_PREFIX=$(host_prefix) -DTESTING=OFF -DSHARED=OFF 
+    -DCMAKE_BUILD_TYPE=$(package)_build_type ..
   endef
 endif
 
