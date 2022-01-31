@@ -18,7 +18,8 @@ class PopShutdownSync(BitcoinTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 2
-        self.extra_args = [["-txindex"], ["-txindex"]]
+        args = ['-txindex']
+        self.extra_args = [args, args]
 
     def skip_test_if_missing_module(self):
         self.skip_if_no_wallet()
@@ -38,7 +39,7 @@ class PopShutdownSync(BitcoinTestFramework):
         return node.getblock(hash)
 
     def run_test(self):
-        self.sync_all(self.nodes[0:2])
+        self.sync_all(self.nodes)
         lastblock = self.nodes[0].getblockcount()
         self.log.info("nodes synced with block height %d", lastblock)
 
@@ -62,7 +63,7 @@ class PopShutdownSync(BitcoinTestFramework):
         self.start_node(0)
         connect_nodes(self.nodes[0], 1)
         self.log.info("node0 restarted")
-        self.sync_all(self.nodes[0:2])
+        self.sync_all(self.nodes)
 
 
 if __name__ == '__main__':
