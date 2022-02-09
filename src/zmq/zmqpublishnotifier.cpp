@@ -106,19 +106,14 @@ bool CZMQAbstractPublishNotifier::Initialize(void *pcontext)
         psocket = i->second->psocket;
         mapPublishNotifiers.insert(std::make_pair(address, this));
 
-        if (!psocket)
-        {
-            zmqError("Failed to create socket");
-            return false;
-        }
-
         return true;
     }
 }
 
 void CZMQAbstractPublishNotifier::Shutdown()
 {
-    assert(psocket);
+    // Early return if Initialize was not called
+    if (!psocket) return;
 
     int count = mapPublishNotifiers.count(address);
 
