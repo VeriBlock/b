@@ -230,7 +230,7 @@ class BTCSQdNode(Node):
             finalityDelay=s['finalityDelay'],
             keystoneInterval=s['keystoneInterval'],
             maxAltchainFutureBlockTime=s['maxAltchainFutureBlockTime'],
-            maxReorgDistance=s['maxReorgDistance']
+            maxReorgDistance=s['maxReorgBlocks']
         )
 
     def getrawatv(self, atvid: Hexstr) -> AtvResponse:
