@@ -851,6 +851,18 @@ std::string ArgsManager::GetChainName() const
     return GetArg("-chain", CBaseChainParams::MAIN);
 }
 
+bool ArgsManager::GetFinalization() const {
+    auto get_net = [&](const std::string& arg) {
+        LOCK(cs_args);
+        util::SettingsValue value = util::GetSetting(m_settings, /* section= */ "", SettingName(arg),
+            /* ignore_default_section_config= */ false,
+            /* get_chain_name= */ true);
+        return value.isNull() ? false : value.isBool() ? value.get_bool() : InterpretBool(value.get_str());
+    };
+
+    return get_net("-finalization");
+}
+
 bool ArgsManager::UseDefaultSection(const std::string& arg) const
 {
     return m_network == CBaseChainParams::MAIN || m_network_only_args.count(arg) == 0;

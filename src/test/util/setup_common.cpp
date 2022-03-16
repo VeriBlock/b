@@ -73,7 +73,7 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
     gArgs.ForceSetArg("-datadir", m_path_root.string());
     ClearDatadirCache();
     SelectParams(chainName);
-    VeriBlock::selectPopConfig("regtest");
+    VeriBlock::selectPopConfig("regtest", true);
     SeedInsecureRand();
     gArgs.ForceSetArg("-printtoconsole", "0");
     InitLogging();

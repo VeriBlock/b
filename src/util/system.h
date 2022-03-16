@@ -289,6 +289,8 @@ public:
      */
     std::string GetChainName() const;
 
+    bool GetFinalization() const;
+
     /**
      * Add argument
      */
