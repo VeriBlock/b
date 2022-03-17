@@ -5,6 +5,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <limits>
 #include <util/system.h>
 
 #include <chainparamsbase.h>
@@ -852,14 +853,16 @@ std::string ArgsManager::GetChainName() const
     return GetArg("-chain", CBaseChainParams::MAIN);
 }
 
-int64_t ArgsManager::AltBlockInMemWindow() const {
-    int64_t window = GetArg("-popaltblocksinmem", altintegration::AltChainParamsRegTest::MAX_REORG_BLOCKS_MIN_VALUE);
-    if(window == -1) {
+int64_t ArgsManager::AltBlocksInMem() const {
+    int64_t window = GetArg("-popaltblocksinmem", altintegration::MAX_REORG_BLOCKS_MIN_VALUE);
+    if (window < 0) {
+        return std::numeric_limits<::int32_t>::max();
+    }
+    if (window >= std::numeric_limits<int32_t>::max()) {
         return std::numeric_limits<int32_t>::max();
     }
-    if (window < altintegration::AltChainParamsRegTest::MAX_REORG_BLOCKS_MIN_VALUE) {
-        throw std::runtime_error(strprintf("Alt block inmem window should more or equal to MAX_REORG_BLOCKS_MIN_VALUE: %d",
-         altintegration::AltChainParamsRegTest::MAX_REORG_BLOCKS_MIN_VALUE));
+    if (window < altintegration::MAX_REORG_BLOCKS_MIN_VALUE) {
+        throw std::runtime_error(strprintf("popaltblocksinmem should be >= %d", altintegration::MAX_REORG_BLOCKS_MIN_VALUE));
     }
     return window;
 }
