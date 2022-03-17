@@ -289,7 +289,7 @@ public:
      */
     std::string GetChainName() const;
 
-    bool GetFinalization() const;
+    int64_t AltBlockInMemWindow() const;
 
     /**
      * Add argument

@@ -90,7 +90,7 @@ static bool AppInit(int argc, char* argv[])
         // Check for -chain, -testnet or -regtest parameter (Params() calls are only valid after this clause)
         try {
             SelectParams(gArgs.GetChainName());
-            VeriBlock::selectPopConfig(gArgs.GetChainName(), gArgs.GetFinalization());
+            VeriBlock::selectPopConfig(gArgs.GetChainName(), gArgs.AltBlockInMemWindow());
         } catch (const std::exception& e) {
             return InitError(strprintf("%s\n", e.what()));
         }

@@ -11,6 +11,7 @@
 #include <util/strencodings.h>
 #include <util/string.h>
 #include <util/translation.h>
+#include <veriblock/pop.hpp>
 
 
 #if (defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__))
@@ -851,16 +852,16 @@ std::string ArgsManager::GetChainName() const
     return GetArg("-chain", CBaseChainParams::MAIN);
 }
 
-bool ArgsManager::GetFinalization() const {
-    auto get_net = [&](const std::string& arg) {
-        LOCK(cs_args);
-        util::SettingsValue value = util::GetSetting(m_settings, /* section= */ "", SettingName(arg),
-            /* ignore_default_section_config= */ false,
-            /* get_chain_name= */ true);
-        return value.isNull() ? false : value.isBool() ? value.get_bool() : InterpretBool(value.get_str());
-    };
-
-    return get_net("-finalization");
+int64_t ArgsManager::AltBlockInMemWindow() const {
+    int64_t window = GetArg("-popaltblocksinmem", altintegration::AltChainParamsRegTest::MAX_REORG_BLOCKS_MIN_VALUE);
+    if(window == -1) {
+        return std::numeric_limits<int32_t>::max();
+    }
+    if (window < altintegration::AltChainParamsRegTest::MAX_REORG_BLOCKS_MIN_VALUE) {
+        throw std::runtime_error(strprintf("Alt block inmem window should more or equal to MAX_REORG_BLOCKS_MIN_VALUE: %d",
+         altintegration::AltChainParamsRegTest::MAX_REORG_BLOCKS_MIN_VALUE));
+    }
+    return window;
 }
 
 bool ArgsManager::UseDefaultSection(const std::string& arg) const

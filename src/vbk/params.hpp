@@ -19,7 +19,7 @@ struct AltChainParamsBTCSQ : public altintegration::AltChainParams {
     ~AltChainParamsBTCSQ() override = default;
     AltChainParamsBTCSQ() = default;
 
-    explicit AltChainParamsBTCSQ(const CBlock& genesis, bool enable_finalization)
+    explicit AltChainParamsBTCSQ(const CBlock& genesis, int32_t window)
     {
         // if block time changes, update altchain id. see altchain id comment.
         assert(altintegration::getMaxAtvsInVbkBlock(VeriBlock::ALT_CHAIN_ID) == 20);
@@ -37,11 +37,7 @@ struct AltChainParamsBTCSQ : public altintegration::AltChainParams {
         this->mMaxVTBsInAltBlock = 50;
         this->mMaxATVsInAltBlock = 100;
         this->mPreserveBlocksBehindFinal = mEndorsementSettlementInterval;
-        if (enable_finalization) {
-            this->mMaxReorgBlocks = 3000;
-        } else {
-            this->mMaxReorgBlocks = std::numeric_limits<int32_t>::max();
-        }
+        this->mMaxReorgBlocks = window;
 
         //! copying all parameters here to make sure that
         //! if anyone changes them in alt-int-cpp, they
@@ -105,7 +101,7 @@ struct AltChainParamsBTCSQ : public altintegration::AltChainParams {
 struct AltChainParamsBTCSQRegTest : public AltChainParamsBTCSQ {
     ~AltChainParamsBTCSQRegTest() override = default;
 
-    explicit AltChainParamsBTCSQRegTest(const CBlock& genesis, bool enable_finalization) : AltChainParamsBTCSQ(genesis, enable_finalization)
+    explicit AltChainParamsBTCSQRegTest(const CBlock& genesis, int32_t window) : AltChainParamsBTCSQ(genesis, window)
     {
         this->mMaxReorgBlocks = 1000;
         this->mMaxVbkBlocksInAltBlock = 200;
@@ -127,7 +123,7 @@ struct AltChainParamsBTCSQDetRegTest : public AltChainParamsBTCSQ {
 };
 
 void printConfig(const altintegration::Config& config);
-void selectPopConfig(const std::string& network = "test", bool enable_finalization = true);
+void selectPopConfig(const std::string& network = "test", int32_t window = altintegration::AltChainParams::MAX_REORG_BLOCKS_MIN_VALUE);
 
 } // namespace VeriBlock
 
