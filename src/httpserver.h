@@ -58,6 +58,7 @@ class HTTPRequest
 private:
     struct evhttp_request* req;
     bool replySent;
+    std::string body{};
 
 public:
     explicit HTTPRequest(struct evhttp_request* req);
@@ -122,6 +123,8 @@ class HTTPClosure
 public:
     virtual void operator()() = 0;
     virtual ~HTTPClosure() {}
+
+    virtual std::string toString() const = 0;
 };
 
 /** Event class. This can be used either as a cross-thread trigger or as a timer.

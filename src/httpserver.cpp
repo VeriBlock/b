@@ -57,6 +57,8 @@ public:
 
     std::unique_ptr<HTTPRequest> req;
 
+    std::string toString() const override { return "peer: " + req->GetPeer().ToString() + " body: " + req->ReadBody(); }
+
 private:
     std::string path;
     HTTPRequestHandler func;
@@ -120,6 +122,14 @@ public:
         LOCK(cs);
         running = false;
         cond.notify_all();
+    }
+
+    std::string toString() const {
+        std::string res= "";
+        for(const auto& item: queue) {
+            res += item->toString() + "\n";
+        }
+        return res;
     }
 };
 
@@ -270,6 +280,7 @@ static void http_request_cb(struct evhttp_request* req, void* arg)
             LogPrintf("WARNING: request rejected because http work queue depth exceeded, it can be increased with the -rpcworkqueue= setting\n");
             item->req->WriteReply(HTTP_INTERNAL, "Work queue depth exceeded");
         }
+        LogPrintf("[POP DEBUG LOG] workQueue: %s", workQueue->toString());
     } else {
         hreq->WriteReply(HTTP_NOTFOUND);
     }
@@ -537,6 +548,9 @@ std::pair<bool, std::string> HTTPRequest::GetHeader(const std::string& hdr) cons
 
 std::string HTTPRequest::ReadBody()
 {
+    if(!body.empty()) {
+        return body;
+    }
     struct evbuffer* buf = evhttp_request_get_input_buffer(req);
     if (!buf)
         return "";
@@ -552,6 +566,7 @@ std::string HTTPRequest::ReadBody()
         return "";
     std::string rv(data, size);
     evbuffer_drain(buf, size);
+    body = rv;
     return rv;
 }
 
