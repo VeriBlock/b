@@ -59,6 +59,7 @@ private:
     struct evhttp_request* req;
     bool replySent;
     std::string body{};
+    bool is_read_body{false};
 
 public:
     explicit HTTPRequest(struct evhttp_request* req);
