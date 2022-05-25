@@ -16,7 +16,10 @@ class WorkExceededTest(BitcoinTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
         self.setup_clean_chain = True
-        self.extra_args = [[],[]]
+        self.extra_args = [["-txindex", "-rpcworkqueue=100"]]
+
+    def setup_network(self):
+        self.setup_nodes()
 
     def getblocktemplate(self):
         arg = {
@@ -26,12 +29,13 @@ class WorkExceededTest(BitcoinTestFramework):
         return self.nodes[0].getblocktemplate(arg)
 
     def run_test(self):
+        # mine 200 blocks
+        self.nodes[0].generate(200)
+
         # spam with the getblock template rpc function
         for i in range(100000):
             res = self.getblocktemplate()
-            print(res)
-
-
+            # print(i)
         assert False
 
 
