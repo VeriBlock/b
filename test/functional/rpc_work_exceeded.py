@@ -5,12 +5,8 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-from decimal import Decimal
+from test_framework.pop import mine_until_pop_active
 from test_framework.test_framework import BitcoinTestFramework
-from test_framework.util import (
-    connect_nodes,
-    p2p_port
-)
 
 class WorkExceededTest(BitcoinTestFramework):
     def set_test_params(self):
@@ -18,8 +14,13 @@ class WorkExceededTest(BitcoinTestFramework):
         self.setup_clean_chain = True
         self.extra_args = [["-txindex", "-rpcworkqueue=100"]]
 
+    def skip_test_if_missing_module(self):
+        self.skip_if_no_pypoptools()
+
     def setup_network(self):
         self.setup_nodes()
+
+        mine_until_pop_active(self.nodes[0])
 
     def getblocktemplate(self):
         arg = {
@@ -29,8 +30,8 @@ class WorkExceededTest(BitcoinTestFramework):
         return self.nodes[0].getblocktemplate(arg)
 
     def run_test(self):
-        # mine 200 blocks
-        self.nodes[0].generate(200)
+        # VBK block
+        self.nodes[0].apm.mineVbkBlocks(10000)
 
         # spam with the getblock template rpc function
         for i in range(100000):
