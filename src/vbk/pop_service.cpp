@@ -37,9 +37,10 @@ void InitPopContext(CDBWrapper& db)
 {
     auto payloads_provider = std::make_shared<PayloadsProvider>(db);
     auto block_provider = std::make_shared<BlockReader>(db);
-    auto ethash_cache = altintegration::make_unique<EthashCache>(db);
+    // disable ethash leveldb realisation due to performance decreasing
+    // auto ethash_cache = altintegration::make_unique<EthashCache>(db);
     auto progpow_header_cache = altintegration::make_unique<ProgpowHeaderCache>(db);
-    SetPop(payloads_provider, block_provider, std::move(ethash_cache), std::move(progpow_header_cache));
+    SetPop(payloads_provider, block_provider, nullptr, std::move(progpow_header_cache));
 }
 
 CBlockIndex* compareTipToBlock(CBlockIndex* candidate)
