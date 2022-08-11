@@ -3,7 +3,7 @@ FROM veriblock/prerelease-btc
 ADD . /app
 WORKDIR /app
 
-RUN pip3 install cmake
+RUN pip3 install cmake==3.16.8
 
 RUN apt-get update && \
     apt-get install --no-install-recommends -y \
