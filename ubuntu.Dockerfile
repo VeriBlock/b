@@ -4,7 +4,7 @@ ADD . /app
 WORKDIR /app
 ARG BUILD_TYPE=Release
 
-RUN pip3 install cmake
+RUN pip3 install cmake==3.16.8
 
 ENV BUILD=${BUILD_TYPE}
 RUN export VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1); \
