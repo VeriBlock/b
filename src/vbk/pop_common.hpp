@@ -20,7 +20,7 @@ void StopPop();
 
 void SetPopConfig(const altintegration::Config& config);
 
-void SetPop(std::shared_ptr<altintegration::PayloadsStorage> payloads_provider, std::shared_ptr<altintegration::BlockReader> block_provider, std::shared_ptr<altintegration::EthashCache> ethash_cache, std::shared_ptr<altintegration::ProgpowHeaderCache> progpow_header_cache);
+void SetPop(std::shared_ptr<altintegration::PayloadsStorage> payloads_provider, std::shared_ptr<altintegration::BlockReader> block_provider, std::unique_ptr<altintegration::EthashCache> ethash_cache, std::unique_ptr<altintegration::ProgpowHeaderCache> progpow_header_cache);
 
 altintegration::BlockIndex<altintegration::AltBlock>* GetAltBlockIndex(const uint256& hash);
 altintegration::BlockIndex<altintegration::AltBlock>* GetAltBlockIndex(const CBlockIndex* index);
