@@ -349,9 +349,8 @@ UniValue getvbkblock(const JSONRPCRequest& req)
 
     auto res = altintegration::ToJSON<UniValue>(*index);
 
-    int estimateed_number_of_vtbs = (int)tree.estimateNumberOfVTBs(*index);
-    res.pushKV("estimateed_number_of_vtbs", estimateed_number_of_vtbs);
-
+    int estimated_vtbs = (int)tree.estimateNumberOfVTBs(*index);
+    res.pushKV("estimated_total_vtbs_in_block", estimated_vtbs);
     return res;
 }
 UniValue getbtcblock(const JSONRPCRequest& req)
