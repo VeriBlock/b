@@ -332,7 +332,26 @@ UniValue getblock(const JSONRPCRequest& req, Tree& tree, const std::string& chai
 
 UniValue getvbkblock(const JSONRPCRequest& req)
 {
-    return getblock(req, VeriBlock::GetPop().getAltBlockTree().vbk(), "vbk");
+    check_getblock(req, "vbk");
+
+    EnsurePopEnabled();
+
+    LOCK(cs_main);
+
+    auto& tree = VeriBlock::GetPop().getAltBlockTree().vbk();
+
+    std::string strhash = req.params[0].get_str();
+    auto* index = GetBlockIndex<altintegration::VbkBlockTree>(tree, strhash);
+    if (!index) {
+        // no block found
+        return UniValue(UniValue::VNULL);
+    }
+
+    auto res = altintegration::ToJSON<UniValue>(*index);
+
+    int estimated_vtbs = (int)tree.estimateNumberOfVTBs(*index);
+    res.pushKV("estimated_total_vtbs_in_block", estimated_vtbs);
+    return res;
 }
 UniValue getbtcblock(const JSONRPCRequest& req)
 {
@@ -501,7 +520,7 @@ UniValue getrawpopmempool(const JSONRPCRequest& request)
         UniValue vbkblocks(UniValue::VARR);
 
         // intentionally ignore return value
-        mp.generatePopData(
+        auto ret = mp.generatePopData(
             [&](const altintegration::ATV& p, const altintegration::ValidationState& state) {
                 UniValue j(UniValue::VOBJ);
                 j.pushKV("id", altintegration::HexStr(p.getId()));
@@ -520,6 +539,7 @@ UniValue getrawpopmempool(const JSONRPCRequest& request)
                 j.pushKV("validity", altintegration::ToJSON<UniValue>(state));
                 vbkblocks.push_back(j);
             });
+        (void)ret;
 
         result.pushKV("atvs", atvs);
         result.pushKV("vtbs", vtbs);
