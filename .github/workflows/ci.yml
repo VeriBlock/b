@@ -193,7 +193,7 @@ jobs:
           rm -rf build
           mkdir build;
           cd build;
-          cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF -DWITH_PYPOPTOOLS=ON;
+          cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF;
           make -j2;
           sudo make install
           )
@@ -208,16 +208,16 @@ jobs:
         run: make -j2
       - name: make check
         run: make
-      - name: run functional tests
-        if: always()
-        timeout-minutes: 90
-        run: python3 test/functional/test_runner.py
-      - name: run pop integration tests
-        if: always()
-        timeout-minutes: 60
-        env:
-          BTCSQD_PATH: './src/btcsqd'
-        run: python3 test/integration/test_runner.py
+      # - name: run functional tests
+      #   if: always()
+      #   timeout-minutes: 90
+      #   run: python3 test/functional/test_runner.py
+      # - name: run pop integration tests
+      #   if: always()
+      #   timeout-minutes: 60
+      #   env:
+      #     BTCSQD_PATH: './src/btcsqd'
+      #   run: python3 test/integration/test_runner.py
 
   linux-asan:
     runs-on: ubuntu-latest
