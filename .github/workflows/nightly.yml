@@ -24,8 +24,8 @@ jobs:
         run: echo "VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)" >> $GITHUB_ENV
       - name: veriblock-pop-cpp release version
         run: echo Using veriblock-pop-cpp version $VERIBLOCK_POP_CPP_VERSION
-      - name: add bitcoin ppa
-        run: sudo add-apt-repository ppa:bitcoin/bitcoin
+      # - name: add bitcoin ppa
+      #   run: sudo add-apt-repository ppa:bitcoin/bitcoin
       - name: run apt update
         run: sudo apt-get update
       - name: install build requirements
