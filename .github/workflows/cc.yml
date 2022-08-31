@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - develop
-      - master
+      # - master
       - release/*
       - mainnet
       - trunk/*
@@ -12,7 +12,7 @@ on:
   pull_request:
     branches:
       - develop
-      - master
+      # - master
       - release/*
       - trunk/*
 

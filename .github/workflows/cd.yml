@@ -3,7 +3,7 @@ name: Docker CD
 on:
   push:
     branches:
-      - master
+      # - master
       - develop
       - release/*
       - mainnet
@@ -11,7 +11,7 @@ on:
 
   pull_request:
     branches:
-      - master
+      # - master
       - release/*
 
 
