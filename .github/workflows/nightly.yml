@@ -1,9 +1,25 @@
 name: CI (nightly)
 
+# on:
+#   schedule:
+#     # create nightly full builds at 02:00 utc
+#     - cron:  '0 2 * * *'
+
 on:
-  schedule:
-    # create nightly full builds at 02:00 utc
-    - cron:  '0 2 * * *'
+  push:
+    branches:
+      - develop
+      - master
+      - release/*
+      - mainnet
+      - trunk/*
+
+  pull_request:
+    branches:
+      - develop
+      - master
+      - release/*
+      - trunk/*
 
 jobs:
   linux:
@@ -335,203 +351,204 @@ jobs:
 #        run: |
 #          python test\functional\test_runner.py --combinedlogslen=4000 --exclude feature_fee_estimation
 
-  macos:
-    runs-on: macos-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v1
-        with:
-          path: main
-      - name: Extract branch name & commit
-        id: extract_branch
-        run: |
-          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
-          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
-          echo "::set-output name=commits_ahead::$(git rev-list $(git describe --tags $(git rev-list --tags --max-count=1)).. --count)"
-          echo "::set-output name=last_tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
-      - name: get version for veriblock-pop-cpp
-        run: echo "VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)" >> $GITHUB_ENV
-      - name: veriblock-pop-cpp release version
-        run: echo Using veriblock-pop-cpp version $VERIBLOCK_POP_CPP_VERSION
-      - name: install homebrew
-        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-      - name: install dependencies
-        run: |
-          brew install automake berkeley-db4 boost miniupnpc pkg-config protobuf librsvg qrencode zeromq
-          brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/d468bb8c4f5c34b18588e5d1b955021d58e1ff57/Formula/qt.rb
-      - name: install veriblock-pop-cpp
-        run: |
-          (
-          cd /tmp;
-          wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
-          tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
-          cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
-          mkdir build;
-          cd build;
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF;
-          make -j2;
-          sudo make install
-          )
-      - name: autogen
-        run: ./autogen.sh
-      - name: configure
-        run: ./configure
-          --enable-werror
-          --disable-bench
-      - name: make
-        run: make -j2
-      - name: make check
-        timeout-minutes: 20
-        run: make check
-      - name: run functional tests
-        if: always()
-        timeout-minutes: 60
-        run: python3 test/functional/test_runner.py
+# TODO
+  # macos:
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v1
+  #       with:
+  #         path: main
+  #     - name: Extract branch name & commit
+  #       id: extract_branch
+  #       run: |
+  #         echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
+  #         echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
+  #         echo "::set-output name=commits_ahead::$(git rev-list $(git describe --tags $(git rev-list --tags --max-count=1)).. --count)"
+  #         echo "::set-output name=last_tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
+  #     - name: get version for veriblock-pop-cpp
+  #       run: echo "VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)" >> $GITHUB_ENV
+  #     - name: veriblock-pop-cpp release version
+  #       run: echo Using veriblock-pop-cpp version $VERIBLOCK_POP_CPP_VERSION
+  #     - name: install homebrew
+  #       run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+  #     - name: install dependencies
+  #       run: |
+  #         brew install automake berkeley-db4 boost miniupnpc pkg-config protobuf librsvg qrencode zeromq
+  #         brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/d468bb8c4f5c34b18588e5d1b955021d58e1ff57/Formula/qt.rb
+  #     - name: install veriblock-pop-cpp
+  #       run: |
+  #         (
+  #         cd /tmp;
+  #         wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
+  #         tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
+  #         cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
+  #         mkdir build;
+  #         cd build;
+  #         cmake .. -DCMAKE_BUILD_TYPE=Release -DTESTING=OFF;
+  #         make -j2;
+  #         sudo make install
+  #         )
+  #     - name: autogen
+  #       run: ./autogen.sh
+  #     - name: configure
+  #       run: ./configure
+  #         --enable-werror
+  #         --disable-bench
+  #     - name: make
+  #       run: make -j2
+  #     - name: make check
+  #       timeout-minutes: 20
+  #       run: make check
+  #     - name: run functional tests
+  #       if: always()
+  #       timeout-minutes: 60
+  #       run: python3 test/functional/test_runner.py
 
-  x86_64-apple-darwin16:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v1
-        with:
-          path: main
-      - name: Extract branch name & commit
-        id: extract_branch
-        run: |
-          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
-          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
-          echo "::set-output name=commits_ahead::$(git rev-list $(git describe --tags $(git rev-list --tags --max-count=1)).. --count)"
-          echo "::set-output name=last_tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
-      - name: run apt update
-        run: sudo apt-get update
-      - name: install build requirements
-        run: sudo apt-get install curl librsvg2-bin libtiff-tools bsdmainutils cmake imagemagick libcap-dev libz-dev libbz2-dev python3-setuptools
-      - name: download and extract macos sdk
-        run: |
-          wget -P depends/sdk-sources https://github.com/phracker/MacOSX-SDKs/releases/download/10.15/MacOSX10.14.sdk.tar.xz
-          mkdir -p depends/SDKs
-          tar -xf depends/sdk-sources/MacOSX10.14.sdk.tar.xz -C depends/SDKs
-      - name: set variables and build dependencies for x86_64-apple-darwin16
-        env:
-          HOST: x86_64-apple-darwin16
-        run: cd depends && make -j2
-      - name: autogen
-        run: ./autogen.sh
-      - name: configure
-        run: ./configure --prefix=${PWD}/depends/x86_64-apple-darwin16
-          --disable-shared
-          --enable-werror
-          --disable-bench
-          --without-qtdbus
-      - name: make
-        run: make -j2 deploy
-      - name: create artifacts
-        if: success()
-        run: |
-          mv ./BTCSQ-Qt.app release/
-          mv ./BTCSQ-Core.dmg release/
-          mv ./release BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
-          zip -r9 BTCSQ-nightly-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-macos-qt.zip BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
-      - name: upload artifacts
-        if: success()
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.ARTIFACT_HOST }}
-          username: ${{ secrets.ARTIFACT_USER }}
-          key: ${{ secrets.ARTIFACT_KEY }}
-          passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
-          source: BTCSQ-nightly-${{ steps.extract_branch.outputs.last_tag }}-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.commits_ahead }}-${{ steps.extract_branch.outputs.git_hash }}-macos-qt.zip
-          target: ${{ secrets.ARTIFACT_PATH }}
+  # x86_64-apple-darwin16:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v1
+  #       with:
+  #         path: main
+  #     - name: Extract branch name & commit
+  #       id: extract_branch
+  #       run: |
+  #         echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
+  #         echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
+  #         echo "::set-output name=commits_ahead::$(git rev-list $(git describe --tags $(git rev-list --tags --max-count=1)).. --count)"
+  #         echo "::set-output name=last_tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
+  #     - name: run apt update
+  #       run: sudo apt-get update
+  #     - name: install build requirements
+  #       run: sudo apt-get install curl librsvg2-bin libtiff-tools bsdmainutils cmake imagemagick libcap-dev libz-dev libbz2-dev python3-setuptools
+  #     - name: download and extract macos sdk
+  #       run: |
+  #         wget -P depends/sdk-sources https://github.com/phracker/MacOSX-SDKs/releases/download/10.15/MacOSX10.14.sdk.tar.xz
+  #         mkdir -p depends/SDKs
+  #         tar -xf depends/sdk-sources/MacOSX10.14.sdk.tar.xz -C depends/SDKs
+  #     - name: set variables and build dependencies for x86_64-apple-darwin16
+  #       env:
+  #         HOST: x86_64-apple-darwin16
+  #       run: cd depends && make -j2
+  #     - name: autogen
+  #       run: ./autogen.sh
+  #     - name: configure
+  #       run: ./configure --prefix=${PWD}/depends/x86_64-apple-darwin16
+  #         --disable-shared
+  #         --enable-werror
+  #         --disable-bench
+  #         --without-qtdbus
+  #     - name: make
+  #       run: make -j2 deploy
+  #     - name: create artifacts
+  #       if: success()
+  #       run: |
+  #         mv ./BTCSQ-Qt.app release/
+  #         mv ./BTCSQ-Core.dmg release/
+  #         mv ./release BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
+  #         zip -r9 BTCSQ-nightly-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-macos-qt.zip BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
+  #     - name: upload artifacts
+  #       if: success()
+  #       uses: appleboy/scp-action@master
+  #       with:
+  #         host: ${{ secrets.ARTIFACT_HOST }}
+  #         username: ${{ secrets.ARTIFACT_USER }}
+  #         key: ${{ secrets.ARTIFACT_KEY }}
+  #         passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
+  #         source: BTCSQ-nightly-${{ steps.extract_branch.outputs.last_tag }}-${{ steps.extract_branch.outputs.branch }}.${{ steps.extract_branch.outputs.commits_ahead }}-${{ steps.extract_branch.outputs.git_hash }}-macos-qt.zip
+  #         target: ${{ secrets.ARTIFACT_PATH }}
 
-  cc:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        host: [x86_64-pc-linux-gnu, arm-linux-gnueabihf, aarch64-linux-gnu, powerpc64-linux-gnu, powerpc64le-linux-gnu, riscv64-linux-gnu, s390x-linux-gnu, x86_64-w64-mingw32]
-      fail-fast: false
-    steps:
-      - name: checkout
-        uses: actions/checkout@v1
-        with:
-          path: main
-      - name: Extract branch name & commit
-        id: extract_branch
-        run: |
-          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
-          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
-          echo "::set-output name=commits_ahead::$(git rev-list $(git describe --tags $(git rev-list --tags --max-count=1)).. --count)"
-          echo "::set-output name=last_tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
-      - name: run apt-get update
-        run: sudo apt-get update
-      - name: install build requirements
-        run: sudo apt-get install make automake cmake curl g++-multilib libtool binutils-gold bsdmainutils pkg-config python3 patch
-      - name: install additional dependencies
-        if: matrix.host == 'x86_64-w64-mingw32'
-        run: sudo apt-get install g++-mingw-w64-x86-64 nsis
-      - name: set the default mingw32 g++ compiler option to posix
-        if: matrix.host == 'x86_64-w64-mingw32'
-        run: sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
-      - name: strip out problematic Windows %PATH% imported var
-        if: matrix.host == 'x86_64-w64-mingw32'
-        run: PATH=$(echo "$PATH" | sed -e 's/:\/mnt.*//g')
-      - name: install additional dependencies
-        if: matrix.host == 'arm-linux-gnueabihf'
-        run: sudo apt-get install g++-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
-      - name: install additional dependencies
-        if: matrix.host == 'aarch64-linux-gnu'
-        run: sudo apt-get install g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
-      - name: install additional dependencies
-        if: matrix.host == 'powerpc64-linux-gnu'
-        run: sudo apt-get install g++-powerpc64-linux-gnu binutils-powerpc64-linux-gnu
-      - name: install additional dependencies
-        if: matrix.host == 'powerpc64le-linux-gnu'
-        run: sudo apt-get install g++-powerpc64le-linux-gnu binutils-powerpc64le-linux-gnu
-      - name: install additional dependencies
-        if: matrix.host == 'riscv64-linux-gnu'
-        run: sudo apt-get install g++-riscv64-linux-gnu binutils-riscv64-linux-gnu
-      - name: install additional dependencies
-        if: matrix.host == 's390x-linux-gnu'
-        run: sudo apt-get install g++-s390x-linux-gnu binutils-s390x-linux-gnu
-      - name: set variables and build dependencies for ${{ matrix.host }}
-        env:
-          HOST: ${{ matrix.host }}
-        run: cd depends && make -j2
-      - name: autogen
-        run: ./autogen.sh
-      - name: configure
-        if: matrix.host == 'x86_64-w64-mingw32'
-        run: CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure --prefix=/
-          --enable-werror
-          --disable-bench
-      - name: configure
-        if: matrix.host != 'x86_64-w64-mingw32'
-        run: ./configure --prefix=$PWD/depends/${{ matrix.host }}
-          --enable-werror
-          --disable-bench
-      - name: make
-        run: make -j2
-      - name: make deploy
-        if: success()
-        run: make deploy
-      - name: create artifacts
-        if: matrix.host == 'x86_64-w64-mingw32'
-        run: |
-          mv ./btcsq-0.19.99-win64-setup-unsigned.exe release/
-          mv ./release BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
-          zip -r9 BTCSQ-nightly-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-win64-qt.zip BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
-      - name: create artifacts
-        if: matrix.host != 'x86_64-w64-mingw32'
-        run: |
-          mv ./release BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
-          zip -r9 BTCSQ-nightly-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-${{ matrix.host }}-qt.zip BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
-      - name: upload artifacts
-        if: matrix.host == 'x86_64-w64-mingw32'
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.ARTIFACT_HOST }}
-          username: ${{ secrets.ARTIFACT_USER }}
-          key: ${{ secrets.ARTIFACT_KEY }}
-          passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
-          source: BTCSQ-nightly-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-win64-qt.zip
-          target: ${{ secrets.ARTIFACT_PATH }}
+  # cc:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       host: [x86_64-pc-linux-gnu, arm-linux-gnueabihf, aarch64-linux-gnu, powerpc64-linux-gnu, powerpc64le-linux-gnu, riscv64-linux-gnu, s390x-linux-gnu, x86_64-w64-mingw32]
+  #     fail-fast: false
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v1
+  #       with:
+  #         path: main
+  #     - name: Extract branch name & commit
+  #       id: extract_branch
+  #       run: |
+  #         echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
+  #         echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
+  #         echo "::set-output name=commits_ahead::$(git rev-list $(git describe --tags $(git rev-list --tags --max-count=1)).. --count)"
+  #         echo "::set-output name=last_tag::$(git describe --tags $(git rev-list --tags --max-count=1))"
+  #     - name: run apt-get update
+  #       run: sudo apt-get update
+  #     - name: install build requirements
+  #       run: sudo apt-get install make automake cmake curl g++-multilib libtool binutils-gold bsdmainutils pkg-config python3 patch
+  #     - name: install additional dependencies
+  #       if: matrix.host == 'x86_64-w64-mingw32'
+  #       run: sudo apt-get install g++-mingw-w64-x86-64 nsis
+  #     - name: set the default mingw32 g++ compiler option to posix
+  #       if: matrix.host == 'x86_64-w64-mingw32'
+  #       run: sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
+  #     - name: strip out problematic Windows %PATH% imported var
+  #       if: matrix.host == 'x86_64-w64-mingw32'
+  #       run: PATH=$(echo "$PATH" | sed -e 's/:\/mnt.*//g')
+  #     - name: install additional dependencies
+  #       if: matrix.host == 'arm-linux-gnueabihf'
+  #       run: sudo apt-get install g++-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
+  #     - name: install additional dependencies
+  #       if: matrix.host == 'aarch64-linux-gnu'
+  #       run: sudo apt-get install g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
+  #     - name: install additional dependencies
+  #       if: matrix.host == 'powerpc64-linux-gnu'
+  #       run: sudo apt-get install g++-powerpc64-linux-gnu binutils-powerpc64-linux-gnu
+  #     - name: install additional dependencies
+  #       if: matrix.host == 'powerpc64le-linux-gnu'
+  #       run: sudo apt-get install g++-powerpc64le-linux-gnu binutils-powerpc64le-linux-gnu
+  #     - name: install additional dependencies
+  #       if: matrix.host == 'riscv64-linux-gnu'
+  #       run: sudo apt-get install g++-riscv64-linux-gnu binutils-riscv64-linux-gnu
+  #     - name: install additional dependencies
+  #       if: matrix.host == 's390x-linux-gnu'
+  #       run: sudo apt-get install g++-s390x-linux-gnu binutils-s390x-linux-gnu
+  #     - name: set variables and build dependencies for ${{ matrix.host }}
+  #       env:
+  #         HOST: ${{ matrix.host }}
+  #       run: cd depends && make -j2
+  #     - name: autogen
+  #       run: ./autogen.sh
+  #     - name: configure
+  #       if: matrix.host == 'x86_64-w64-mingw32'
+  #       run: CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure --prefix=/
+  #         --enable-werror
+  #         --disable-bench
+  #     - name: configure
+  #       if: matrix.host != 'x86_64-w64-mingw32'
+  #       run: ./configure --prefix=$PWD/depends/${{ matrix.host }}
+  #         --enable-werror
+  #         --disable-bench
+  #     - name: make
+  #       run: make -j2
+  #     - name: make deploy
+  #       if: success()
+  #       run: make deploy
+  #     - name: create artifacts
+  #       if: matrix.host == 'x86_64-w64-mingw32'
+  #       run: |
+  #         mv ./btcsq-0.19.99-win64-setup-unsigned.exe release/
+  #         mv ./release BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
+  #         zip -r9 BTCSQ-nightly-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-win64-qt.zip BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
+  #     - name: create artifacts
+  #       if: matrix.host != 'x86_64-w64-mingw32'
+  #       run: |
+  #         mv ./release BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
+  #         zip -r9 BTCSQ-nightly-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-${{ matrix.host }}-qt.zip BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
+  #     - name: upload artifacts
+  #       if: matrix.host == 'x86_64-w64-mingw32'
+  #       uses: appleboy/scp-action@master
+  #       with:
+  #         host: ${{ secrets.ARTIFACT_HOST }}
+  #         username: ${{ secrets.ARTIFACT_USER }}
+  #         key: ${{ secrets.ARTIFACT_KEY }}
+  #         passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
+  #         source: BTCSQ-nightly-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-win64-qt.zip
+  #         target: ${{ secrets.ARTIFACT_PATH }}
           
