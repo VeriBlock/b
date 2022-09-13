@@ -96,5 +96,11 @@ def find_last_contained_vtb_vbk_block(rpc):
             print("height: {}".format(walk_block["height"]))
             return walk_block
 
+def vbk_get_block_by_hash(rpc, hash):
+    return rpc.call(name="getblocks", params={"searchLength": 0, "filters": [{"hash": hash}]})["blocks"][0]
+
+def vbk_get_block_by_number(rpc, number):
+    return rpc.call(name="getblocks", params={"searchLength": 0, "filters": [{"number": number}]})["blocks"][0]
+
 block = find_last_contained_vtb_vbk_block(rpc=btc_rpc)
 print(block["header"]["hash"])
