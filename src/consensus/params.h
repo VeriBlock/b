@@ -80,6 +80,13 @@ struct Params {
     int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;
+
+    // VeriBlock
+    uint64_t VeriBlockPopSecurityHeight;
+    /** Block height at which Zawy's LWMA difficulty algorithm becomes active */
+    int ZawyLWMAHeight;
+    // Params for Zawy's LWMA difficulty adjustment algorithm.
+    int64_t nZawyLwmaAveragingWindow;
 };
 } // namespace Consensus
 

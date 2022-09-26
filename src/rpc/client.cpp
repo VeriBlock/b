@@ -1,5 +1,7 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2018 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -26,6 +28,17 @@ public:
  */
 static const CRPCConvertParam vRPCConvertParams[] =
 {
+    // VeriBlock
+    { "getbtcblockhash", 0, "height"},
+    { "getvbkblockhash", 0, "height"},
+    { "getrawatv", 1, "verbose"},
+    { "getrawvtb", 1, "verbose"},
+    { "getrawvbkblock", 1, "verbose"},
+    { "getpopdatabyheight", 0, "block_height"},
+    { "getrawpopmempool", 0, "verbosity"},
+    { "setmempooldostalledcheck", 0, "flag"},
+    { "extractblockinfo", 0, "pubdata"},
+    // end VeriBlock
     { "setmocktime", 0, "timestamp" },
     { "utxoupdatepsbt", 1, "descriptors" },
     { "generatetoaddress", 0, "nblocks" },

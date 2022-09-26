@@ -1,5 +1,7 @@
 // tinyformat.h
 // Copyright (C) 2011, Chris Foster [chris42f (at) gmail (d0t) com]
+// Copyright (C) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 //
 // Boost Software License - Version 1.0
 //
@@ -1148,6 +1150,15 @@ TINYFORMAT_FOREACH_ARGNUM(TINYFORMAT_MAKE_FORMAT_FUNCS)
 
 #endif
 
+} // namespace tinyformat
+
+#endif // TINYFORMAT_H_INCLUDED
+
+
+#pragma once
+
+namespace tinyformat {
+
 // Added for Bitcoin Core
 template<typename... Args>
 std::string format(const std::string &fmt, const Args&... args)
@@ -1157,10 +1168,9 @@ std::string format(const std::string &fmt, const Args&... args)
     return oss.str();
 }
 
-} // namespace tinyformat
-
 // Added for Bitcoin Core:
 /** Format arguments and return the string or write to given std::ostream (see tinyformat::format doc for details) */
 #define strprintf tfm::format
 
-#endif // TINYFORMAT_H_INCLUDED
+}
+

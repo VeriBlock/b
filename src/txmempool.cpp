@@ -1,5 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2018 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -10,6 +12,7 @@
 #include <consensus/validation.h>
 #include <optional.h>
 #include <validation.h>
+#include <chainparams.h>
 #include <policy/policy.h>
 #include <policy/fees.h>
 #include <policy/settings.h>
@@ -18,6 +21,8 @@
 #include <util/moneystr.h>
 #include <util/time.h>
 #include <validationinterface.h>
+
+#include <vbk/util.hpp>
 
 CTxMemPoolEntry::CTxMemPoolEntry(const CTransactionRef& _tx, const CAmount& _nFee,
                                  int64_t _nTime, unsigned int _entryHeight,
@@ -634,8 +639,9 @@ void CTxMemPool::check(const CCoinsViewCache *pcoins) const
         innerUsage += memusage::DynamicUsage(links.parents) + memusage::DynamicUsage(links.children);
         bool fDependsWait = false;
         setEntries setParentCheck;
+
         for (const CTxIn &txin : tx.vin) {
-            // Check that every mempool transaction's inputs refer to available coins, or other mempool tx's.
+        // Check that every mempool transaction's inputs refer to available coins, or other mempool tx's.
             indexed_transaction_set::const_iterator it2 = mapTx.find(txin.prevout.hash);
             if (it2 != mapTx.end()) {
                 const CTransaction& tx2 = it2->GetTx();

@@ -1,5 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2018 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,6 +13,9 @@
 #include <consensus/consensus.h>
 #include <primitives/transaction.h>
 #include <primitives/block.h>
+
+#include <vbk/util.hpp>
+#include <veriblock/pop.hpp>
 
 /** A "reason" why a transaction was invalid, suitable for determining whether the
   * provider of the transaction should be banned/ignored/disconnected/etc.
@@ -42,6 +47,7 @@ enum class TxValidationResult {
      */
     TX_CONFLICT,
     TX_MEMPOOL_POLICY,        //!< violated mempool's fee/size/descendant/RBF/etc limits
+    TX_BAD_POP_DATA           //!< data that is stored inside pop tx is invalid
 };
 
 /** A "reason" why a block was invalid, suitable for determining whether the
@@ -108,6 +114,22 @@ public:
     bool IsError() const { return m_mode == MODE_ERROR; }
     std::string GetRejectReason() const { return m_reject_reason; }
     std::string GetDebugMessage() const { return m_debug_message; }
+    std::string ToString() const {return m_reject_reason + ": " + m_debug_message; }
+
+    operator altintegration::ValidationState() {
+        altintegration::ValidationState v;
+        if(IsInvalid()) {
+            v.Invalid(m_reject_reason, m_debug_message);
+            return v;
+        }
+
+        if(IsError()) {
+            v.Invalid(m_reject_reason);
+            return v;
+        }
+
+        return v;
+    }
 };
 
 inline ValidationState::~ValidationState() {};
@@ -149,9 +171,13 @@ static inline int64_t GetTransactionWeight(const CTransaction& tx)
 {
     return ::GetSerializeSize(tx, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) * (WITNESS_SCALE_FACTOR - 1) + ::GetSerializeSize(tx, PROTOCOL_VERSION);
 }
+
 static inline int64_t GetBlockWeight(const CBlock& block)
 {
-    return ::GetSerializeSize(block, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) * (WITNESS_SCALE_FACTOR - 1) + ::GetSerializeSize(block, PROTOCOL_VERSION);
+    int64_t popDataSize = 0;
+    popDataSize += VeriBlock::GetPopDataWeight(block.popData);
+
+    return ::GetSerializeSize(block, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) * (WITNESS_SCALE_FACTOR - 1) + ::GetSerializeSize(block, PROTOCOL_VERSION) - popDataSize;
 }
 static inline int64_t GetTransactionInputWeight(const CTxIn& txin)
 {

@@ -1,4 +1,6 @@
 // Copyright (c) 2015-2019 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -13,6 +15,8 @@
 #include <random.h>
 #include <scheduler.h>
 #include <txmempool.h>
+
+#include <vbk/pop_service.hpp>
 
 #include <type_traits>
 
@@ -69,7 +73,6 @@ static constexpr CAmount CENT{1000000};
  */
 struct BasicTestingSetup {
     ECCVerifyHandle globalVerifyHandle;
-
     explicit BasicTestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
     ~BasicTestingSetup();
 private:
@@ -83,7 +86,6 @@ struct TestingSetup : public BasicTestingSetup {
     NodeContext m_node;
     boost::thread_group threadGroup;
     CScheduler scheduler;
-
     explicit TestingSetup(const std::string& chainName = CBaseChainParams::MAIN);
     ~TestingSetup();
 };
@@ -108,7 +110,11 @@ struct TestChain100Setup : public RegTestingSetup {
     // Create a new block with just given transactions, coinbase paying to
     // scriptPubKey, and try to add it to the current chain.
     CBlock CreateAndProcessBlock(const std::vector<CMutableTransaction>& txns,
-                                 const CScript& scriptPubKey);
+                                 const CScript& scriptPubKey, bool* isBlockValid = nullptr);
+
+    CBlock CreateAndProcessBlock(const std::vector<CMutableTransaction>& txns, uint256 prevBlock,
+                                 const CScript& scriptPubKey, bool* isBlockValid = nullptr);
+
 
     ~TestChain100Setup();
 

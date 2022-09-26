@@ -1,4 +1,6 @@
 // Copyright (c) 2009-2018 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -17,6 +19,8 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
+
+#include <vbk/util.hpp>
 
 #include <algorithm>
 
@@ -94,9 +98,11 @@ static bool CheckTxScriptsSanity(const CMutableTransaction& tx)
     // Check input scripts for non-coinbase txs
     if (!CTransaction(tx).IsCoinBase()) {
         for (unsigned int i = 0; i < tx.vin.size(); i++) {
-            if (!tx.vin[i].scriptSig.HasValidOps() || tx.vin[i].scriptSig.size() > MAX_SCRIPT_SIZE) {
+            if (!tx.vin[i].scriptSig.HasValidOps())
                 return false;
-            }
+            if(tx.vin[i].scriptSig.size() > MAX_SCRIPT_SIZE)
+                return false;
+            
         }
     }
     // Check output scripts

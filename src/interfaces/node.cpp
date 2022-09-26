@@ -1,4 +1,6 @@
 // Copyright (c) 2018 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -35,6 +37,7 @@
 #include <config/bitcoin-config.h>
 #endif
 
+#include <vbk/params.hpp>
 #include <univalue.h>
 
 class CWallet;
@@ -62,7 +65,7 @@ public:
     void forceSetArg(const std::string& arg, const std::string& value) override { gArgs.ForceSetArg(arg, value); }
     bool softSetArg(const std::string& arg, const std::string& value) override { return gArgs.SoftSetArg(arg, value); }
     bool softSetBoolArg(const std::string& arg, bool value) override { return gArgs.SoftSetBoolArg(arg, value); }
-    void selectParams(const std::string& network) override { SelectParams(network); }
+    void selectParams(const std::string& network) override { SelectParams(network); VeriBlock::selectPopConfig(network);}
     uint64_t getAssumedBlockchainSize() override { return Params().AssumedBlockchainSize(); }
     uint64_t getAssumedChainStateSize() override { return Params().AssumedChainStateSize(); }
     std::string getNetwork() override { return Params().NetworkIDString(); }

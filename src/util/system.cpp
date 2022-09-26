@@ -1,14 +1,18 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2019 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#include <limits>
 #include <util/system.h>
 
 #include <chainparamsbase.h>
 #include <util/strencodings.h>
 #include <util/string.h>
 #include <util/translation.h>
+#include <veriblock/pop.hpp>
 
 
 #if (defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__))
@@ -69,7 +73,7 @@
 // Application startup time (used for uptime calculation)
 const int64_t nStartupTime = GetTime();
 
-const char * const BITCOIN_CONF_FILENAME = "bitcoin.conf";
+const char * const BITCOIN_CONF_FILENAME = "btcsq.conf";
 
 ArgsManager gArgs;
 
@@ -253,6 +257,7 @@ const std::list<SectionInfo> ArgsManager::GetUnrecognizedSections() const
 {
     // Section names to be recognized in the config file.
     static const std::set<std::string> available_sections{
+        CBaseChainParams::DETREGTEST,
         CBaseChainParams::REGTEST,
         CBaseChainParams::TESTNET,
         CBaseChainParams::MAIN
@@ -562,7 +567,7 @@ fs::path GetDefaultDataDir()
     // Unix: ~/.bitcoin
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "Bitcoin";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "BTCSQ";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -572,10 +577,10 @@ fs::path GetDefaultDataDir()
         pathRet = fs::path(pszHome);
 #ifdef MAC_OSX
     // Mac
-    return pathRet / "Library/Application Support/Bitcoin";
+    return pathRet / "Library/Application Support/BTCSQ";
 #else
     // Unix
-    return pathRet / ".bitcoin";
+    return pathRet / ".btcsq";
 #endif
 #endif
 }
@@ -831,18 +836,69 @@ std::string ArgsManager::GetChainName() const
         return value.isNull() ? false : value.isBool() ? value.get_bool() : InterpretBool(value.get_str());
     };
 
+    const bool fDetRegTest = get_net("-detregtest");
     const bool fRegTest = get_net("-regtest");
     const bool fTestNet = get_net("-testnet");
     const bool is_chain_arg_set = IsArgSet("-chain");
 
-    if ((int)is_chain_arg_set + (int)fRegTest + (int)fTestNet > 1) {
-        throw std::runtime_error("Invalid combination of -regtest, -testnet and -chain. Can use at most one.");
+    if ((int)is_chain_arg_set + (int)fRegTest + (int)fTestNet + (int)fDetRegTest > 1) {
+        throw std::runtime_error("Invalid combination of -detregtest, -regtest, -testnet and -chain. Can use at most one.");
     }
+    if (fDetRegTest)
+        return CBaseChainParams::DETREGTEST;
     if (fRegTest)
         return CBaseChainParams::REGTEST;
     if (fTestNet)
         return CBaseChainParams::TESTNET;
     return GetArg("-chain", CBaseChainParams::MAIN);
+}
+
+int64_t ArgsManager::AltBlocksInMem() const {
+    int64_t window = GetArg("-popaltblocksinmem", altintegration::ALT_MAX_REORG_BLOCKS_MIN_VALUE);
+    if (window < 0) {
+        LogPrintf("popaltblocksinmem is negative. Will keep all blocks in memory\n");
+        return std::numeric_limits<::int32_t>::max();
+    }
+    if (window >= std::numeric_limits<int32_t>::max()) {
+        LogPrintf("popaltblocksinmem is bigger than maximum (max of int32). Will keep all blocks in memory\n");
+        return std::numeric_limits<int32_t>::max();
+    }
+    if (window < altintegration::ALT_MAX_REORG_BLOCKS_MIN_VALUE) {
+        throw std::runtime_error(strprintf("popaltblocksinmem should be >= %d", altintegration::ALT_MAX_REORG_BLOCKS_MIN_VALUE));
+    }
+    return window;
+}
+
+int64_t ArgsManager::VbkBlocksInMem() const {
+    int64_t window = GetArg("-popvbkblocksinmem", altintegration::VBK_MAX_REORG_BLOCKS_MIN_VALUE);
+    if (window < 0) {
+        LogPrintf("popvbkblocksinmem is negative. Will keep all blocks in memory\n");
+        return std::numeric_limits<::int32_t>::max();
+    }
+    if (window >= std::numeric_limits<int32_t>::max()) {
+        LogPrintf("popvbkblocksinmem is bigger than maximum (max of int32). Will keep all blocks in memory\n");
+        return std::numeric_limits<int32_t>::max();
+    }
+    if (window < altintegration::VBK_MAX_REORG_BLOCKS_MIN_VALUE) {
+        throw std::runtime_error(strprintf("popvbkblocksinmem should be >= %d", altintegration::VBK_MAX_REORG_BLOCKS_MIN_VALUE));
+    }
+    return window;
+}
+
+int64_t ArgsManager::BtcBlocksInMem() const {
+    int64_t window = GetArg("-popbtcblocksinmem", altintegration::BTC_MAX_REORG_BLOCKS_MIN_VALUE);
+    if (window < 0) {
+        LogPrintf("popbtcblocksinmem is negative. Will keep all blocks in memory\n");
+        return std::numeric_limits<::int32_t>::max();
+    }
+    if (window >= std::numeric_limits<int32_t>::max()) {
+        LogPrintf("popbtcblocksinmem is bigger than maximum (max of int32). Will keep all blocks in memory\n");
+        return std::numeric_limits<int32_t>::max();
+    }
+    if (window < altintegration::BTC_MAX_REORG_BLOCKS_MIN_VALUE) {
+        throw std::runtime_error(strprintf("popbtcblocksinmem should be >= %d", altintegration::BTC_MAX_REORG_BLOCKS_MIN_VALUE));
+    }
+    return window;
 }
 
 bool ArgsManager::UseDefaultSection(const std::string& arg) const
@@ -1096,7 +1152,7 @@ std::string CopyrightHolders(const std::string& strPrefix)
 
     // Make sure Bitcoin Core copyright is not removed by accident
     if (copyright_devs.find("Bitcoin Core") == std::string::npos) {
-        strCopyrightHolders += "\n" + strPrefix + "The Bitcoin Core developers";
+        strCopyrightHolders += "\n" + strprintf("\xc2\xA9 %u-%u ", 2009, 2019) + "The Bitcoin Core developers";
     }
     return strCopyrightHolders;
 }

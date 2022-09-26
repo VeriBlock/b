@@ -1,4 +1,6 @@
 // Copyright (c) 2016-2018 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,6 +14,7 @@
 #include <util/system.h>
 #include <util/translation.h>
 #include <wallet/wallettool.h>
+#include <vbk/params.hpp>
 
 #include <functional>
 
@@ -41,7 +44,7 @@ static bool WalletAppInit(int argc, char* argv[])
     }
     if (argc < 2 || HelpRequested(gArgs)) {
         std::string usage = strprintf("%s bitcoin-wallet version", PACKAGE_NAME) + " " + FormatFullVersion() + "\n\n" +
-                                      "bitcoin-wallet is an offline tool for creating and interacting with Bitcoin Core wallet files.\n" +
+                                      "bitcoin-wallet is an offline tool for creating and interacting with BTCSQ Core wallet files.\n" +
                                       "By default bitcoin-wallet will act on wallets in the default mainnet wallet directory in the datadir.\n" +
                                       "To change the target wallet, use the -datadir, -wallet and -testnet/-regtest arguments.\n\n" +
                                       "Usage:\n" +
@@ -61,6 +64,7 @@ static bool WalletAppInit(int argc, char* argv[])
     }
     // Check for -testnet or -regtest parameter (Params() calls are only valid after this clause)
     SelectParams(gArgs.GetChainName());
+    VeriBlock::selectPopConfig(gArgs.GetChainName(), gArgs.AltBlocksInMem(), gArgs.VbkBlocksInMem(), gArgs.BtcBlocksInMem());
 
     return true;
 }

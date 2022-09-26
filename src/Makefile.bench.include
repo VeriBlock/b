@@ -1,4 +1,6 @@
 # Copyright (c) 2015-2016 The Bitcoin Core developers
+# Copyright (c) 2019-2021 Xenios SEZC
+# https://www.veriblock.org
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -60,7 +62,8 @@ bench_bench_bitcoin_LDADD = \
   $(LIBSECP256K1) \
   $(LIBUNIVALUE) \
   $(EVENT_PTHREADS_LIBS) \
-  $(EVENT_LIBS)
+  $(EVENT_LIBS) \
+  $(VERIBLOCK_POP_CPP_LIBS)
 
 if ENABLE_ZMQ
 bench_bench_bitcoin_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)

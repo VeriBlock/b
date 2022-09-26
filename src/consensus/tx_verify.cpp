@@ -1,4 +1,6 @@
 // Copyright (c) 2017-2018 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -8,6 +10,8 @@
 #include <primitives/transaction.h>
 #include <script/interpreter.h>
 #include <consensus/validation.h>
+
+#include <vbk/util.hpp>
 
 // TODO remove the following dependencies
 #include <chain.h>

@@ -1,5 +1,7 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2019 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -157,11 +159,6 @@ static UniValue getrawtransaction(const JSONRPCRequest& request)
     uint256 hash = ParseHashV(request.params[0], "parameter 1");
     CBlockIndex* blockindex = nullptr;
 
-    if (hash == Params().GenesisBlock().hashMerkleRoot) {
-        // Special exception for the genesis block coinbase transaction
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "The genesis block coinbase is not considered an ordinary transaction and cannot be retrieved");
-    }
-
     // Accept either a bool (true) or a num (>=1) to indicate verbose output.
     bool fVerbose = false;
     if (!request.params[1].isNull()) {
@@ -186,21 +183,27 @@ static UniValue getrawtransaction(const JSONRPCRequest& request)
 
     CTransactionRef tx;
     uint256 hash_block;
-    if (!GetTransaction(hash, tx, Params().GetConsensus(), hash_block, blockindex)) {
-        std::string errmsg;
-        if (blockindex) {
-            if (!(blockindex->nStatus & BLOCK_HAVE_DATA)) {
-                throw JSONRPCError(RPC_MISC_ERROR, "Block not available");
+    if(hash == Params().GenesisBlock().hashMerkleRoot) {
+        // special case: user queried coinbase tx from genesis block
+        assert(Params().GenesisBlock().vtx.size() == 1);
+        tx = Params().GenesisBlock().vtx[0];
+    } else {
+        if (!GetTransaction(hash, tx, Params().GetConsensus(), hash_block, blockindex)) {
+            std::string errmsg;
+            if (blockindex) {
+                if (!(blockindex->nStatus & BLOCK_HAVE_DATA)) {
+                    throw JSONRPCError(RPC_MISC_ERROR, "Block not available");
+                }
+                errmsg = "No such transaction found in the provided block";
+            } else if (!g_txindex) {
+                errmsg = "No such mempool transaction. Use -txindex or provide a block hash to enable blockchain transaction queries";
+            } else if (!f_txindex_ready) {
+                errmsg = "No such mempool transaction. Blockchain transactions are still in the process of being indexed";
+            } else {
+                errmsg = "No such mempool or blockchain transaction";
             }
-            errmsg = "No such transaction found in the provided block";
-        } else if (!g_txindex) {
-            errmsg = "No such mempool transaction. Use -txindex or provide a block hash to enable blockchain transaction queries";
-        } else if (!f_txindex_ready) {
-            errmsg = "No such mempool transaction. Blockchain transactions are still in the process of being indexed";
-        } else {
-            errmsg = "No such mempool or blockchain transaction";
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, errmsg + ". Use gettransaction for wallet transactions.");
         }
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, errmsg + ". Use gettransaction for wallet transactions.");
     }
 
     if (!fVerbose) {
@@ -969,7 +972,7 @@ UniValue decodepsbt(const JSONRPCRequest& request)
             "          \"asm\" : \"asm\",            (string) The asm\n"
             "          \"hex\" : \"hex\",            (string) The hex\n"
             "          \"type\" : \"pubkeyhash\",    (string) The type, eg 'pubkeyhash'\n"
-            "          \"address\" : \"address\"     (string) Bitcoin address if there is one\n"
+            "          \"address\" : \"address\"     (string) BTCSQ address if there is one\n"
             "        }\n"
             "      },\n"
             "      \"partial_signatures\" : {             (json object, optional)\n"
@@ -1218,7 +1221,7 @@ UniValue decodepsbt(const JSONRPCRequest& request)
 UniValue combinepsbt(const JSONRPCRequest& request)
 {
             RPCHelpMan{"combinepsbt",
-                "\nCombine multiple partially signed Bitcoin transactions into one transaction.\n"
+                "\nCombine multiple partially signed BTCSQ transactions into one transaction.\n"
                 "Implements the Combiner role.\n",
                 {
                     {"txs", RPCArg::Type::ARR, RPCArg::Optional::NO, "A json array of base64 strings of partially signed transactions",

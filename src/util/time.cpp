@@ -15,6 +15,8 @@
 #include <ctime>
 #include <tinyformat.h>
 
+#include <veriblock/pop/time.hpp>
+
 static std::atomic<int64_t> nMockTime(0); //!< For unit testing
 
 int64_t GetTime()
@@ -44,6 +46,7 @@ template std::chrono::microseconds GetTime();
 void SetMockTime(int64_t nMockTimeIn)
 {
     nMockTime.store(nMockTimeIn, std::memory_order_relaxed);
+    altintegration::setMockTime(nMockTimeIn);
 }
 
 int64_t GetMockTime()
@@ -93,7 +96,7 @@ void MilliSleep(int64_t n)
 std::string FormatISO8601DateTime(int64_t nTime) {
     struct tm ts;
     time_t time_val = nTime;
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __MINGW32__
     gmtime_s(&ts, &time_val);
 #else
     gmtime_r(&time_val, &ts);
@@ -104,7 +107,7 @@ std::string FormatISO8601DateTime(int64_t nTime) {
 std::string FormatISO8601Date(int64_t nTime) {
     struct tm ts;
     time_t time_val = nTime;
-#ifdef _MSC_VER
+#if defined _MSC_VER || defined __MINGW32__
     gmtime_s(&ts, &time_val);
 #else
     gmtime_r(&time_val, &ts);

@@ -1,4 +1,6 @@
 // Copyright (c) 2011-2019 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -28,6 +30,8 @@
 #include <util/validation.h>
 #include <validation.h>
 #include <validationinterface.h>
+
+#include <vbk/params.hpp>
 
 #include <functional>
 
@@ -69,6 +73,7 @@ BasicTestingSetup::BasicTestingSetup(const std::string& chainName)
     gArgs.ForceSetArg("-datadir", m_path_root.string());
     ClearDatadirCache();
     SelectParams(chainName);
+    VeriBlock::selectPopConfig("regtest");
     SeedInsecureRand();
     gArgs.ForceSetArg("-printtoconsole", "0");
     InitLogging();
@@ -108,6 +113,8 @@ TestingSetup::TestingSetup(const std::string& chainName) : BasicTestingSetup(cha
     GetMainSignals().RegisterBackgroundSignalScheduler(scheduler);
 
     pblocktree.reset(new CBlockTreeDB(1 << 20, true));
+    VeriBlock::InitPopContext(*pblocktree);
+
     g_chainstate = MakeUnique<CChainState>();
     ::ChainstateActive().InitCoinsDB(
         /* cache_size_bytes */ 1 << 23, /* in_memory */ true, /* should_wipe */ false);
@@ -140,6 +147,7 @@ TestingSetup::~TestingSetup()
 {
     threadGroup.interrupt_all();
     threadGroup.join_all();
+    VeriBlock::StopPop();
     GetMainSignals().FlushBackgroundCallbacks();
     GetMainSignals().UnregisterBackgroundSignalScheduler();
     g_rpc_node = nullptr;
@@ -151,11 +159,11 @@ TestingSetup::~TestingSetup()
     pblocktree.reset();
 }
 
-TestChain100Setup::TestChain100Setup()
+TestChain100Setup::TestChain100Setup(): RegTestingSetup()
 {
     // CreateAndProcessBlock() does not support building SegWit blocks, so don't activate in these tests.
     // TODO: fix the code to support SegWit blocks.
-    gArgs.ForceSetArg("-segwitheight", "432");
+    gArgs.ForceSetArg("-segwitheight", "1000");
     // Need to recreate chainparams
     SelectParams(CBaseChainParams::REGTEST);
 
@@ -168,12 +176,25 @@ TestChain100Setup::TestChain100Setup()
         CBlock b = CreateAndProcessBlock(noTxns, scriptPubKey);
         m_coinbase_txns.push_back(b.vtx[0]);
     }
+
+    assert(ChainActive().Tip() != nullptr);
+    assert(ChainActive().Tip()->nHeight == 100);
+    assert(BlockIndex().size() == 101);
+
+    auto& tree = VeriBlock::GetPop().getAltBlockTree();
+    assert(tree.getBestChain().tip()->getHeight() == ChainActive().Tip()->nHeight);
 }
 
-// Create a new block with just given transactions, coinbase paying to
-// scriptPubKey, and try to add it to the current chain.
-CBlock TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction>& txns, const CScript& scriptPubKey)
-{
+CBlock TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction>& txns, uint256 prevBlock,
+                             const CScript& scriptPubKey, bool* isBlockValid) {
+
+    CBlockIndex* pPrev = nullptr;
+    {
+        LOCK(cs_main);
+        pPrev = LookupBlockIndex(prevBlock);
+        assert(pPrev && "CreateAndProcessBlock called with unknown prev block");
+    }
+
     const CChainParams& chainparams = Params();
     std::unique_ptr<CBlockTemplate> pblocktemplate = BlockAssembler(chainparams).CreateNewBlock(scriptPubKey);
     CBlock& block = pblocktemplate->block;
@@ -186,16 +207,29 @@ CBlock TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransa
     {
         LOCK(cs_main);
         unsigned int extraNonce = 0;
-        IncrementExtraNonce(&block, ::ChainActive().Tip(), extraNonce);
+        IncrementExtraNonce(&block, pPrev, extraNonce);
     }
+
+    block.nTime = pPrev->nTime + (rand() % 100 + 1);
 
     while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())) ++block.nNonce;
 
     std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(block);
-    ProcessNewBlock(chainparams, shared_pblock, true, nullptr);
+
+    bool isValid = ProcessNewBlock(chainparams, shared_pblock, true, nullptr);
+    if(isBlockValid != nullptr) {
+        *isBlockValid = isValid;
+    }
 
     CBlock result = block;
     return result;
+}
+
+// Create a new block with just given transactions, coinbase paying to
+// scriptPubKey, and try to add it to the current chain.
+CBlock TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction>& txns, const CScript& scriptPubKey, bool* isBlockValid)
+{
+    return CreateAndProcessBlock(txns, ChainActive().Tip()->GetBlockHash(), scriptPubKey, isBlockValid);
 }
 
 TestChain100Setup::~TestChain100Setup()
@@ -225,3 +259,4 @@ CBlock getBlock13b8a()
     stream >> block;
     return block;
 }
+

@@ -1,5 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2018 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -28,6 +30,8 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
 #include <boost/signals2/signal.hpp>
+
+#include <vbk/util.hpp>
 
 class CBlockIndex;
 extern CCriticalSection cs_main;
@@ -660,6 +664,11 @@ public:
     /** Expire all transaction (and their dependencies) in the mempool older than time. Return the number of removed transactions. */
     int Expire(std::chrono::seconds time) EXCLUSIVE_LOCKS_REQUIRED(cs);
 
+    /** Expire POP transactions (and their dependencies) in the mempool when height is below endorsement settlement interval.
+      * Return the number of removed transactions.
+      */
+    int ExpirePop() EXCLUSIVE_LOCKS_REQUIRED(cs);
+
     /**
      * Calculate the ancestor and descendant count for the given transaction.
      * The counts include the transaction itself.
@@ -804,9 +813,11 @@ struct DisconnectedBlockTransactions {
     // to be refactored such that this assumption is no longer true (for
     // instance if there was some other way we cleaned up the mempool after a
     // reorg, besides draining this object).
-    ~DisconnectedBlockTransactions() { assert(queuedTx.empty()); }
+    ~DisconnectedBlockTransactions() {
+        assert(queuedTx.empty());
+    }
 
-    indexed_disconnected_transactions queuedTx;
+    indexed_disconnected_transactions queuedTx{};
     uint64_t cachedInnerUsage = 0;
 
     // Estimate the overhead of queuedTx to be 6 pointers + an allocation, as

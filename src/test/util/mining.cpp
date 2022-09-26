@@ -1,4 +1,6 @@
 // Copyright (c) 2019 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,6 +13,7 @@
 #include <pow.h>
 #include <script/standard.h>
 #include <validation.h>
+#include <vbk/merkle.hpp>
 
 CTxIn generatetoaddress(const std::string& address)
 {
@@ -27,10 +30,9 @@ CTxIn MineBlock(const CScript& coinbase_scriptPubKey)
 
     while (!CheckProofOfWork(block->GetHash(), block->nBits, Params().GetConsensus())) {
         ++block->nNonce;
-        assert(block->nNonce);
     }
 
-    bool processed{ProcessNewBlock(Params(), block, true, nullptr)};
+    bool processed = ProcessNewBlock(Params(), block, true, nullptr);
     assert(processed);
 
     return CTxIn{block->vtx[0]->GetHash(), 0};
@@ -38,14 +40,18 @@ CTxIn MineBlock(const CScript& coinbase_scriptPubKey)
 
 std::shared_ptr<CBlock> PrepareBlock(const CScript& coinbase_scriptPubKey)
 {
+    const auto& params = Params();
     auto block = std::make_shared<CBlock>(
-        BlockAssembler{Params()}
+        BlockAssembler{params}
             .CreateNewBlock(coinbase_scriptPubKey)
             ->block);
 
     LOCK(cs_main);
     block->nTime = ::ChainActive().Tip()->GetMedianTimePast() + 1;
-    block->hashMerkleRoot = BlockMerkleRoot(*block);
+
+    CBlockIndex* tip = ::ChainActive().Tip();
+    assert(tip != nullptr);
+    block->hashMerkleRoot = VeriBlock::TopLevelMerkleRoot(tip, *block);
 
     return block;
 }

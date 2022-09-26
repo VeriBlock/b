@@ -1,4 +1,6 @@
 // Copyright (c) 2009-2018 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -28,6 +30,7 @@
 #include <stdio.h>
 
 #include <boost/algorithm/string.hpp>
+#include <vbk/params.hpp>
 
 static bool fCreateBlank;
 static std::map<std::string,UniValue> registers;
@@ -90,6 +93,7 @@ static int AppInitRawTx(int argc, char* argv[])
     // Check for -chain, -testnet or -regtest parameter (Params() calls are only valid after this clause)
     try {
         SelectParams(gArgs.GetChainName());
+        VeriBlock::selectPopConfig(gArgs.GetChainName(), gArgs.AltBlocksInMem(), gArgs.VbkBlocksInMem(), gArgs.BtcBlocksInMem());
     } catch (const std::exception& e) {
         tfm::format(std::cerr, "Error: %s\n", e.what());
         return EXIT_FAILURE;

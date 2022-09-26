@@ -169,7 +169,6 @@ public:
     unsigned int GetValueSize() {
         return piter->value().size();
     }
-
 };
 
 class CDBWrapper

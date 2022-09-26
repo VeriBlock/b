@@ -1,5 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2019 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -13,6 +15,8 @@
 
 #include <memory>
 #include <stdint.h>
+
+#include <vbk/util.hpp>
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/ordered_index.hpp>
@@ -125,7 +129,7 @@ struct update_for_parent_inclusion
 /** Generate a new block, without valid proof-of-work */
 class BlockAssembler
 {
-private:
+protected:
     // The constructed block template
     std::unique_ptr<CBlockTemplate> pblocktemplate;
     // A convenience pointer that always refers to the CBlock in pblocktemplate
@@ -164,7 +168,7 @@ public:
     static Optional<int64_t> m_last_block_num_txs;
     static Optional<int64_t> m_last_block_weight;
 
-private:
+protected:
     // utility functions
     /** Clear the block's state and prepare for assembling a new block */
     void resetBlock();
@@ -175,6 +179,7 @@ private:
     /** Add transactions based on feerate including unconfirmed ancestors
       * Increments nPackagesSelected / nDescendantsUpdated with corresponding
       * statistics from the package selection (for logging statistics). */
+    template<typename MempoolComparatorTagName>
     void addPackageTxs(int &nPackagesSelected, int &nDescendantsUpdated) EXCLUSIVE_LOCKS_REQUIRED(mempool.cs);
 
     // helper functions for addPackageTxs()

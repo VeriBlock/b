@@ -72,6 +72,8 @@ public:
     // A BlockTransactions message
     uint256 blockhash;
     std::vector<CTransactionRef> txn;
+    // VeriBlock data
+    altintegration::PopData popData;
 
     BlockTransactions() {}
     explicit BlockTransactions(const BlockTransactionsRequest& req) :
@@ -95,6 +97,8 @@ public:
             for (size_t i = 0; i < txn.size(); i++)
                 READWRITE(TransactionCompressor(txn[i]));
         }
+        // VeriBlock data
+        READWRITE(popData);
     }
 };
 
@@ -143,6 +147,8 @@ protected:
 
 public:
     CBlockHeader header;
+    // VeriBlock data
+    altintegration::PopData popData;
 
     // Dummy for deserialization
     CBlockHeaderAndShortTxIDs() {}
@@ -183,6 +189,10 @@ public:
             }
         }
 
+        if (this->header.nVersion & VeriBlock::POP_BLOCK_VERSION_BIT) {
+            READWRITE(popData);
+        }
+
         READWRITE(prefilledtxn);
 
         if (BlockTxCount() > std::numeric_limits<uint16_t>::max())
@@ -200,12 +210,14 @@ protected:
     CTxMemPool* pool;
 public:
     CBlockHeader header;
+    altintegration::PopData popData;
     explicit PartiallyDownloadedBlock(CTxMemPool* poolIn) : pool(poolIn) {}
 
     // extra_txn is a list of extra transactions to look at, in <witness hash, reference> form
     ReadStatus InitData(const CBlockHeaderAndShortTxIDs& cmpctblock, const std::vector<std::pair<uint256, CTransactionRef>>& extra_txn);
     bool IsTxAvailable(size_t index) const;
     ReadStatus FillBlock(CBlock& block, const std::vector<CTransactionRef>& vtx_missing);
+    ReadStatus FillBlock(CBlock& block, const std::vector<CTransactionRef>& vtx_missing, const altintegration::PopData& popData);
 };
 
 #endif // BITCOIN_BLOCKENCODINGS_H

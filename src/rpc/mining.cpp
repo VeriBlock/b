@@ -1,5 +1,7 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2018 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -33,6 +35,10 @@
 #include <validationinterface.h>
 #include <versionbitsinfo.h>
 #include <warnings.h>
+#include <consensus/merkle.h>
+
+#include <vbk/pop_service.hpp>
+#include <vbk/merkle.hpp>
 
 #include <memory>
 #include <stdint.h>
@@ -52,8 +58,13 @@ static UniValue GetNetworkHashPS(int lookup, int height) {
         return 0;
 
     // If lookup is -1, then use blocks since last difficulty change.
-    if (lookup <= 0)
-        lookup = pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;
+    if (lookup <= 0) {
+        if (pb->nHeight < Params().GetConsensus().ZawyLWMAHeight) {
+            lookup = pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;
+        } else {
+            lookup = Params().GetConsensus().nZawyLwmaAveragingWindow;
+        }
+    }
 
     // If lookup is larger than chain, then set it to chain length.
     if (lookup > pb->nHeight)
@@ -259,7 +270,7 @@ static UniValue getmininginfo(const JSONRPCRequest& request)
 }
 
 
-// NOTE: Unlike wallet RPC (which use BTC values), mining RPCs follow GBT (BIP 22) in using satoshi amounts
+// NOTE: Unlike wallet RPC (which use BTCSQ values), mining RPCs follow GBT (BIP 22) in using satoshi amounts
 static UniValue prioritisetransaction(const JSONRPCRequest& request)
 {
             RPCHelpMan{"prioritisetransaction",
@@ -392,6 +403,22 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
             "  \"curtime\" : ttt,                  (numeric) current timestamp in " + UNIX_EPOCH_TIME + "\n"
             "  \"bits\" : \"xxxxxxxx\",              (string) compressed target of next block\n"
             "  \"height\" : n                      (numeric) The height of the next block\n"
+            "  \"default_witness_commitment\" : \"xxxx\" (string) coinbase witness commitment \n"
+            "  \"pop_context\" : \n"
+            "    \"serialized\": \"xxx\"     (string) serialized version of AuthenticatedContextInfoContainer\n"
+            "    \"stateRoot\" : \"xxx\"     (string) Hex-encoded StateRoot=sha256d(txRoot, popDataRoot)\n"
+            "    \"context\"   : {\n"
+            "      \"height\"    : 123       (numeric) Current block height.\n"
+            "      \"firstPreviousKeystone\": \"xxx\"  (string) First previous keystone of current block.\n"
+            "      \"secondPreviousKeystone\": \"xxx\" (string) Second previous keystone of current block.\n"
+            "      }\n"
+            "    }\n"
+            "  \"pop_data_root\" : \"xxxx\"   (string) Merkle Root of PopData\n"
+            "  \"pop_data\" : { \"atvs\": [], \"vtbs\": [], \"vbkblocks\": [] }   (object) Valid POP data that must be included in next block in order they appear here (vbkblocks, vtbs, atvs).\n"
+            "  \"pop_payout\" : [                 (array) List of POP payouts that must be addedd to next coinbase in order they appear in array.\n"
+            "    \"payout_info\": \"...\",\n"
+            "    \"amount\": xxx\n"
+            "   ]\n"
             "}\n"
                 },
                 RPCExamples{
@@ -470,8 +497,9 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
     if(!g_rpc_node->connman)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
-    if (g_rpc_node->connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0)
-        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, PACKAGE_NAME " is not connected!");
+    // VERIBLOCK: when node does not have other peers, this disables certain RPCs. Disable this condition for now.
+    //  if (g_rpc_node->connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0)
+    //      throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, PACKAGE_NAME " is not connected!");
 
     if (::ChainstateActive().IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, PACKAGE_NAME " is in initial sync and waiting for blocks...");
@@ -615,6 +643,7 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
     aMutable.push_back("transactions");
     aMutable.push_back("prevblock");
 
+
     UniValue result(UniValue::VOBJ);
     result.pushKV("capabilities", aCaps);
 
@@ -701,6 +730,34 @@ static UniValue getblocktemplate(const JSONRPCRequest& request)
 
     if (!pblocktemplate->vchCoinbaseCommitment.empty()) {
         result.pushKV("default_witness_commitment", HexStr(pblocktemplate->vchCoinbaseCommitment.begin(), pblocktemplate->vchCoinbaseCommitment.end()));
+    }
+
+    if (VeriBlock::isPopActive((int64_t)(pindexPrev->nHeight + 1))) {
+        //VeriBlock Data
+        const auto popDataRoot = pblock->popData.getMerkleRoot();
+        result.pushKV("pop_data_root", HexStr(popDataRoot.begin(), popDataRoot.end()));
+        result.pushKV("pop_data", altintegration::ToJSON<UniValue>(pblock->popData, /*verbose=*/true));
+        if(pblock->nVersion & VeriBlock::POP_BLOCK_VERSION_BIT) {
+            assert(!pblock->popData.empty());
+        } else {
+            assert(pblock->popData.empty());
+        }
+        using altintegration::ContextInfoContainer;
+        auto ctx = ContextInfoContainer::createFromPrevious(VeriBlock::GetAltBlockIndex(pindexPrev),
+                                                            VeriBlock::GetPop().getConfig().getAltParams());
+        result.pushKV("pop_first_previous_keystone", HexStr(ctx.keystones.firstPreviousKeystone));
+        result.pushKV("pop_second_previous_keystone", HexStr(ctx.keystones.secondPreviousKeystone));
+
+        // pop rewards
+        UniValue popRewardsArray(UniValue::VARR);
+        VeriBlock::PoPRewards popRewards = VeriBlock::getPopRewards(*pindexPrev, Params());
+        for (const auto& itr : popRewards) {
+            UniValue popRewardValue(UniValue::VOBJ);
+            popRewardValue.pushKV("payout_info", HexStr(itr.first.begin(), itr.first.end()));
+            popRewardValue.pushKV("amount", itr.second);
+            popRewardsArray.push_back(popRewardValue);
+        }
+        result.pushKV("pop_rewards", popRewardsArray);
     }
 
     return result;

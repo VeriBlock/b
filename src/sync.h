@@ -1,5 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2018 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -136,7 +138,8 @@ private:
     bool TryEnter(const char* pszName, const char* pszFile, int nLine)
     {
         EnterCritical(pszName, pszFile, nLine, (void*)(Base::mutex()), true);
-        Base::try_lock();
+        bool ignore = Base::try_lock();
+        (void)ignore;
         if (!Base::owns_lock())
             LeaveCritical();
         return Base::owns_lock();

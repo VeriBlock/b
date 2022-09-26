@@ -1,4 +1,6 @@
 // Copyright (c) 2009-2018 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -47,7 +49,8 @@ bool sanity_test_range_fmt()
 {
     std::string test;
     try {
-        test.at(1);
+        char ignore = test.at(1);
+        (void)ignore;
     } catch (const std::out_of_range&) {
         return true;
     } catch (...) {

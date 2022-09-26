@@ -1,14 +1,16 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2018 The Bitcoin Core developers
+// Copyright (c) 2019-2021 Xenios SEZC
+// https://www.veriblock.org
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 // NOTE: This file is intended to be customised by the end user, and includes only local node policy logic
 
 #include <policy/policy.h>
-
 #include <consensus/validation.h>
 #include <coins.h>
+#include <vbk/util.hpp>
 
 
 CAmount GetDustThreshold(const CTxOut& txout, const CFeeRate& dustRelayFeeIn)
@@ -99,6 +101,7 @@ bool IsStandardTx(const CTransaction& tx, bool permit_bare_multisig, const CFeeR
         // future-proofing. That's also enough to spend a 20-of-20
         // CHECKMULTISIG scriptPubKey, though such a scriptPubKey is not
         // considered standard.
+
         if (txin.scriptSig.size() > 1650) {
             reason = "scriptsig-size";
             return false;

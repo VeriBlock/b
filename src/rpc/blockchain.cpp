@@ -44,6 +44,10 @@
 #include <memory>
 #include <mutex>
 
+#include <vbk/adaptors/univalue_json.hpp>
+#include <vbk/pop_common.hpp>
+#include <vbk/pop_service.hpp>
+
 struct CUpdatedBlock
 {
     uint256 hash;
@@ -917,7 +921,25 @@ static UniValue getblock(const JSONRPCRequest& request)
         return strHex;
     }
 
-    return blockToJSON(block, tip, pblockindex, verbosity >= 2);
+    UniValue json = blockToJSON(block, tip, pblockindex, verbosity >= 2);
+
+    if (VeriBlock::isCrossedBootstrapBlock(pblockindex->nHeight)) {
+        // this block is after bootstrap block
+        LOCK(cs_main);
+        UniValue obj(UniValue::VOBJ);
+
+        auto* index = VeriBlock::GetAltBlockIndex(block.GetHash());
+        if (index) {
+            obj.pushKV("state", altintegration::ToJSON<UniValue>(*index));
+        } else {
+            obj.pushKV("state", UniValue(UniValue::VNULL));
+        }
+
+        obj.pushKV("data", altintegration::ToJSON<UniValue>(block.popData, verbosity >= 2));
+        json.pushKV("pop", obj);
+    }
+
+    return json;
 }
 
 static UniValue pruneblockchain(const JSONRPCRequest& request)
@@ -1287,6 +1309,8 @@ UniValue getblockchaininfo(const JSONRPCRequest& request)
     BuriedForkDescPushBack(softforks, "bip65", consensusParams.BIP65Height);
     BuriedForkDescPushBack(softforks, "csv", consensusParams.CSVHeight);
     BuriedForkDescPushBack(softforks, "segwit", consensusParams.SegwitHeight);
+    //VeriBlock
+    BuriedForkDescPushBack(softforks, "pop_security", consensusParams.VeriBlockPopSecurityHeight);
     BIP9SoftForkDescPushBack(softforks, "testdummy", consensusParams, Consensus::DEPLOYMENT_TESTDUMMY);
     obj.pushKV("softforks",             softforks);
 
@@ -1928,7 +1952,7 @@ static UniValue getblockstats(const JSONRPCRequest& request)
     ret_all.pushKV("minfeerate", (minfeerate == MAX_MONEY) ? 0 : minfeerate);
     ret_all.pushKV("mintxsize", mintxsize == MAX_BLOCK_SERIALIZED_SIZE ? 0 : mintxsize);
     ret_all.pushKV("outs", outputs);
-    ret_all.pushKV("subsidy", GetBlockSubsidy(pindex->nHeight, Params().GetConsensus()));
+    ret_all.pushKV("subsidy", GetBlockSubsidy(pindex->nHeight, Params()));
     ret_all.pushKV("swtotal_size", swtotal_size);
     ret_all.pushKV("swtotal_weight", swtotal_weight);
     ret_all.pushKV("swtxs", swtxs);
