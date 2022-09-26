@@ -8,7 +8,6 @@ Transifex is setup to monitor the GitHub repo for updates, and when code contain
 
 Multiple language support is critical in assisting Bitcoin’s global adoption, and growth. One of Bitcoin’s greatest strengths is cross-border money transfers, any help making that easier is greatly appreciated.
 
-See the [Transifex Bitcoin project](https://www.transifex.com/bitcoin/bitcoin/) to assist in translations. You should also join the translation mailing list for announcements - see details below.
 
 ### Writing code with translations
 We use automated scripts to help extract translations in both Qt, and non-Qt source files. It is rarely necessary to manually edit the files in `src/qt/locale/`. The translation source files must adhere to the following format:
@@ -54,7 +53,6 @@ Setup your Transifex client config as follows. Please *ignore the token field*.
 
 ```ini
 nano ~/.transifexrc
-
 [https://www.transifex.com]
 hostname = https://www.transifex.com
 password = PASSWORD

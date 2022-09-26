@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-#  bitcoind The bitcoin core server.
+#  btcsqd The btcsq core server.
 #
 #
 # chkconfig: 345 80 20
-# description: bitcoind
-# processname: bitcoind
+# description: btcsqd
+# processname: btcsqd
 #
 
 # Source function library.
@@ -18,19 +18,19 @@ fi
 
 RETVAL=0
 
-prog=bitcoind
-# you can override the lockfile via BITCOIND_LOCKFILE in /etc/sysconfig/bitcoind
+prog=btcsqd
+# you can override the lockfile via BITCOIND_LOCKFILE in /etc/sysconfig/btcsqd
 lockfile=${BITCOIND_LOCKFILE-/var/lock/subsys/bitcoind}
 
-# bitcoind defaults to /usr/bin/bitcoind, override with BITCOIND_BIN
-bitcoind=${BITCOIND_BIN-/usr/bin/bitcoind}
+# btcsqd defaults to /usr/bin/btcsqd, override with BITCOIND_BIN
+btcsqd=${BITCOIND_BIN-/usr/bin/btcsqd}
 
-# bitcoind opts default to -disablewallet, override with BITCOIND_OPTS
-bitcoind_opts=${BITCOIND_OPTS--disablewallet}
+# btcsqd opts default to -disablewallet, override with BITCOIND_OPTS
+btcsqd_opts=${BITCOIND_OPTS--disablewallet}
 
 start() {
     echo -n $"Starting $prog: "
-    daemon $DAEMONOPTS $bitcoind $bitcoind_opts
+    daemon $DAEMONOPTS $btcsqd $btcsqd_opts
     RETVAL=$?
     echo
     [ $RETVAL -eq 0 ] && touch $lockfile

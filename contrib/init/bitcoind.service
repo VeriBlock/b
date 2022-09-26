@@ -5,49 +5,49 @@
 # See "man systemd.service" for details.
 
 # Note that almost all daemon options could be specified in
-# /etc/bitcoin/bitcoin.conf, but keep in mind those explicitly
+# /etc/btcsq/btcsq.conf, but keep in mind those explicitly
 # specified as arguments in ExecStart= will override those in the
 # config file.
 
 [Unit]
-Description=Bitcoin daemon
+Description=BTCSQ daemon
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/bitcoind -daemon \
-                            -pid=/run/bitcoind/bitcoind.pid \
-                            -conf=/etc/bitcoin/bitcoin.conf \
-                            -datadir=/var/lib/bitcoind
+ExecStart=/usr/bin/btcsqd -daemon \
+                            -pid=/run/btcsqd/btcsqd.pid \
+                            -conf=/etc/btcsq/btcsq.conf \
+                            -datadir=/var/lib/btcsqd
 
 # Make sure the config directory is readable by the service user
 PermissionsStartOnly=true
-ExecStartPre=/bin/chgrp bitcoin /etc/bitcoin
+ExecStartPre=/bin/chgrp btcsq /etc/btcsq
 
 # Process management
 ####################
 
 Type=forking
-PIDFile=/run/bitcoind/bitcoind.pid
+PIDFile=/run/btcsqd/btcsqd.pid
 Restart=on-failure
 TimeoutStopSec=600
 
 # Directory creation and permissions
 ####################################
 
-# Run as bitcoin:bitcoin
-User=bitcoin
-Group=bitcoin
+# Run as btcsq:btcsq
+User=btcsq
+Group=btcsq
 
-# /run/bitcoind
-RuntimeDirectory=bitcoind
+# /run/btcsqd
+RuntimeDirectory=btcsqd
 RuntimeDirectoryMode=0710
 
-# /etc/bitcoin
-ConfigurationDirectory=bitcoin
+# /etc/btcsq
+ConfigurationDirectory=btcsq
 ConfigurationDirectoryMode=0710
 
-# /var/lib/bitcoind
-StateDirectory=bitcoind
+# /var/lib/btcsqd
+StateDirectory=btcsqd
 StateDirectoryMode=0710
 
 # Hardening measures

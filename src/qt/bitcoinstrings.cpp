@@ -61,8 +61,7 @@ QT_TRANSLATE_NOOP("bitcoin-core", ""
 QT_TRANSLATE_NOOP("bitcoin-core", ""
 "The transaction amount is too small to send after the fee has been deducted"),
 QT_TRANSLATE_NOOP("bitcoin-core", ""
-"This is a pre-release test build - use at your own risk - do not use for "
-"mining or merchant applications"),
+"This is a pre-release test build - use at your own risk - do not use for mining or merchant applications"),
 QT_TRANSLATE_NOOP("bitcoin-core", ""
 "This is the transaction fee you may discard if change is smaller than dust "
 "at this level"),

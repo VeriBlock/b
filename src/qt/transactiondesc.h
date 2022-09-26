@@ -5,8 +5,11 @@
 #ifndef BITCOIN_QT_TRANSACTIONDESC_H
 #define BITCOIN_QT_TRANSACTIONDESC_H
 
+#include <QDebug>
 #include <QObject>
 #include <QString>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 class TransactionRecord;
 
@@ -29,7 +32,11 @@ public:
 private:
     TransactionDesc() {}
 
+
     static QString FormatTxStatus(const interfaces::WalletTx& wtx, const interfaces::WalletTxStatus& status, bool inMempool, int numBlocks);
+    // VBK
+    static QString FormatBFIStatus(TransactionRecord *rec);
+    // VBK
 };
 
 #endif // BITCOIN_QT_TRANSACTIONDESC_H

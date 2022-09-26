@@ -116,6 +116,10 @@ OptionsDialog::OptionsDialog(QWidget *parent, bool enableWallet) :
     mapper = new QDataWidgetMapper(this);
     mapper->setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
     mapper->setOrientation(Qt::Vertical);
+	    
+    /* VBK */
+    QString bfiendpoint = QString::fromStdString(gArgs.GetArg("-bfiendpoint",""));
+    ui->bfiDataSourceUrls->setText(bfiendpoint);
 
     GUIUtil::ItemDelegate* delegate = new GUIUtil::ItemDelegate(mapper);
     connect(delegate, &GUIUtil::ItemDelegate::keyEscapePressed, this, &OptionsDialog::reject);
@@ -171,6 +175,7 @@ void OptionsDialog::setModel(OptionsModel *_model)
     /* warn when one of the following settings changes by user action (placed here so init via mapper doesn't trigger them) */
 
     /* Main */
+	
     connect(ui->prune, &QCheckBox::clicked, this, &OptionsDialog::showRestartWarning);
     connect(ui->prune, &QCheckBox::clicked, this, &OptionsDialog::togglePruneWarning);
     connect(ui->pruneSize, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &OptionsDialog::showRestartWarning);
@@ -185,6 +190,7 @@ void OptionsDialog::setModel(OptionsModel *_model)
     /* Display */
     connect(ui->lang, static_cast<void (QValueComboBox::*)()>(&QValueComboBox::valueChanged), [this]{ showRestartWarning(); });
     connect(ui->thirdPartyTxUrls, &QLineEdit::textChanged, [this]{ showRestartWarning(); });
+
 }
 
 void OptionsDialog::setCurrentTab(OptionsDialog::Tab tab)
@@ -259,6 +265,7 @@ void OptionsDialog::on_resetButton_clicked()
         QApplication::quit();
     }
 }
+
 
 void OptionsDialog::on_openBitcoinConfButton_clicked()
 {

@@ -1,0 +1,102 @@
+name: Docker CD
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - release/*
+      - mainnet
+      - test_deploy
+
+  pull_request:
+    branches:
+      - master
+      - release/*
+
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        build: ["Debug"]
+    steps:
+      - uses: actions/checkout@v1
+      - name: Get snapshot hash, version & branch
+        id: snapshot
+        run: |
+          echo "GIT_HASH=$(git rev-parse --short=7 "$GITHUB_SHA")" >> $GITHUB_ENV
+          echo "BRANCH=$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//./g')" >> $GITHUB_ENV
+          echo "TAGS=$(if [ "${{ github.event_name }}" == "push" ] && [ "$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')" == "master" ]; then echo "latest,$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')"; elif [ "${{ github.event_name }}" == "pull_request" ]; then echo ""; else echo "$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')"; fi)" >> $GITHUB_ENV
+      - name: Publish to Registry
+        env:
+          BUILD_TYPE: ${{ matrix.build }}
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: veriblock/btcsq
+          username: ${{ secrets.PUBLIC_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.PUBLIC_DOCKERHUB_PASSWORD }}
+          dockerfile: ubuntu.Dockerfile
+          tags: "ubuntu-${{ env. BRANCH }}-${{ env.GIT_HASH }}-${{ matrix.build }}"
+      - name: Show Tags
+        run: |
+          echo "Successfully pushed the following tags:"
+          echo "----"
+          echo "ubuntu-${{ env.BRANCH }}-${{ env.GIT_HASH }}-${{ matrix.build }}"
+          echo "----"
+
+  ubuntu-asan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Get snapshot hash, version & branch
+        id: snapshot
+        run: |
+          echo "GIT_HASH=$(git rev-parse --short=7 "$GITHUB_SHA")" >> $GITHUB_ENV
+          echo "BRANCH=$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//./g')" >> $GITHUB_ENV
+          echo "TAGS=$(if [ "${{ github.event_name }}" == "push" ] && [ "$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')" == "master" ]; then echo "latest-asan,$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')"; elif [ "${{ github.event_name }}" == "pull_request" ]; then echo ""; else echo "$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')"; fi)" >> $GITHUB_ENV
+      - name: Publish to Registry
+        env:
+          BUILD_TYPE: ${{ matrix.build }}
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: veriblock/btcsq
+          username: ${{ secrets.PUBLIC_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.PUBLIC_DOCKERHUB_PASSWORD }}
+          dockerfile: ubuntu-asan.Dockerfile
+          tags: "ubuntu-${{ env. BRANCH }}-${{ env.GIT_HASH }}-asan"
+      - name: Show Tags
+        run: |
+          echo "Successfully pushed the following tags:"
+          echo "----"
+          echo "ubuntu-${{ env.BRANCH }}-${{ env.GIT_HASH }}-asan"
+          echo "----"
+
+  alpine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Get snapshot hash, version & branch
+        id: snapshot
+        run: |
+          echo "GIT_HASH=$(git rev-parse --short=7 "$GITHUB_SHA")" >> $GITHUB_ENV
+          echo "BRANCH=$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//./g')" >> $GITHUB_ENV
+          echo "TAGS=$(if [ "${{ github.event_name }}" == "push" ] && [ "$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')" == "master" ]; then echo "latest,$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')"; elif [ "${{ github.event_name }}" == "pull_request" ]; then echo ""; else echo "$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')"; fi)" >> $GITHUB_ENV
+      - name: Publish to Registry
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          dockerfile: alpine.Dockerfile
+          name: veriblock/btcsq
+          username: ${{ secrets.PUBLIC_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.PUBLIC_DOCKERHUB_PASSWORD }}
+          tags: "${{ env.BRANCH }}-${{ env.GIT_HASH }},${{ github.sha }}"
+      - name: Show Tags
+        run: |
+          echo "Successfully pushed the following tags:"
+          echo "----"
+          echo "$(IFS=',' read -ra TAGS <<< "$(if [ "${{ github.event_name }}" == "push" ] && [ "${BRANCH}" == "master" ]; then echo "latest,${BRANCH}"; elif [ "${{ github.event_name }}" == "pull_request" ]; then echo ""; else echo "${BRANCH}"; fi)"; for i in "${TAGS[@]}"; do echo $i; done)"
+          echo "${{ env.BRANCH }}-${{ env.GIT_HASH }}"
+          echo "${{ github.sha }}"
+          echo "----"

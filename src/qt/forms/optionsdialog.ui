@@ -252,7 +252,7 @@
        <item>
         <widget class="QCheckBox" name="mapPortUpnp">
          <property name="toolTip">
-          <string>Automatically open the Bitcoin client port on the router. This only works when your router supports UPnP and it is enabled.</string>
+          <string>Automatically open the BTCSQ client port on the router. This only works when your router supports UPnP and it is enabled.</string>
          </property>
          <property name="text">
           <string>Map port using &amp;UPnP</string>
@@ -272,7 +272,7 @@
        <item>
         <widget class="QCheckBox" name="connectSocks">
          <property name="toolTip">
-          <string>Connect to the Bitcoin network through a SOCKS5 proxy.</string>
+          <string>Connect to the BTCSQ network through a SOCKS5 proxy.</string>
          </property>
          <property name="text">
           <string>&amp;Connect through SOCKS5 proxy (default proxy):</string>
@@ -459,7 +459,7 @@
        <item>
         <widget class="QCheckBox" name="connectSocksTor">
          <property name="toolTip">
-          <string>Connect to the Bitcoin network through a separate SOCKS5 proxy for Tor hidden services.</string>
+          <string>Connect to the BTCSQ network through a separate SOCKS5 proxy for Tor hidden services.</string>
          </property>
          <property name="text">
           <string>Use separate SOCKS&amp;5 proxy to reach peers via Tor hidden services:</string>
@@ -562,6 +562,7 @@
        </item>
       </layout>
      </widget>
+	 
      <widget class="QWidget" name="tabWindow">
       <attribute name="title">
        <string>&amp;Window</string>
@@ -612,7 +613,8 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabDisplay">
+	 
+	 <widget class="QWidget" name="tabDisplay">
       <attribute name="title">
        <string>&amp;Display</string>
       </attribute>
@@ -707,6 +709,62 @@
        </item>
       </layout>
      </widget>
+	 
+	 <widget class="QWidget" name="tabBFI">
+      <attribute name="title">
+       <string>&amp;BFI Setup</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_BFI">
+       
+	<item>
+          <widget class="QLabel" name="bfiInfoLabel">
+           <property name="toolTip">
+            <string>Bitcoin Finality Indicator (BFI) indicates when a transaction on an altchain network has as much security as a transaction on Bitcoin itself.</string>
+           </property>
+           <property name="textFormat">
+            <enum>Qt::RichText</enum>
+           </property>
+           <property name="openExternalLinks">
+            <bool>true</bool>
+           </property>
+         
+           <property name="text">
+           <string>Bitcoin Finality Indicator (BFI) indicates when a transaction on an altchain network has as much security as a transaction on Bitcoin itself.&lt;br&gt;See here for more details: &lt;a href='https://veriblock.org/vbfi'&gt;https://veriblock.org/vbfi&lt;/a&gt;.&lt;br&gt;The BFI service can be run locally, or for convenience, directly pulled from a hosted website (like looking up transactions in an altchain web explorer).&lt;br&gt;&lt;br&gt;Check the -bfiendpoint in the btcsq.conf file to set the BFI endpoint.&lt;br&gt;</string>
+           </property>
+           
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="bfiDataSourceUrls">
+           <property name="toolTip">
+            <string>BFI data source end point.</string>
+           </property>
+           <property name="placeholderText">
+            <string notr="true">https://bfi.example.com/block/best/%1</string>
+           </property>
+           
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+		 
+       <item>
+        <spacer name="verticalSpacer_BFI">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     
     </widget>
    </item>
    <item>

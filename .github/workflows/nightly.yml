@@ -1,0 +1,327 @@
+name: CI (nightly)
+
+on:
+  schedule:
+    # create nightly full builds at 02:00 utc
+    - cron:  '0 2 * * *'
+
+jobs:
+  linux-native:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+      - name: Extract branch name & commit
+        id: extract_branch
+        run: |
+          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
+          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
+      - name: Prepare ccache timestamp
+        id: cache_timestamp
+        run: |
+          current_date=`date --utc +%Y%m%d_%H%M%SZ`
+          echo "::set-output name=timestamp::${current_date}"
+      - name: ccache cache files
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
+        uses: actions/cache@v1.1.0
+        with:
+          path: ~/.ccache
+          key: linux-ccache-${{ steps.cache_timestamp.outputs.timestamp }}
+          restore-keys: |
+            linux-ccache-
+      - name: get version for veriblock-pop-cpp
+        run: echo "VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)" >> $GITHUB_ENV
+      - name: veriblock-pop-cpp release version
+        run: echo Using veriblock-pop-cpp version $VERIBLOCK_POP_CPP_VERSION
+      - name: install apt-get deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install libdb++-dev build-essential libtool autotools-dev automake pkg-config bsdmainutils ccache python3 python3-pip python3-setuptools python-setuptools
+          sudo apt-get install libevent-dev python3-zmq python3-dev libboost-python-dev libboost-system-dev libboost-filesystem-dev libboost-test-dev libboost-thread-dev libminiupnpc-dev libzmq3-dev
+      - name: install veriblock-pop-cpp
+        env:
+          BUILD_TYPE: Release
+        run: |
+          (
+          pip3 install wheel
+          sudo su;
+          cd /opt;
+          wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
+          tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
+          cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
+          python3 setup.py install
+          python3 setup.py test
+          rm -rf build
+          mkdir build;
+          cd build;
+          cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF -DWITH_PYPOPTOOLS=ON;
+          make -j2;
+          sudo make install
+          )
+      - name: autogen
+        run: ./autogen.sh
+      - name: configure
+        run: ./configure
+          --with-incompatible-bdb
+          --without-gui
+          --enable-werror
+          --disable-bench
+      - name: make
+        run: make -j2 deploy
+      - name: create artifacts
+        if: success()
+        run: |
+          mv ./release BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}
+          tar czvf BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-linux-x64.tar.gz BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}/
+      - name: upload artifacts
+        if: success()
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.ARTIFACT_HOST }}
+          username: ${{ secrets.ARTIFACT_USER }}
+          key: ${{ secrets.ARTIFACT_KEY }}
+          passphrase: ${{ secrets.ARTIFACT_KEY_PASSPHRASE }}
+          source: BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-linux-x64.tar.gz
+          target: ${{ secrets.ARTIFACT_PATH }}
+      - name: upload artifacts to public mirrors
+        if: success()
+        uses: appleboy/scp-action@master
+        with:
+          host: "mirror1.veriblock.org, mirror2.veriblock.org"
+          username: ${{ secrets.MIRROR_ARTIFACTS_USER }}
+          key: ${{ secrets.MIRROR_ARTIFACTS_KEY }}
+          source: BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-linux-x64.tar.gz
+          target: "artifacts/btcsq"
+      - name: Archive artifacts on GH
+        if: success()
+        uses: actions/upload-artifact@v2
+        with:
+          name: btcsq-linux-x64
+          path: BTCSQ-${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.git_hash }}-linux-x64.tar.gz
+      - name: make check
+        timeout-minutes: 60
+        run: make check
+      - name: upload logs
+        uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: test-suite
+          path: src/test-suite.log
+      - name: run functional tests
+        if: always()
+        timeout-minutes: 60
+        run: python3 test/functional/test_runner.py
+      - name: run pop integration tests
+        if: always()
+        timeout-minutes: 60
+        env:
+          BTCSQD_PATH: './src/btcsqd'
+        run: python3 test/integration/test_runner.py
+      # - name: run pop integration benchmark
+      #   if: always()
+      #   timeout-minutes: 60
+      #   env:
+      #     BTCSQD_PATH: './src/btcsqd'
+      #   run: python3 test/integration/benchmark_runner.py
+
+
+  macos-native:
+    runs-on: macos-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+      - name: install dependencies
+        run: |
+          brew install ccache automake berkeley-db@4 boost boost-python3 miniupnpc pkg-config protobuf librsvg ccache qrencode zeromq qt
+      - name: Extract branch name & commit
+        id: extract_branch
+        run: |
+          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
+          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
+      - name: Prepare ccache timestamp
+        id: cache_timestamp
+        run: |
+          current_date=`date +%Y%m%d_%H%M%SZ`
+          echo "::set-output name=timestamp::${current_date}"
+          ccache_dir=$(ccache -k cache_dir)
+          echo "::set-output name=ccache_dir::${ccache_dir}"
+      - name: ccache cache files
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.ccache
+            ${{ steps.cache_timestamp.outputs.ccache_dir }}
+          key: macos-ccache-${{ steps.cache_timestamp.outputs.timestamp }}
+          restore-keys: |
+            macos-ccache-
+      - name: get version for veriblock-pop-cpp
+        run: echo "VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)" >> $GITHUB_ENV
+      - name: veriblock-pop-cpp release version
+        run: echo Using veriblock-pop-cpp version ${VERIBLOCK_POP_CPP_VERSION}
+      - name: install veriblock-pop-cpp
+        env:
+          BUILD_TYPE: Release
+        run: |
+          (
+          pip3 install wheel
+          sudo su;
+          cd /tmp;
+          wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
+          tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
+          cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
+          rm -rf build
+          mkdir build;
+          cd build;
+          cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF -DWITH_PYPOPTOOLS=OFF;
+          make -j2;
+          sudo make install
+          )
+      - name: autogen
+        run: ./autogen.sh
+      - name: configure
+        run: ./configure
+          --enable-werror
+          --disable-bench
+          --with-incompatible-bdb
+      - name: make
+        run: make -j2
+      - name: make check
+        run: make
+      # - name: run functional tests
+      #   if: always()
+      #   timeout-minutes: 90
+      #   run: python3 test/functional/test_runner.py
+      # - name: run pop integration tests
+      #   if: always()
+      #   timeout-minutes: 60
+      #   env:
+      #     BTCSQD_PATH: './src/btcsqd'
+      #   run: python3 test/integration/test_runner.py
+
+  linux-asan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.9' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+          architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+      - name: Extract branch name & commit
+        id: extract_branch
+        run: |
+          echo "::set-output name=git_hash::$(git rev-parse --short=7 "$GITHUB_SHA")"
+          echo "::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//\./g')"
+      - name: Prepare ccache timestamp
+        id: cache_timestamp
+        run: |
+          current_date=`date --utc +%Y%m%d_%H%M%SZ`
+          echo "::set-output name=timestamp::${current_date}"
+      - name: ccache cache files
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
+        uses: actions/cache@v1.1.0
+        with:
+          path: ~/.ccache
+          key: linux-asan-ccache-${{ steps.cache_timestamp.outputs.timestamp }}
+          restore-keys: |
+            linux-asan-ccache-
+      - name: get version for veriblock-pop-cpp
+        run: echo "VERIBLOCK_POP_CPP_VERSION=$(awk -F '=' '/\$\(package\)_version/{print $NF}' $PWD/depends/packages/veriblock-pop-cpp.mk | head -n1)" >> $GITHUB_ENV
+      - name: veriblock-pop-cpp release version
+        run: echo Using veriblock-pop-cpp version ${VERIBLOCK_POP_CPP_VERSION}
+      - name: run apt update
+        run: sudo apt-get update
+      - name: install build requirements
+        run: sudo apt-get install python3-setuptools python-setuptools build-essential libtool autotools-dev automake pkg-config bsdmainutils python3 ccache
+      - name: install dependencies
+        run: |
+          sudo apt-get install clang-8 llvm-8 python3-zmq python3-dev libboost-python-dev qtbase5-dev \
+            qttools5-dev-tools libevent-dev bsdmainutils libboost-system-dev libboost-filesystem-dev \
+            libboost-test-dev libboost-thread-dev libminiupnpc-dev libzmq3-dev libqrencode-dev \
+            libdb++-dev
+      - name: install veriblock-pop-cpp
+        env:
+          CC: clang-8
+          CXX: clang++-8
+          BUILD_TYPE: Debug
+        run: |
+          (
+          pip3 install wheel
+          sudo su;
+          cd /opt;
+          wget https://github.com/VeriBlock/alt-integration-cpp/archive/${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
+          tar -xf ${VERIBLOCK_POP_CPP_VERSION}.tar.gz;
+          cd alt-integration-cpp-${VERIBLOCK_POP_CPP_VERSION};
+          python3 setup.py install
+          python3 setup.py test
+          rm -rf build
+          mkdir build;
+          cd build;
+          cmake .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DTESTING=OFF -DASAN=ON;
+          make -j2;
+          sudo make install
+          )
+      - name: fix sanitizer suppressions file
+        run: sed -i '/^implicit-/d' "${{ github.workspace }}/test/sanitizer_suppressions/ubsan"
+      - name: set sanitizer options
+        run: |
+          echo "ASAN_OPTIONS=detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1" >> $GITHUB_ENV
+          echo "LSAN_OPTIONS=suppressions=${{ github.workspace }}/test/sanitizer_suppressions/lsan" >> $GITHUB_ENV
+          echo "TSAN_OPTIONS=suppressions=${{ github.workspace }}/test/sanitizer_suppressions/tsan:log_path=${{ github.workspace }}/sanitizer-output/tsan" >> $GITHUB_ENV
+          echo "UBSAN_OPTIONS=suppressions=${{ github.workspace }}/test/sanitizer_suppressions/ubsan:print_stacktrace=1:halt_on_error=1:report_error_type=1" >> $GITHUB_ENV
+      - name: autogen
+        run: ./autogen.sh
+      - name: configure
+        run: ./configure
+          --enable-zmq
+          --with-incompatible-bdb
+          --with-gui=qt5
+          CPPFLAGS='-DARENA_DEBUG -DDEBUG_LOCKORDER'
+          --with-sanitizers=address,undefined
+          CC=clang-8 CXX=clang++-8
+      - name: make
+        run: make -j2 deploy
+      - name: make check
+        timeout-minutes: 60
+        run: make check
+      - name: upload logs
+        uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: test-suite
+          path: src/test-suite.log
+      - name: run functional tests
+        if: always()
+        timeout-minutes: 180
+        run: python3 test/functional/test_runner.py
+      - name: run pop integration tests
+        if: always()
+        timeout-minutes: 60
+        env:
+          BTCSQD_PATH: './src/btcsqd'
+        run: python3 test/integration/test_runner.py
+
+      - name: Create ASAN artifacts
+        if: success()
+        run: |
+          REL=btcsq-linux-asan-x64
+          mkdir -p $REL
+          cp ./src/btcsq{d,-cli,-tx,-wallet} $REL
+          echo "ASAN_OPTIONS=detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1" >> $REL/env
+          echo "LSAN_OPTIONS=suppressions=${{ github.workspace }}/test/sanitizer_suppressions/lsan" >> $REL/env
+          echo "TSAN_OPTIONS=suppressions=${{ github.workspace }}/test/sanitizer_suppressions/tsan:log_path=${{ github.workspace }}/sanitizer-output/tsan" >> $REL/env
+          echo "UBSAN_OPTIONS=suppressions=${{ github.workspace }}/test/sanitizer_suppressions/ubsan:print_stacktrace=1:halt_on_error=1:report_error_type=1" >> $REL/env
+      - name: Archive artifacts on GH
+        if: success()
+        uses: actions/upload-artifact@v2
+        with:
+          name: btcsq-linux-asan-x64
+          path: btcsq-linux-asan-x64

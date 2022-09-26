@@ -7,7 +7,7 @@
   <PropertyGroup Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
-    <ItemGroup>
+  <ItemGroup>
 @SOURCE_FILES@
     <ClCompile Include="..\..\src\wallet\init.cpp">
       <ObjectFileName>$(IntDir)wallet_init.obj</ObjectFileName>

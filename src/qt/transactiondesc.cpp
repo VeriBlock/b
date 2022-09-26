@@ -6,6 +6,19 @@
 #include <config/bitcoin-config.h>
 #endif
 
+// VBK
+#include <QIODevice>
+#include <QtNetwork>
+#include <QByteArray>
+#include <QEventLoop>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QNetworkAccessManager>
+
+#include <vbk/vbk.hpp>
+// VBK
+
+
 #include <qt/transactiondesc.h>
 
 #include <qt/bitcoinunits.h>
@@ -77,6 +90,93 @@ bool GetPaymentRequestMerchant(const std::string& pr, QString& merchant)
     return false;
 }
 
+
+////////////////////////////
+// VBK
+
+QJsonObject objectFromString(const QString& in)
+{
+    QJsonObject obj;
+
+    QJsonDocument doc = QJsonDocument::fromJson(in.toUtf8());
+
+    // check validity of the document
+    if (!doc.isNull()) {
+        if (doc.isObject()) {
+            obj = doc.object();
+        } else {
+            qDebug() << "Document is not an object";
+        }
+    } else {
+        qDebug() << "Invalid JSON...\n"
+                 << in;
+    }
+
+    return obj;
+}
+
+QString TransactionDesc::FormatBFIStatus(TransactionRecord* rec)
+{
+    try {
+        std::string bfiendpoint = gArgs.GetArg("bfiendpoint", ""); // read from conf.
+        if (bfiendpoint.empty()) {
+            return tr("BFI not setup yet, specify bfiendpoint=url in btcsq.conf");
+        }
+
+        QString input = QString::fromStdString(bfiendpoint + "/%1/chains/transactions/%2")
+                            .arg(QString::number(VeriBlock::ALT_CHAIN_ID))
+                            .arg(rec->getTxHash());
+        QUrl qurl = QUrl::fromUserInput(input);
+        if (!qurl.isValid()) {
+            return tr("URL is not valid. bfiendpoint=%s").arg(input);
+        }
+
+        QEventLoop loop;
+        QNetworkAccessManager nam;
+        QNetworkRequest req;
+        req.setRawHeader("Content-Type", "application/json");
+        req.setRawHeader("Accept-Encoding", "gzip, deflate");
+        req.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
+        req.setRawHeader("User-Agent", "BTCSQ Daemon");
+        req.setUrl(qurl);
+        QNetworkReply* reply = nam.get(req);
+        connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+
+        loop.exec();
+        QString dataLine = "";
+        QByteArray buffer = reply->readAll();
+        dataLine = buffer.constData();
+        QJsonObject o = objectFromString(dataLine.toUtf8().constData());
+
+        if (reply->error()) {
+            qDebug() << "[BFI] Error: " << reply->errorString();
+            return tr("Error getting Bitcoin Finality: %1").arg(reply->errorString());
+        }
+
+        bool isAttackInProgress = o.value("isAttackInProgress").toBool();
+        if (isAttackInProgress) {
+            return tr("Detected Alternative Chain, wait for Bitcoin Finality");
+        }
+
+        int bitcoinFinality = o.value("bitcoinFinality").toInt();
+        if (bitcoinFinality >= 0) {
+            return tr("%1 blocks of Bitcoin Finality").arg(bitcoinFinality);
+        }
+
+        return tr("%1 blocks until Bitcoin Finality").arg(-bitcoinFinality);
+    } catch (const std::exception& e) {
+        qDebug() << "[BFI] Got exception: " << e.what();
+    } catch (...) {
+        qDebug() << "[BFI] Unknown exception";
+    }
+
+    return "";
+}
+
+
+// VBK
+////////////////////////////
+
 QString TransactionDesc::toHTML(interfaces::Node& node, interfaces::Wallet& wallet, TransactionRecord *rec, int unit)
 {
     int numBlocks;
@@ -96,6 +196,10 @@ QString TransactionDesc::toHTML(interfaces::Node& node, interfaces::Wallet& wall
     CAmount nNet = nCredit - nDebit;
 
     strHTML += "<b>" + tr("Status") + ":</b> " + FormatTxStatus(wtx, status, inMempool, numBlocks);
+    strHTML += "<br>";
+    // VBK -->
+    strHTML += "<b>" + tr("BFI Status") + ":</b> " + FormatBFIStatus(rec);
+    // VBK <--
     strHTML += "<br>";
 
     strHTML += "<b>" + tr("Date") + ":</b> " + (nTime ? GUIUtil::dateTimeStr(nTime) : "") + "<br>";

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # Copyright (c) 2014-2019 The Bitcoin Core developers
+# Copyright (c) 2019-2021 Xenios SEZC
+# https://www.veriblock.org
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Run regression test suite.
@@ -81,46 +83,70 @@ BASE_SCRIPTS = [
     # vv Tests less than 5m vv
     'mining_getblocktemplate_longpoll.py',
     'feature_maxuploadtarget.py',
-    'feature_block.py',
+    # 'feature_block.py',
     'rpc_fundrawtransaction.py',
-    'p2p_compactblocks.py',
+    # 'p2p_compactblocks.py',
     'feature_segwit.py',
     # vv Tests less than 2m vv
     'wallet_basic.py',
     'wallet_labels.py',
-    'p2p_segwit.py',
+    # 'p2p_segwit.py',
     'p2p_timeouts.py',
     'p2p_tx_download.py',
     'wallet_dump.py',
     'wallet_listtransactions.py',
     # vv Tests less than 60s vv
-    'p2p_sendheaders.py',
+    # disabled, because it runs >15 MIN
+    # 'feature_pop_popdata_max_size.py',
+    # 'p2p_sendheaders.py',
     'wallet_zapwallettxes.py',
     'wallet_importmulti.py',
     'mempool_limit.py',
-    'rpc_txoutproof.py',
+    # 'rpc_txoutproof.py',
     'wallet_listreceivedby.py',
     'wallet_abandonconflict.py',
-    'feature_csv_activation.py',
-    'rpc_rawtransaction.py',
+    # 'feature_csv_activation.py',
+    # 'rpc_rawtransaction.py',
     'wallet_address_types.py',
-    'feature_bip68_sequence.py',
+    # 'feature_bip68_sequence.py',
     'p2p_feefilter.py',
     'feature_reindex.py',
     'feature_abortnode.py',
     # vv Tests less than 30s vv
+    # VeriBlock tests
+    'feature_pop_activate.py',
+    'feature_pop_e2e.py',
+    'feature_pop_enable.py',
+    'feature_pop_enable_sync.py',
+    'feature_pop_fork_resolution.py',
+    'feature_pop_fork_resolution_on_unconnected.py',
+    'feature_pop_init.py',
+    'feature_pop_mempool_getpop.py',
+    'feature_pop_mempool_reorg.py',
+    'feature_pop_mempool_sync.py',
+    'feature_pop_merkleroot.py',
+    'feature_pop_p2p.py',
+    'feature_pop_params.py',
+    'feature_pop_payout.py',
+    'feature_pop_shutdown_sync.py',
+    'feature_pop_shutdown_sync2.py',
+    'feature_pop_sync.py',
+    'feature_pop_verifydb.py',
+    'feature_pop_stratum_compat.py',
+    'feature_pop_spend_gb_coinbase.py',
+    ## end VeriBlock tests
     'wallet_keypool_topup.py',
     'feature_fee_estimation.py',
     'interface_zmq.py',
     'interface_bitcoin_cli.py',
     'mempool_resurrect.py',
     'wallet_txn_doublespend.py --mineblock',
-    'tool_wallet.py',
+    # 'tool_wallet.py',
     'wallet_txn_clone.py',
     'wallet_txn_clone.py --segwit',
     'rpc_getchaintips.py',
     'rpc_misc.py',
-    'interface_rest.py',
+    # 'interface_rest.py',
     'mempool_spend_coinbase.py',
     'wallet_avoidreuse.py',
     'mempool_reorg.py',
@@ -142,7 +168,7 @@ BASE_SCRIPTS = [
     'wallet_groups.py',
     'p2p_disconnect_ban.py',
     'rpc_decodescript.py',
-    'rpc_blockchain.py',
+    # 'rpc_blockchain.py',
     'rpc_deprecated.py',
     'wallet_disable.py',
     'rpc_net.py',
@@ -152,11 +178,11 @@ BASE_SCRIPTS = [
     'p2p_blocksonly.py',
     'mining_prioritisetransaction.py',
     'p2p_invalid_locator.py',
-    'p2p_invalid_block.py',
+    # 'p2p_invalid_block.py',
     'p2p_invalid_messages.py',
-    'p2p_invalid_tx.py',
-    'feature_assumevalid.py',
-    'example_test.py',
+    # 'p2p_invalid_tx.py',
+    # 'feature_assumevalid.py',
+    # 'example_test.py',
     'wallet_txn_doublespend.py',
     'wallet_txn_clone.py --mineblock',
     'feature_notifications.py',
@@ -166,43 +192,43 @@ BASE_SCRIPTS = [
     'mempool_packages.py',
     'mempool_package_onemore.py',
     'rpc_createmultisig.py',
-    'feature_versionbits_warning.py',
+    # 'feature_versionbits_warning.py',
     'rpc_preciousblock.py',
-    'wallet_importprunedfunds.py',
+    # 'wallet_importprunedfunds.py',
     'p2p_leak_tx.py',
     'rpc_signmessage.py',
     'wallet_balance.py',
-    'feature_nulldummy.py',
+    # 'feature_nulldummy.py',
     'mempool_accept.py',
     'wallet_import_rescan.py',
     'wallet_import_with_label.py',
     'rpc_bind.py --ipv4',
     'rpc_bind.py --ipv6',
     'rpc_bind.py --nonloopback',
-    'mining_basic.py',
-    'wallet_bumpfee.py',
+    # 'mining_basic.py',
+    # 'wallet_bumpfee.py',
     'wallet_bumpfee_totalfee_deprecation.py',
     'wallet_implicitsegwit.py',
     'rpc_named_arguments.py',
     'wallet_listsinceblock.py',
     'p2p_leak.py',
     'wallet_encryption.py',
-    'feature_dersig.py',
-    'feature_cltv.py',
+    # 'feature_dersig.py',
+    # 'feature_cltv.py',
     'rpc_uptime.py',
     'wallet_resendwallettransactions.py',
     'wallet_fallbackfee.py',
-    'rpc_dumptxoutset.py',
+    # 'rpc_dumptxoutset.py',
     'feature_minchainwork.py',
-    'rpc_getblockstats.py',
+    # 'rpc_getblockstats.py',
     'wallet_create_tx.py',
-    'p2p_fingerprint.py',
+    # 'p2p_fingerprint.py',
     'feature_uacomment.py',
     'wallet_coinbase_category.py',
     'feature_filelock.py',
     'feature_loadblock.py',
-    'p2p_dos_header_tree.py',
-    'p2p_unrequested_blocks.py',
+    # 'p2p_dos_header_tree.py',
+    # 'p2p_unrequested_blocks.py',
     'feature_includeconf.py',
     'rpc_deriveaddresses.py',
     'rpc_deriveaddresses.py --usecli',
@@ -275,7 +301,7 @@ def main():
     logging.basicConfig(format='%(message)s', level=logging_level)
 
     # Create base test directory
-    tmpdir = "%s/test_runner_₿_🏃_%s" % (args.tmpdirprefix, datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
+    tmpdir = "%s/test_runner_%s" % (args.tmpdirprefix, datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
 
     os.makedirs(tmpdir)
 
@@ -368,7 +394,7 @@ def run_tests(*, test_list, src_dir, build_dir, tmpdir, jobs=1, enable_coverage=
     # Warn if bitcoind is already running
     # pidof might fail or return an empty string if bitcoind is not running
     try:
-        if subprocess.check_output(["pidof", "bitcoind"]) not in [b'']:
+        if subprocess.check_output(["pidof", "btcsqd"]) not in [b'']:
             print("%sWARNING!%s There is already a bitcoind process running on this system. Tests may fail unexpectedly due to resource contention!" % (BOLD[1], BOLD[0]))
     except (OSError, subprocess.SubprocessError):
         pass
