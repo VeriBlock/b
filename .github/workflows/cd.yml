@@ -33,7 +33,7 @@ jobs:
       - name: Publish to Registry
         env:
           BUILD_TYPE: ${{ matrix.build }}
-        uses: elgohr/Publish-Docker-Github-Action@master
+        uses: elgohr/Publish-Docker-Github-Action@v5
         with:
           name: veriblock/btcsq
           username: ${{ secrets.PUBLIC_DOCKERHUB_USERNAME }}
@@ -60,7 +60,7 @@ jobs:
       - name: Publish to Registry
         env:
           BUILD_TYPE: ${{ matrix.build }}
-        uses: elgohr/Publish-Docker-Github-Action@master
+        uses: elgohr/Publish-Docker-Github-Action@v5
         with:
           name: veriblock/btcsq
           username: ${{ secrets.PUBLIC_DOCKERHUB_USERNAME }}
@@ -85,7 +85,7 @@ jobs:
           echo "BRANCH=$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//./g')" >> $GITHUB_ENV
           echo "TAGS=$(if [ "${{ github.event_name }}" == "push" ] && [ "$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')" == "master" ]; then echo "latest,$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')"; elif [ "${{ github.event_name }}" == "pull_request" ]; then echo ""; else echo "$(echo ${GITHUB_REF#refs/heads/} | sed 's/\//-/g')"; fi)" >> $GITHUB_ENV
       - name: Publish to Registry
-        uses: elgohr/Publish-Docker-Github-Action@master
+        uses: elgohr/Publish-Docker-Github-Action@v5
         with:
           dockerfile: alpine.Dockerfile
           name: veriblock/btcsq
